@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/Core/">
+    <Project Path="Core/Domain/Domain.csproj" />
+    <Project Path="Core/Service/Service.csproj" />
+    <Project Path="Service.Abstraction/Service.Abstraction.csproj" />
+  </Folder>
+  <Folder Name="/Infrastructure/">
+    <Project Path="Infrastructure/Persistance/Persistance.csproj" />
+    <Project Path="Persentation/Persentation.csproj" />
+  </Folder>
+  <Project Path="Shared/Shared.csproj" />
+  <Project Path="Sunbula/Sunbula.csproj" />
+</Solution>
