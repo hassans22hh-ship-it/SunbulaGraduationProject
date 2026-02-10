@@ -1,10 +1,12 @@
 <Solution>
-  <Folder Name="/Core/">
+  <Folder Name="/Service/" />
+  <Folder Name="/Service/TaskManagmentService/" />
+  <Folder Name="/Service/TaskManagmentService/Core/">
     <Project Path="Core/Domain/Domain.csproj" />
     <Project Path="Core/Service/Service.csproj" />
     <Project Path="Service.Abstraction/Service.Abstraction.csproj" />
   </Folder>
-  <Folder Name="/Infrastructure/">
+  <Folder Name="/Service/TaskManagmentService/Infrastructure/">
     <Project Path="Infrastructure/Persistance/Persistance.csproj" />
     <Project Path="Persentation/Persentation.csproj" />
   </Folder>
