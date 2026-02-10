@@ -1,6 +1,8 @@
 <Solution>
   <Folder Name="/Service/" />
-  <Folder Name="/Service/TaskManagmentService/" />
+  <Folder Name="/Service/TaskManagmentService/">
+    <Project Path="Shared/Shared.csproj" />
+  </Folder>
   <Folder Name="/Service/TaskManagmentService/Core/">
     <Project Path="Core/Domain/Domain.csproj" />
     <Project Path="Core/Service/Service.csproj" />
@@ -10,6 +12,5 @@
     <Project Path="Infrastructure/Persistance/Persistance.csproj" />
     <Project Path="Persentation/Persentation.csproj" />
   </Folder>
-  <Project Path="Shared/Shared.csproj" />
   <Project Path="Sunbula/Sunbula.csproj" />
 </Solution>
