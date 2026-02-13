@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Infrastructure\Persistance\Persistance.csproj" />
+    <ProjectReference Include="..\Modules\UserIdentity\Presentation\Presentation.csproj" />
     <ProjectReference Include="..\Persentation\Persentation.csproj" />
   </ItemGroup>
 

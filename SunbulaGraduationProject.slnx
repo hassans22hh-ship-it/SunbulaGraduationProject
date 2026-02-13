@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/BuildingBlocks/">
+    <Project Path="BuildingBlocks/Contracts/Contracts.csproj" Id="e20cddf6-558c-4719-b293-b40fb3ab4e09" />
+    <Project Path="BuildingBlocks/SharedKernel/SharedKernel.csproj" Id="3df026ed-d6f2-493c-b537-435e019c9932" />
+  </Folder>
   <Folder Name="/Core/">
     <Project Path="Core/Domain/Domain.csproj" />
     <Project Path="Core/Service/Service.csproj" />
@@ -7,6 +11,13 @@
   <Folder Name="/Infrastructure/">
     <Project Path="Infrastructure/Persistance/Persistance.csproj" />
     <Project Path="Persentation/Persentation.csproj" />
+  </Folder>
+  <Folder Name="/Modules/" />
+  <Folder Name="/Modules/UserIdentity/">
+    <Project Path="Modules/UserIdentity/Application/Application.csproj" Id="b92b9924-afd2-4fc7-b8f9-decdcac7dee3" />
+    <Project Path="Modules/UserIdentity/Domain/Domain.csproj" Id="8c69139a-7217-43ee-a005-42747aa67117" />
+    <Project Path="Modules/UserIdentity/Infrastructure/Infrastructure.csproj" Id="28f70348-d250-4311-b64d-31130b0599f8" />
+    <Project Path="Modules/UserIdentity/Presentation/Presentation.csproj" Id="09302e64-9f82-4703-980c-729af6e0e03b" />
   </Folder>
   <Project Path="Shared/Shared.csproj" />
   <Project Path="Sunbula/Sunbula.csproj" />
