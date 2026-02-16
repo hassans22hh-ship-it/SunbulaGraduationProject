@@ -1,6 +1,6 @@
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi;
+using Persistance.Data.StorePlant;
 using Persistance.Data.TaskManagement;
 
 namespace Sunbula
@@ -34,8 +34,20 @@ namespace Sunbula
   options.UseSqlServer(
       builder.Configuration.GetConnectionString("TaskManagementDb")));
             #endregion
-            #region Plant
+            #region StorePlantDb
+            /*
+               * ===================================================
+              //StorePlantDb 
+              ======================================================
+              madeby:Yara Mahmoud
+              Date:14-2-2026
+              ========================================>
+              ***************************************************
 
+              */
+            builder.Services.AddDbContext<StorePlantDbContext>(options =>
+  options.UseSqlServer(
+      builder.Configuration.GetConnectionString("StorePlantDb")));
             #endregion
 
             #endregion
@@ -46,10 +58,10 @@ namespace Sunbula
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-               
-                    app.UseSwagger();
-                    app.UseSwaggerUI();
-                
+
+                app.UseSwagger();
+                app.UseSwaggerUI();
+
             }
 
             app.UseHttpsRedirection();
