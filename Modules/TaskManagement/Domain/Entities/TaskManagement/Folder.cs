@@ -1,8 +1,9 @@
-﻿namespace Domain.Entities.TaskManagement
+﻿using SharedKernel;
+
+namespace Domain.Entities.TaskManagement
 {
-    public class Folder
+    public class Folder:BaseEntity
     {
-        public Guid Id { get; private set; }
 
         public string Name { get; private set; } = null!;
 

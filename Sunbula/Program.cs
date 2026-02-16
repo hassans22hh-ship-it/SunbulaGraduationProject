@@ -1,7 +1,10 @@
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi;
+
 using Persistance.Data.TaskManagement;
+using Infrastructure;
 
 namespace Sunbula
 {
@@ -18,6 +21,9 @@ namespace Sunbula
             //builder.Services.AddOpenApi();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            #region UserIdentity
+            builder.Services.AddInfrastructure(builder.Configuration);
+            #endregion
             #region ConnectionByDb
             #region TaskManagementDb
             /*
@@ -46,10 +52,10 @@ namespace Sunbula
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-               
-                    app.UseSwagger();
-                    app.UseSwaggerUI();
-                
+
+                app.UseSwagger();
+                app.UseSwaggerUI();
+
             }
 
             app.UseHttpsRedirection();
@@ -61,5 +67,7 @@ namespace Sunbula
 
             app.Run();
         }
+
+     
     }
 }
