@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi;
-
 using Persistance.Data.TaskManagement;
 using Infrastructure;
 
@@ -21,25 +20,15 @@ namespace Sunbula
             //builder.Services.AddOpenApi();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            #region Tasks
+            builder.Services.AddTaskManagementModule(builder.Configuration);
+            #endregion
             #region UserIdentity
             builder.Services.AddInfrastructure(builder.Configuration);
             #endregion
             #region ConnectionByDb
-            #region TaskManagementDb
-            /*
-               * ===================================================
-              //TaskManagementDb 
-              ======================================================
-              madeby:HassanSaied
-              Date:8-2-2026
-              ========================================>
-              ***************************************************
-
-              */
-            builder.Services.AddDbContext<TaskManagementDbContext>(options =>
-  options.UseSqlServer(
-      builder.Configuration.GetConnectionString("TaskManagementDb")));
-            #endregion
+   
+         
             #region Plant
 
             #endregion

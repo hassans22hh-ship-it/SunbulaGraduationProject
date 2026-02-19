@@ -12,7 +12,7 @@ namespace Domain.Entities.TaskManagement
         public Guid UserId { get; private set; }
 
         // Navigation
-        public ICollection<TaskItem> Tasks { get; private set; } = new List<TaskItem>();
+        public ICollection<Task> Tasks { get; private set; } = new List<Task>();
 
         private Folder() { }
 
