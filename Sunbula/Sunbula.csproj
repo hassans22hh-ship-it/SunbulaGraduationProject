@@ -17,6 +17,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Infrastructure\Persistance\Persistance.csproj" />
+    <ProjectReference Include="..\Modules\Debt\DebtInfrastructure\DebtInfrastructure.csproj" />
+    <ProjectReference Include="..\Modules\Finance\Infrastructure\FinanceInfrastructure.csproj" />
+    <ProjectReference Include="..\Modules\TaskManagement\TaskInfrastructure\TaskInfrastructure.csproj" />
     <ProjectReference Include="..\Modules\UserIdentity\Infrastructure\UserIdentityInfrastructure.csproj" />
     <ProjectReference Include="..\Persentation\Persentation.csproj" />
   </ItemGroup>

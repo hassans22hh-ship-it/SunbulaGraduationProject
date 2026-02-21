@@ -1,9 +1,9 @@
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.OpenApi;
-using Persistance.Data.TaskManagement;
+using DebtInfrastructure;
+using FinanceInfrastructure;
 using Infrastructure;
+using Microsoft.EntityFrameworkCore;
+using TaskInfrastructure;
 
 namespace Sunbula
 {
@@ -27,8 +27,9 @@ namespace Sunbula
             builder.Services.AddInfrastructure(builder.Configuration);
             #endregion
             #region ConnectionByDb
-   
-         
+
+            builder.Services.AddDebtModule(builder.Configuration);
+            builder.Services.AddFinanceModule(builder.Configuration);
             #region Plant
 
             #endregion
@@ -57,6 +58,6 @@ namespace Sunbula
             app.Run();
         }
 
-     
+
     }
 }

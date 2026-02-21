@@ -6,7 +6,7 @@ using TaskDomain.Entities.TaskManagement.ValueObjects;
 
 namespace TaskInfrastructure.Persistence.Configurations
 {
-    public sealed class TaskConfiguration:IEntityTypeConfiguration<Task>
+    public sealed class TaskConfiguration : IEntityTypeConfiguration<Task>
     {
         public void Configure(EntityTypeBuilder<Task> builder)
         {
@@ -71,7 +71,7 @@ namespace TaskInfrastructure.Persistence.Configurations
                 .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasMany(t => t.TaskCategories)
-                .WithOne(tc => tc.Tasks)
+                .WithOne(tc => tc.Task)
                 .HasForeignKey(tc => tc.TaskId)
                 .OnDelete(DeleteBehavior.Cascade);
 

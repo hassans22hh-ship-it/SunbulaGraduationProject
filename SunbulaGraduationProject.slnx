@@ -15,22 +15,25 @@
   </Folder>
   <Folder Name="/Modules/" />
   <Folder Name="/Modules/Debt/">
-    <Project Path="Modules/Debt/Domain/Domain.csproj" Id="949634b7-0aeb-42fa-8624-e195b2571d7f" />
+    <Project Path="Modules/Debt/Application/Application.csproj" Id="09d966aa-dda0-4f3f-9c36-6d6410e3a1eb" />
+    <Project Path="Modules/Debt/DebtInfrastructure/DebtInfrastructure.csproj" Id="6d5fcdec-a407-4886-a0a2-96adff03f71f" />
+    <Project Path="Modules/Debt/Domain/DebtDomain.csproj" Id="949634b7-0aeb-42fa-8624-e195b2571d7f" />
+    <Project Path="Presentation/Presentation.csproj" Id="f4d700b9-c3a7-4af6-89bd-558cff8114e5" />
   </Folder>
   <Folder Name="/Modules/Finance/">
-    <Project Path="Modules/Finance/Application/Application.csproj" Id="70302f3c-ee40-4d2a-aff5-b20e3aca755d" />
-    <Project Path="Modules/Finance/Domain/Domain.csproj" Id="5f227677-fe20-4c4d-8564-7cc9184902cd" />
-    <Project Path="Modules/Finance/Infrastructure/Infrastructure.csproj" Id="33a5c71b-9ae2-405a-b8e6-49abb8762f24" />
-    <Project Path="Modules/Finance/Presentation/Presentation.csproj" Id="f419aafa-38a6-4482-90cb-f7c5b8b084c6" />
+    <Project Path="Modules/Finance/Application/FinanceApplication.csproj" Id="70302f3c-ee40-4d2a-aff5-b20e3aca755d" />
+    <Project Path="Modules/Finance/Domain/FinanceDomain.csproj" Id="5f227677-fe20-4c4d-8564-7cc9184902cd" />
+    <Project Path="Modules/Finance/Infrastructure/FinanceInfrastructure.csproj" Id="33a5c71b-9ae2-405a-b8e6-49abb8762f24" />
+    <Project Path="Modules/Finance/Presentation/FinancePresentation.csproj" Id="f419aafa-38a6-4482-90cb-f7c5b8b084c6" />
   </Folder>
   <Folder Name="/Modules/StorePlant/">
     <Project Path="Modules/StorePlant/Domain/Domain.csproj" Id="0512a018-4559-4612-a303-ba085f9284f5" />
   </Folder>
   <Folder Name="/Modules/TaskManagement/">
-    <Project Path="Modules/Infrastructure/Infrastructure.csproj" Id="7e8ed4e0-55af-4116-9acc-e55ee5df6a88" />
     <Project Path="Modules/TaskManagement/Application/Application.csproj" Id="29762547-2c12-46b1-9452-0ff03447b0ac" />
     <Project Path="Modules/TaskManagement/Domain/TaskDomain.csproj" Id="9a49da7e-f3c2-42d5-8e03-6d2405224978" />
     <Project Path="Modules/TaskManagement/Presentation/Presentation.csproj" Id="3ac937c4-4b8b-468c-b1da-5bfc0a2748e0" />
+    <Project Path="Modules/TaskManagement/TaskInfrastructure/TaskInfrastructure.csproj" Id="a1b2c3d4-e5f6-7890-abcd-ef1234567890" />
   </Folder>
   <Folder Name="/Modules/TimeTracking/">
     <Project Path="Modules/TimeTracking/Application/Application.csproj" Id="7bce6d00-1423-4e6f-adec-47341297aca2" />

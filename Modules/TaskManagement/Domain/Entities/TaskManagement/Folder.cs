@@ -1,32 +1,102 @@
 ﻿using SharedKernel;
+using TaskDomain.Entities.TaskManagement.Events;
+using TaskDomain.Entities.TaskManagement.ValueObjects;
 
 namespace Domain.Entities.TaskManagement
 {
     public class Folder:BaseEntity
     {
 
-        public string Name { get; private set; } = null!;
+        private readonly List<Task> _tasks = new();
 
-        public string Color { get; private set; } = "#FFFFFF";
-
-        public Guid UserId { get; private set; }
-
-        // Navigation
-        public ICollection<Task> Tasks { get; private set; } = new List<Task>();
-
+        // Private constructor for EF Core
         private Folder() { }
 
-        public Folder(Guid userId, string name, string color)
+        // Private constructor for factory method
+        private Folder(Guid id, Guid userId, string name, TaskColor color) : base(id)
         {
-            Id = Guid.NewGuid();
             UserId = userId;
             Name = name;
             Color = color;
         }
 
-        public void Rename(string name)
+        // Properties
+        public Guid UserId { get; private set; }
+        public string Name { get; private set; } = string.Empty;
+        public TaskColor Color { get; private set; } = null!;
+
+        // Navigation properties
+        public IReadOnlyCollection<Task> Tasks => _tasks.AsReadOnly();
+
+        // ═══════════════════════════════════════════════════════════════
+        // FACTORY METHOD
+        // ═══════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Creates a new Folder.
+        /// </summary>
+        public static Folder Create(Guid userId, string name, string color)
         {
-            Name = name;
+            ValidateName(name);
+            var folderColor = TaskColor.Create(color);
+
+            var folder = new Folder(Guid.NewGuid(), userId, name, folderColor);
+
+            folder.RaiseDomainEvent(new FolderCreatedEvent(folder.Id, folder.UserId));
+
+            return folder;
         }
+
+        // ═══════════════════════════════════════════════════════════════
+        // DOMAIN METHODS
+        // ═══════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Updates folder information.
+        /// </summary>
+        public void Update(string name, string color)
+        {
+            ValidateName(name);
+            var folderColor = TaskColor.Create(color);
+
+            Name = name;
+            Color = folderColor;
+
+            MarkAsUpdated();
+        }
+
+        /// <summary>
+        /// Checks if folder can be deleted.
+        /// Business rule: Cannot delete folder with tasks.
+        /// </summary>
+        public bool CanBeDeleted()
+        {
+            return !_tasks.Any();
+        }
+
+        /// <summary>
+        /// Gets the count of tasks in this folder.
+        /// </summary>
+        public int GetTaskCount()
+        {
+            return _tasks.Count;
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // VALIDATION
+        // ═══════════════════════════════════════════════════════════════
+
+        private static void ValidateName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Folder name cannot be empty", nameof(name));
+
+            if (name.Length < 2)
+                throw new ArgumentException("Folder name must be at least 2 characters", nameof(name));
+
+            if (name.Length > 100)
+                throw new ArgumentException("Folder name cannot exceed 100 characters", nameof(name));
+        }
+
     }
 }

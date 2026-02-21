@@ -1,10 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using SharedKernel;
 
 namespace TaskDomain.Entities.TaskManagement.Events
 {
-    internal class CategoryCreatedEvent
+    public sealed class CategoryCreatedEvent(Guid CategoryId, Guid UserId) : IDomainEvent
     {
+        public Guid Id { get; } = Guid.NewGuid();
+        public DateTime OccurredOn { get; } = DateTime.UtcNow;
+
+        public Guid CategoryId { get; } = CategoryId;
+        public Guid UserId { get; } = UserId;
     }
 }

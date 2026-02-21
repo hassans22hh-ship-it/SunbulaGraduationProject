@@ -19,12 +19,10 @@ namespace TaskInfrastructure
 
             // Unit of Work
             //services.AddScoped<IUnitOfWork, UnitOfWork>();
-
             // Repositories
             //services.AddScoped<ITaskRepository, TaskRepository>();
             //services.AddScoped<ICategoryRepository, CategoryRepository>();
             //services.AddScoped<IFolderRepository, FolderRepository>();
-
             // Services
             //services.AddScoped<ITaskService, TaskService>();
             //services.AddScoped<ICategoryService, CategoryService>();

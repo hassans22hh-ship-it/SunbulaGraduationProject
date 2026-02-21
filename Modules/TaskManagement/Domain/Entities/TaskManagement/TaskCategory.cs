@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TaskDomain.Entities.TaskManagement
+﻿namespace TaskDomain.Entities.TaskManagement
 {
     public class TaskCategory : SharedKernel.BaseEntity
     {
         public Guid TaskId { get; private set; }
         public Guid CategoryId { get; private set; }
+
+        public virtual Domain.Entities.TaskManagement.Task Task { get; private set; } = null!;
+        public virtual Category Category { get; private set; } = null!;
 
         private TaskCategory() { } // EF Core
 
