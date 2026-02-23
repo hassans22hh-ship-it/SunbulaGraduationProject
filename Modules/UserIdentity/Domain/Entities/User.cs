@@ -136,7 +136,7 @@ namespace Domain.Entities
         public void RevokeRefreshToken(Guid refreshTokenId)
         {
             var token = _refreshTokens.FirstOrDefault(t => t.Id == refreshTokenId);
-            if (token != null)
+            if (token == null)
             {
                 throw new InvalidOperationException("Refresh token not found");
             }
