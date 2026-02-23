@@ -1,0 +1,74 @@
+﻿namespace TimeTrackingDomain.ValueObjects
+{
+    /// Represents a duration with helpers for display and coin calculation.
+
+    public class Duration: IEquatable<Duration>
+    {
+
+        private Duration(int totalMinutes)
+        {
+            TotalMinutes = totalMinutes;
+        }
+
+        public int TotalMinutes { get; }
+        public int Hours => TotalMinutes / 60;
+        public int Minutes => TotalMinutes % 60;
+        public double TotalHours => TotalMinutes / 60.0;
+
+        /// <summary>
+        /// Creates a Duration from total minutes.
+        /// </summary>
+        public static Duration FromMinutes(int totalMinutes)
+        {
+            if (totalMinutes < 0)
+                throw new ArgumentException("Duration cannot be negative.", nameof(totalMinutes));
+
+            if (totalMinutes > 1440)
+                throw new ArgumentException("Duration cannot exceed 24 hours (1440 minutes).", nameof(totalMinutes));
+
+            return new Duration(totalMinutes);
+        }
+
+        /// <summary>
+        /// Creates a Duration from a TimeRange.
+        /// </summary>
+        public static Duration FromTimeRange(DateTime startTime, DateTime endTime)
+        {
+            var minutes = (int)(endTime - startTime).TotalMinutes;
+            return FromMinutes(Math.Max(0, minutes));
+        }
+
+        /// <summary>
+        /// Calculates coins earned based on behavior type.
+        /// </summary>
+        public decimal CalculateCoins(Enums.BehaviorType behaviorType)
+        {
+            var coinFactor = behaviorType switch
+            {
+                Enums.BehaviorType.Positive => 2.0m,
+                Enums.BehaviorType.Neutral => 1.0m,
+                Enums.BehaviorType.Rest => 1.0m,
+                Enums.BehaviorType.Negative => -1.0m,
+                _ => 0m
+            };
+
+            return Math.Round((decimal)TotalHours * coinFactor, 2);
+        }
+
+        public static implicit operator int(Duration d) => d.TotalMinutes;
+
+        public bool Equals(Duration? other)
+        {
+            if (other is null) return false;
+            return TotalMinutes == other.TotalMinutes;
+        }
+
+        public override bool Equals(object? obj) => obj is Duration d && Equals(d);
+        public override int GetHashCode() => TotalMinutes.GetHashCode();
+        public override string ToString() => $"{Hours}h {Minutes}m";
+
+        public static bool operator ==(Duration? left, Duration? right) => left?.Equals(right) ?? right is null;
+        public static bool operator !=(Duration? left, Duration? right) => !(left == right);
+    }
+}
+

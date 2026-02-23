@@ -4,7 +4,8 @@ using FinanceInfrastructure;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using TaskInfrastructure;
-
+using TimeTrackingInfrastructure;
+using PlantInfrastructure;
 namespace Sunbula
 {
     public class Program
@@ -30,10 +31,8 @@ namespace Sunbula
 
             builder.Services.AddDebtModule(builder.Configuration);
             builder.Services.AddFinanceModule(builder.Configuration);
-            #region Plant
-
-            #endregion
-
+             builder.Services.AddTimeTrackingModule(builder.Configuration);
+            builder.Services.AddStorePlantModule(builder.Configuration);
             #endregion
             var app = builder.Build();
 

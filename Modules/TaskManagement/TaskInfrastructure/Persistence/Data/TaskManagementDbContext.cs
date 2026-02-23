@@ -29,7 +29,7 @@ namespace TaskInfrastructure.Persistence.Data
         public TaskManagementDbContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<TaskManagementDbContext>();
-            optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=SunbulaTaskManagement;Trusted_Connection=True;");
+            optionsBuilder.UseSqlServer("Server=.;Database=TaskManagement;Trusted_Connection=True;TrustServerCertificate=True");
             return new TaskManagementDbContext(optionsBuilder.Options);
         }
     }
