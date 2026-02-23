@@ -6,12 +6,14 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
+  <!--<ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.2" />
-  </ItemGroup>
+  </ItemGroup>-->
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Service\Service.csproj" />
+    <ProjectReference Include="..\..\Modules\TaskManagement\Domain\TaskDomain.csproj" />
   </ItemGroup>
 
 </Project>

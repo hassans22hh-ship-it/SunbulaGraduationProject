@@ -10,7 +10,7 @@ namespace Persistance.Data.TaskManagement
         {
         }
 
-        public DbSet<TaskItem> Tasks => Set<TaskItem>();
+        //public DbSet<TaskItem> Tasks => Set<TaskItem>();
         public DbSet<Folder> Folders => Set<Folder>();
    
 

@@ -1,5 +1,11 @@
 
+using DebtInfrastructure;
+using FinanceInfrastructure;
+using Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using TaskInfrastructure;
+using TimeTrackingInfrastructure;
+using PlantInfrastructure;
 using Persistance.Data.StorePlant;
 using Persistance.Data.TaskManagement;
 
@@ -18,38 +24,18 @@ namespace Sunbula
             //builder.Services.AddOpenApi();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            #region Tasks
+            builder.Services.AddTaskManagementModule(builder.Configuration);
+            #endregion
+            #region UserIdentity
+            builder.Services.AddInfrastructure(builder.Configuration);
+            #endregion
             #region ConnectionByDb
-            #region TaskManagementDb
-            /*
-               * ===================================================
-              //TaskManagementDb 
-              ======================================================
-              madeby:HassanSaied
-              Date:8-2-2026
-              ========================================>
-              ***************************************************
 
-              */
-            builder.Services.AddDbContext<TaskManagementDbContext>(options =>
-  options.UseSqlServer(
-      builder.Configuration.GetConnectionString("TaskManagementDb")));
-            #endregion
-            #region StorePlantDb
-            /*
-               * ===================================================
-              //StorePlantDb 
-              ======================================================
-              madeby:Yara Mahmoud
-              Date:14-2-2026
-              ========================================>
-              ***************************************************
-
-              */
-            builder.Services.AddDbContext<StorePlantDbContext>(options =>
-  options.UseSqlServer(
-      builder.Configuration.GetConnectionString("StorePlantDb")));
-            #endregion
-
+            builder.Services.AddDebtModule(builder.Configuration);
+            builder.Services.AddFinanceModule(builder.Configuration);
+             builder.Services.AddTimeTrackingModule(builder.Configuration);
+            builder.Services.AddStorePlantModule(builder.Configuration);
             #endregion
             var app = builder.Build();
 
@@ -73,5 +59,7 @@ namespace Sunbula
 
             app.Run();
         }
+
+
     }
 }
