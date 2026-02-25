@@ -13,8 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Contracts\" />
-    <Folder Include="Specifications\" />
     <Folder Include="ValueObjects\" />
   </ItemGroup>
 
