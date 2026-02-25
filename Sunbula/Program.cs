@@ -2,12 +2,9 @@
 using DebtInfrastructure;
 using FinanceInfrastructure;
 using Infrastructure;
-using Microsoft.EntityFrameworkCore;
+using PlantInfrastructure;
 using TaskInfrastructure;
 using TimeTrackingInfrastructure;
-using PlantInfrastructure;
-using Persistance.Data.StorePlant;
-using Persistance.Data.TaskManagement;
 
 namespace Sunbula
 {
