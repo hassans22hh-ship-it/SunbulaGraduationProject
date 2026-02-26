@@ -6,8 +6,8 @@
     {
 
         Beginner  = 1,   //  20–50 coins
-    Medium    = 2,   //  50–300 coins
-    Advanced  = 3,   //  1000–2000 coins
-    Rare      = 4    //  5000 coins
+        Medium    = 2,   //  50–300 coins
+        Advanced  = 3,   //  1000–2000 coins
+        Rare      = 4    //  5000 coins
     }
 }
