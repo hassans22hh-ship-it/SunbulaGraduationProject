@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Specifications\**" />
+    <EmbeddedResource Remove="Specifications\**" />
+    <None Remove="Specifications\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\..\BuildingBlocks\Contracts\Contracts.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\SharedKernel\SharedKernel.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\Shared\Shared.csproj" />
@@ -14,7 +20,6 @@
 
   <ItemGroup>
     <Folder Include="Contracts\" />
-    <Folder Include="Specifications\" />
     <Folder Include="ValueObjects\" />
   </ItemGroup>
 
