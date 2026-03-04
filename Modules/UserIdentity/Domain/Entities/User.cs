@@ -3,10 +3,11 @@ using SharedKernel;
 
 namespace Domain.Entities
 {
-    public class User:BaseEntity
+    public class User : BaseEntity
 
     {
         private List<UserRefreshToken> _refreshTokens = new();
+        private string _email = string.Empty; // Backing field for EF Core persistence
         // Validation
         private static void ValidateName(string name, string paramName)
         {
@@ -25,9 +26,9 @@ namespace Domain.Entities
                 throw new ArgumentException($"{paramName} cannot exceed 50 characters", paramName);
             }
         }
-        private  User() { }
+        private User() { }
 
-        private User(Guid id, Email email, string firstName, string lastName, string? phoneNumber)
+        private User(Guid id, Email email, string firstName, string passwordHash, string lastName, string? phoneNumber)
             : base(id)
         {
             Email = email;
@@ -38,15 +39,21 @@ namespace Domain.Entities
             IsEmailConfirmed = false;
             CoinBalance = 0;
             ConsecutiveStreakDays = 0;
+            PasswordHash = passwordHash;
         }
 
-        public Email Email { get; private set; } = null!;
+        public Email Email
+        {
+            get => Email.Create(_email);
+            private set => _email = value.Value;
+        }
         public string FirstName { get; private set; } = string.Empty;
         public string LastName { get; private set; } = string.Empty;
         public string? PhoneNumber { get; private set; }
         public bool IsActive { get; private set; }
         public bool IsEmailConfirmed { get; private set; }
         public DateTime? LastLoginAt { get; private set; }
+        public string PasswordHash { get; private set; } = string.Empty;
 
         // Gamification properties
         public int CoinBalance { get; private set; }
@@ -55,13 +62,13 @@ namespace Domain.Entities
         // Navigation properties
         public IReadOnlyCollection<UserRefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
         //Factory method 
-        public static User Create(Email email, string firstName, string lastName, string? phoneNumber)
+        public static User Create(Email email, string firstName, string lastName, string passwordHash, string? phoneNumber)
         {
 
             ValidateName(firstName, nameof(firstName));
             ValidateName(lastName, nameof(lastName));
 
-            var user = new User(Guid.NewGuid(), email, firstName, lastName, phoneNumber);
+            var user = new User(Guid.NewGuid(), email, firstName, passwordHash, lastName, phoneNumber);
 
             user.RaiseDomainEvent(new UserRegisteredEvent(user.Id, user.Email.Value));
 
@@ -88,7 +95,14 @@ namespace Domain.Entities
             IsEmailConfirmed = true;
             MarkAsUpdated();
         }
+        public void UpdatePassword(string newPasswordHash)
+        {
+            if (string.IsNullOrWhiteSpace(newPasswordHash))
+                throw new ArgumentException("Password hash cannot be empty", nameof(newPasswordHash));
 
+            PasswordHash = newPasswordHash;
+            MarkAsUpdated();
+        }
         public void Deactivate()
         {
             if (!IsActive)
@@ -161,6 +175,21 @@ namespace Domain.Entities
             MarkAsUpdated();
 
             RaiseDomainEvent(new CoinBalanceChangedEvent(Id, previousBalance, CoinBalance, amount, reason));
+        }
+
+        public void SpendCoins(int amount, string reason)
+        {
+            if (amount <= 0)
+                throw new ArgumentException("Amount must be positive", nameof(amount));
+
+            if (CoinBalance < amount)
+                throw new InvalidOperationException($"Insufficient coin balance. Current: {CoinBalance}, Required: {amount}");
+
+            var previousBalance = CoinBalance;
+            CoinBalance -= amount;
+            MarkAsUpdated();
+
+            RaiseDomainEvent(new CoinBalanceChangedEvent(Id, previousBalance, CoinBalance, -amount, reason));
         }
     }
 }

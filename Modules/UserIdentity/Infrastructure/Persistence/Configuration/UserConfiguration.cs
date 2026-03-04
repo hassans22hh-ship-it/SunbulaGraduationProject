@@ -1,11 +1,10 @@
 ﻿using Domain.Entities;
-using Domain.Entities.ValueOpjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Persistence.Configuration
 {
-    public class UserConfiguration:IEntityTypeConfiguration<User>
+    public class UserConfiguration : IEntityTypeConfiguration<User>
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
@@ -16,14 +15,18 @@ namespace Infrastructure.Persistence.Configuration
             builder.HasKey(u => u.Id);
             builder.Property(u => u.Id).ValueGeneratedNever();
 
-            // Email as Value Object
-            builder.Property(u => u.Email)
-                .HasConversion(
-                    email => email.Value,
-                    value => Email.Create(value))
+            // Email - map the private backing field as a plain string (no value converter)
+            builder.Property<string>("_email")
+                .HasColumnName("Email")
                 .IsRequired()
                 .HasMaxLength(256);
 
+            // Ignore the public Email value object property (not mapped)
+            builder.Ignore(u => u.Email);
+
+            builder.Property(u => u.PasswordHash)
+            .IsRequired()
+            .HasMaxLength(512);
             builder.Property(u => u.FirstName)
                 .IsRequired()
                 .HasMaxLength(50);
@@ -71,7 +74,7 @@ namespace Infrastructure.Persistence.Configuration
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Indexes
-            builder.HasIndex(u => u.Email)
+            builder.HasIndex("_email")
                 .IsUnique()
                 .HasDatabaseName("IX_Users_Email");
 
