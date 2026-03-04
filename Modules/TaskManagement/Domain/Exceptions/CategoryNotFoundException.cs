@@ -1,10 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿
 
 namespace TaskDomain.Exceptions
 {
-    internal class CategoryNotFoundException
+    public sealed class CategoryNotFoundException:Exception
     {
+        public CategoryNotFoundException(Guid categoryId)
+        : base($"Category with ID '{categoryId}' was not found")
+        {
+            CategoryId = categoryId;
+        }
+
+        public Guid CategoryId { get; }
     }
 }

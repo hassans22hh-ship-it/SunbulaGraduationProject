@@ -7,15 +7,15 @@ using TaskStatus = TaskDomain.Entities.TaskManagement.Enums.TaskStatus;
 
 namespace Domain.Entities.TaskManagement
 {
-    public class Task:BaseEntity
+    public class TaskItem:BaseEntity
     {
         private readonly List<TaskCategory> _taskCategories = new();
 
         // Private constructor for EF Core
-        private Task() { }
+        private TaskItem() { }
 
         // Private constructor for factory method
-        private Task(
+        private TaskItem(
             Guid id,
             Guid userId,
             string title,
@@ -53,7 +53,7 @@ namespace Domain.Entities.TaskManagement
         // ═══════════════════════════════════════════════════════════════
 
         /// Creates a new Task.
-        public static Task Create(
+        public static TaskItem Create(
             Guid userId,
             string title,
             string? emoji,
@@ -66,7 +66,7 @@ namespace Domain.Entities.TaskManagement
             var taskColor = TaskColor.Create(color);
 
             // Create instance
-            var task = new Task(Guid.NewGuid(), userId, title, emoji, taskColor, behaviorType, folderId);
+            var task = new TaskItem(Guid.NewGuid(), userId, title, emoji, taskColor, behaviorType, folderId);
 
             // Raise domain event
             task.RaiseDomainEvent(new TaskCreatedEvent(task.Id, task.UserId, task.BehaviorType));
