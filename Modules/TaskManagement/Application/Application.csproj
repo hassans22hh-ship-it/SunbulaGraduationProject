@@ -6,11 +6,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="DTOS\**" />
-    <EmbeddedResource Remove="DTOS\**" />
-    <None Remove="DTOS\**" />
-  </ItemGroup>
+
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\TaskDomain.csproj" />

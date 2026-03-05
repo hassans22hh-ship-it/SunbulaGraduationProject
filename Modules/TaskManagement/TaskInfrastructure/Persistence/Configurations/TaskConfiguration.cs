@@ -1,4 +1,4 @@
-﻿using Task = Domain.Entities.TaskManagement.Task;
+﻿using Task = Domain.Entities.TaskManagement.TaskItem;
 using Category = Domain.Entities.TaskManagement;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

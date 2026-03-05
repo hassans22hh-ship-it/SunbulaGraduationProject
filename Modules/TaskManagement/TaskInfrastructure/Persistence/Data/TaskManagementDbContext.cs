@@ -10,7 +10,7 @@ namespace TaskInfrastructure.Persistence.Data
         public TaskManagementDbContext(DbContextOptions<TaskManagementDbContext> options)
             : base(options) { }
 
-        public DbSet<Domain.Entities.TaskManagement.Task> Tasks => Set<Domain.Entities.TaskManagement.Task>();
+        public DbSet<Domain.Entities.TaskManagement.TaskItem> Tasks => Set<Domain.Entities.TaskManagement.TaskItem>();
         public DbSet<Category> Categories => Set<Category>();
         public DbSet<Folder> Folders => Set<Folder>();
         public DbSet<TaskCategory> TaskCategories => Set<TaskCategory>();
