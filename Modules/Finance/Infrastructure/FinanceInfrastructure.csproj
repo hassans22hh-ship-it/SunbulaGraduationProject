@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Application\FinanceApplication.csproj" />
+    <ProjectReference Include="..\Domain\FinanceDomain.csproj" />
   </ItemGroup>
 
 </Project>
