@@ -39,7 +39,7 @@
     <Project Path="Modules/UserIdentity/Application/Application.csproj" Id="b92b9924-afd2-4fc7-b8f9-decdcac7dee3" />
     <Project Path="Modules/UserIdentity/Domain/Domain.csproj" Id="8c69139a-7217-43ee-a005-42747aa67117" />
     <Project Path="Modules/UserIdentity/Infrastructure/UserIdentityInfrastructure.csproj" Id="28f70348-d250-4311-b64d-31130b0599f8" />
-    <Project Path="Modules/UserIdentity/Presentation/Presentation.csproj" Id="09302e64-9f82-4703-980c-729af6e0e03b" />
+    <Project Path="Modules/UserIdentity/Presentation/PresentationIdentity.csproj" Id="09302e64-9f82-4703-980c-729af6e0e03b" />
   </Folder>
   <Project Path="Sunbula/Sunbula.csproj" />
 </Solution>

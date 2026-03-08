@@ -1,8 +1,13 @@
 
+using Application.Options;
 using DebtInfrastructure;
 using FinanceInfrastructure;
 using Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using PlantInfrastructure;
+using System.Text;
 using TaskInfrastructure;
 using TimeTrackingInfrastructure;
 
@@ -17,10 +22,51 @@ namespace Sunbula
             // Add services to the container.
 
             builder.Services.AddControllers();
+            builder.Services.AddControllers().AddApplicationPart(typeof(PresentationIdentity.AssemblyReference).Assembly);
+            
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             //builder.Services.AddOpenApi();
             builder.Services.AddEndpointsApiExplorer();
+            // ═══════════════════════════════════════════════════════════
+            // SWAGGER
+            // ═══════════════════════════════════════════════════════════
             builder.Services.AddSwaggerGen();
+
+            // ═══════════════════════════════════════════════════════════
+            // JWT AUTHENTICATION
+            // ═══════════════════════════════════════════════════════════
+            var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtOptions>();
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = jwtSettings!.Issuer,
+                        ValidAudience = jwtSettings.Audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+                        ClockSkew = TimeSpan.Zero
+                    };
+                });
+
+            builder.Services.AddAuthorization();
+            // ═══════════════════════════════════════════════════════════
+            // CORS
+            // ═══════════════════════════════════════════════════════════
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
             #region Tasks
             builder.Services.AddTaskManagementModule(builder.Configuration);
             #endregion
@@ -48,10 +94,11 @@ namespace Sunbula
             }
 
             app.UseHttpsRedirection();
+            app.UseAuthentication();    
 
             app.UseAuthorization();
 
-
+           
             app.MapControllers();
 
             app.Run();

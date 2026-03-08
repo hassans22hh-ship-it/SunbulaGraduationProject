@@ -22,6 +22,7 @@
     <ProjectReference Include="..\Modules\TaskManagement\TaskInfrastructure\TaskInfrastructure.csproj" />
     <ProjectReference Include="..\Modules\TimeTracking\Infrastructure\TimeTrackingInfrastructure.csproj" />
     <ProjectReference Include="..\Modules\UserIdentity\Infrastructure\UserIdentityInfrastructure.csproj" />
+    <ProjectReference Include="..\Modules\UserIdentity\Presentation\PresentationIdentity.csproj" />
   </ItemGroup>
 
 </Project>
