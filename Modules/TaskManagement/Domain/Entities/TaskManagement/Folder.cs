@@ -7,7 +7,7 @@ namespace Domain.Entities.TaskManagement
     public class Folder:BaseEntity
     {
 
-        private readonly List<Task> _tasks = new();
+        private readonly List<TaskItem> _tasks = new();
 
         // Private constructor for EF Core
         private Folder() { }
@@ -26,7 +26,7 @@ namespace Domain.Entities.TaskManagement
         public TaskColor Color { get; private set; } = null!;
 
         // Navigation properties
-        public IReadOnlyCollection<Task> Tasks => _tasks.AsReadOnly();
+        public IReadOnlyCollection<TaskItem> Tasks => _tasks.AsReadOnly();
 
         // ═══════════════════════════════════════════════════════════════
         // FACTORY METHOD
