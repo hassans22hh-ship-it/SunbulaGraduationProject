@@ -23,7 +23,13 @@ namespace Sunbula
 
             builder.Services.AddControllers();
             builder.Services.AddControllers().AddApplicationPart(typeof(PresentationIdentity.AssemblyReference).Assembly);
-            
+            builder.Services.AddControllers().AddApplicationPart(typeof(TaskPresentation.AssemblyReference).Assembly);
+             builder.Services.AddControllers().AddApplicationPart(typeof(FinancePresentation.AssemblyReference).Assembly);
+            builder.Services.AddControllers().AddApplicationPart(typeof(DebtPresentation.AssemblyReference).Assembly);
+            builder.Services.AddControllers().AddApplicationPart(typeof(TimeTrackingPresentation.AssemblyReference).Assembly);
+            builder.Services.AddControllers().AddApplicationPart(typeof(PlantPresentation.AssemblyReference).Assembly);
+
+
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             //builder.Services.AddOpenApi();
             builder.Services.AddEndpointsApiExplorer();

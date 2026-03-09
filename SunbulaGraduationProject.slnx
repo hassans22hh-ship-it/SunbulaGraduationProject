@@ -8,8 +8,8 @@
   <Folder Name="/Modules/Debt/">
     <Project Path="Modules/Debt/Application/Application.csproj" Id="09d966aa-dda0-4f3f-9c36-6d6410e3a1eb" />
     <Project Path="Modules/Debt/DebtInfrastructure/DebtInfrastructure.csproj" Id="6d5fcdec-a407-4886-a0a2-96adff03f71f" />
+    <Project Path="Modules/Debt/DebtPresentation/DebtPresentation.csproj" Id="062d5570-3189-4c7f-9236-6cbe92003b30" />
     <Project Path="Modules/Debt/Domain/DebtDomain.csproj" Id="949634b7-0aeb-42fa-8624-e195b2571d7f" />
-    <Project Path="Presentation/Presentation.csproj" Id="f4d700b9-c3a7-4af6-89bd-558cff8114e5" />
   </Folder>
   <Folder Name="/Modules/Finance/">
     <Project Path="Modules/Finance/Application/FinanceApplication.csproj" Id="70302f3c-ee40-4d2a-aff5-b20e3aca755d" />
@@ -26,7 +26,7 @@
   <Folder Name="/Modules/TaskManagement/">
     <Project Path="Modules/TaskManagement/Application/Application.csproj" Id="29762547-2c12-46b1-9452-0ff03447b0ac" />
     <Project Path="Modules/TaskManagement/Domain/TaskDomain.csproj" Id="9a49da7e-f3c2-42d5-8e03-6d2405224978" />
-    <Project Path="Modules/TaskManagement/Presentation/Presentation.csproj" Id="3ac937c4-4b8b-468c-b1da-5bfc0a2748e0" />
+    <Project Path="Modules/TaskManagement/Presentation/TaskPresentation.csproj" Id="3ac937c4-4b8b-468c-b1da-5bfc0a2748e0" />
     <Project Path="Modules/TaskManagement/TaskInfrastructure/TaskInfrastructure.csproj" Id="a1b2c3d4-e5f6-7890-abcd-ef1234567890" />
   </Folder>
   <Folder Name="/Modules/TimeTracking/">
@@ -36,7 +36,7 @@
     <Project Path="Modules/TimeTracking/Presentation/TimeTrackingPresentation.csproj" Id="40533f58-3287-427f-8718-1edd2e29f0ce" />
   </Folder>
   <Folder Name="/Modules/UserIdentity/">
-    <Project Path="Modules/UserIdentity/Application/Application.csproj" Id="b92b9924-afd2-4fc7-b8f9-decdcac7dee3" />
+    <Project Path="Modules/UserIdentity/Application/ApplicationIdentity.csproj" Id="b92b9924-afd2-4fc7-b8f9-decdcac7dee3" />
     <Project Path="Modules/UserIdentity/Domain/Domain.csproj" Id="8c69139a-7217-43ee-a005-42747aa67117" />
     <Project Path="Modules/UserIdentity/Infrastructure/UserIdentityInfrastructure.csproj" Id="28f70348-d250-4311-b64d-31130b0599f8" />
     <Project Path="Modules/UserIdentity/Presentation/PresentationIdentity.csproj" Id="09302e64-9f82-4703-980c-729af6e0e03b" />
