@@ -6,7 +6,7 @@
   </Folder>
   <Folder Name="/Modules/" />
   <Folder Name="/Modules/Debt/">
-    <Project Path="Modules/Debt/Application/Application.csproj" Id="09d966aa-dda0-4f3f-9c36-6d6410e3a1eb" />
+    <Project Path="Modules/Debt/Application/DebtApplication.csproj" Id="09d966aa-dda0-4f3f-9c36-6d6410e3a1eb" />
     <Project Path="Modules/Debt/DebtInfrastructure/DebtInfrastructure.csproj" Id="6d5fcdec-a407-4886-a0a2-96adff03f71f" />
     <Project Path="Modules/Debt/DebtPresentation/DebtPresentation.csproj" Id="062d5570-3189-4c7f-9236-6cbe92003b30" />
     <Project Path="Modules/Debt/Domain/DebtDomain.csproj" Id="949634b7-0aeb-42fa-8624-e195b2571d7f" />
@@ -24,7 +24,7 @@
     <Project Path="Modules/StorePlant/PlantPresentation/PlantPresentation.csproj" Id="92af1ff3-19d5-4894-b226-745d44de0ca6" />
   </Folder>
   <Folder Name="/Modules/TaskManagement/">
-    <Project Path="Modules/TaskManagement/Application/Application.csproj" Id="29762547-2c12-46b1-9452-0ff03447b0ac" />
+    <Project Path="Modules/TaskManagement/Application/TaskApplication.csproj" Id="29762547-2c12-46b1-9452-0ff03447b0ac" />
     <Project Path="Modules/TaskManagement/Domain/TaskDomain.csproj" Id="9a49da7e-f3c2-42d5-8e03-6d2405224978" />
     <Project Path="Modules/TaskManagement/Presentation/TaskPresentation.csproj" Id="3ac937c4-4b8b-468c-b1da-5bfc0a2748e0" />
     <Project Path="Modules/TaskManagement/TaskInfrastructure/TaskInfrastructure.csproj" Id="a1b2c3d4-e5f6-7890-abcd-ef1234567890" />

@@ -1,4 +1,9 @@
-﻿using FinanceInfrastructure.Persistence.Data;
+﻿using FinanceApplication.FinanceServiceAbs;
+using FinanceApplication.Mapping;
+using FinanceDomain.contracts;
+using FinanceInfrastructure.financeSService;
+using FinanceInfrastructure.Persistence.Data;
+using FinanceInfrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,7 +22,19 @@ namespace FinanceInfrastructure
                     configuration.GetConnectionString("FinanceDb"),
                     b => b.MigrationsAssembly(typeof(FinanceDbContext).Assembly.FullName)));
 
+            // ── Repositories & UoW ──────────────────────────────────────────────
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            // ── Services ────────────────────────────────────────────────────────
+            services.AddScoped<IWalletService, WalletService>();
+            services.AddScoped<IFinancialTransactionService, FinancialTransactionService>();
+            services.AddScoped<IFinancialCategoryService, FinancialCategoryService>();
+
+            // ── Mapping ─────────────────────────────────────────────────────────
+            services.AddAutoMapper(cfg => cfg.AddProfile<FinanceMappingProfile>());
+
             return services;
         }
     }
 }
+

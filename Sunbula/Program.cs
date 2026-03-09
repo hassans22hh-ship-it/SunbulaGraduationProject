@@ -21,7 +21,6 @@ namespace Sunbula
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
             builder.Services.AddControllers().AddApplicationPart(typeof(PresentationIdentity.AssemblyReference).Assembly);
             builder.Services.AddControllers().AddApplicationPart(typeof(TaskPresentation.AssemblyReference).Assembly);
              builder.Services.AddControllers().AddApplicationPart(typeof(FinancePresentation.AssemblyReference).Assembly);
