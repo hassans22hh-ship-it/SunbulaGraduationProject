@@ -1,0 +1,309 @@
+﻿using Application.ServiceAbstraction;
+using Application.TaskManagmentDTOS;
+using Domain.Entities.TaskManagement;
+using TaskDomain.Contracts;
+using TaskDomain.Entities.TaskManagement.Enums;
+using TaskDomain.Exceptions;
+
+namespace TaskInfrastructure.Services
+{
+    public sealed class TaskService: ITaskService
+    {
+        private readonly IUnitOfWork _unitOfWork;
+
+        public TaskService(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        public async Task<TaskDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            var task = await _unitOfWork.Tasks.GetByIdAsync(id, cancellationToken);
+            if (task == null)
+                throw new TaskNotFoundException(id);
+
+            return MapToDto(task);
+        }
+
+        public async Task<TaskDto> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            var task = await _unitOfWork.Tasks.GetByIdWithCategoriesAsync(id, cancellationToken);
+            if (task == null)
+                throw new TaskNotFoundException(id);
+
+            return MapToDtoWithDetails(task);
+        }
+
+        public async Task<IEnumerable<TaskDto>> GetAllByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            var tasks = await _unitOfWork.Tasks.GetByUserIdAsync(userId, cancellationToken);
+            return tasks.Select(MapToDto);
+        }
+
+        public async Task<IEnumerable<TaskDto>> GetActiveByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            var tasks = await _unitOfWork.Tasks.GetActiveByUserIdAsync(userId, cancellationToken);
+            return tasks.Select(MapToDto);
+        }
+
+        public async Task<IEnumerable<TaskDto>> GetArchivedByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            var tasks = await _unitOfWork.Tasks.GetArchivedByUserIdAsync(userId, cancellationToken);
+            return tasks.Select(MapToDto);
+        }
+
+        public async Task<IEnumerable<TaskDto>> GetByFolderIdAsync(Guid folderId, Guid userId, CancellationToken cancellationToken = default)
+        {
+            // Verify folder belongs to user
+            var folder = await _unitOfWork.Folders.GetByIdAsync(folderId, cancellationToken);
+            if (folder == null)
+                throw new FolderNotFoundException(folderId);
+
+            if (folder.UserId != userId)
+                throw new UnauthorizedAccessException("You don't have permission to access this folder");
+
+            var tasks = await _unitOfWork.Tasks.GetByFolderIdAsync(folderId, cancellationToken);
+            return tasks.Select(MapToDto);
+        }
+
+        public async Task<IEnumerable<TaskDto>> GetByCategoryIdAsync(Guid categoryId, Guid userId, CancellationToken cancellationToken = default)
+        {
+            // Verify category belongs to user
+            var category = await _unitOfWork.Categories.GetByIdAsync(categoryId, cancellationToken);
+            if (category == null)
+                throw new CategoryNotFoundException(categoryId);
+
+            if (category.UserId != userId)
+                throw new UnauthorizedAccessException("You don't have permission to access this category");
+
+            var tasks = await _unitOfWork.Tasks.GetByCategoryIdAsync(categoryId, cancellationToken);
+            return tasks.Select(MapToDto);
+        }
+
+        public async Task<IEnumerable<TaskDto>> GetByBehaviorTypeAsync(
+            Guid userId,
+            BehaviorCategory behaviorType,
+            CancellationToken cancellationToken = default)
+        {
+            var tasks = await _unitOfWork.Tasks.GetByBehaviorTypeAsync(userId, behaviorType, cancellationToken);
+            return tasks.Select(MapToDto);
+        }
+
+        public async Task<TaskDto> CreateAsync(CreateTaskDto dto, Guid userId, CancellationToken cancellationToken = default)
+        {
+            // Check if title exists
+            var titleExists = await _unitOfWork.Tasks.TitleExistsAsync(userId, dto.Title, cancellationToken: cancellationToken);
+            if (titleExists)
+                throw new InvalidOperationException($"Task with title '{dto.Title}' already exists");
+
+            // Verify folder if provided
+            if (dto.FolderId.HasValue)
+            {
+                var folder = await _unitOfWork.Folders.GetByIdAsync(dto.FolderId.Value, cancellationToken);
+                if (folder == null)
+                    throw new FolderNotFoundException(dto.FolderId.Value);
+
+                if (folder.UserId != userId)
+                    throw new UnauthorizedAccessException("You don't have permission to use this folder");
+            }
+
+            // Create using domain factory
+            var task = TaskItem.Create(
+                userId,
+                dto.Title,
+                dto.Emoji,
+                dto.Color,
+                dto.BehaviorType,
+                dto.FolderId);
+
+            // Add categories if provided
+            foreach (var categoryId in dto.CategoryIds)
+            {
+                var category = await _unitOfWork.Categories.GetByIdAsync(categoryId, cancellationToken);
+                if (category == null)
+                    throw new CategoryNotFoundException(categoryId);
+
+                if (category.UserId != userId)
+                    throw new UnauthorizedAccessException("You don't have permission to use this category");
+
+                task.AddCategory(categoryId);
+            }
+
+            await _unitOfWork.Tasks.AddAsync(task, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            return MapToDto(task);
+        }
+
+        public async Task<TaskDto> UpdateAsync(Guid id, UpdateTaskDto dto, Guid userId, CancellationToken cancellationToken = default)
+        {
+            var task = await _unitOfWork.Tasks.GetByIdAsync(id, cancellationToken);
+            if (task == null)
+                throw new TaskNotFoundException(id);
+
+            if (task.UserId != userId)
+                throw new UnauthorizedAccessException("You don't have permission to update this task");
+
+            // Check if new title conflicts with existing
+            if (task.Title != dto.Title)
+            {
+                var titleExists = await _unitOfWork.Tasks.TitleExistsAsync(userId, dto.Title, id, cancellationToken);
+                if (titleExists)
+                    throw new InvalidOperationException($"Task with title '{dto.Title}' already exists");
+            }
+
+            // Verify folder if provided
+            if (dto.FolderId.HasValue)
+            {
+                var folder = await _unitOfWork.Folders.GetByIdAsync(dto.FolderId.Value, cancellationToken);
+                if (folder == null)
+                    throw new FolderNotFoundException(dto.FolderId.Value);
+
+                if (folder.UserId != userId)
+                    throw new UnauthorizedAccessException("You don't have permission to use this folder");
+            }
+
+            task.Update(dto.Title, dto.Emoji, dto.Color, dto.BehaviorType, dto.FolderId);
+
+            _unitOfWork.Tasks.Update(task);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            return MapToDto(task);
+        }
+
+        public async Task ArchiveAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
+        {
+            var task = await _unitOfWork.Tasks.GetByIdAsync(id, cancellationToken);
+            if (task == null)
+                throw new TaskNotFoundException(id);
+
+            if (task.UserId != userId)
+                throw new UnauthorizedAccessException("You don't have permission to archive this task");
+
+            task.Archive();
+
+            _unitOfWork.Tasks.Update(task);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task UnarchiveAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
+        {
+            var task = await _unitOfWork.Tasks.GetByIdAsync(id, cancellationToken);
+            if (task == null)
+                throw new TaskNotFoundException(id);
+
+            if (task.UserId != userId)
+                throw new UnauthorizedAccessException("You don't have permission to unarchive this task");
+
+            task.Unarchive();
+
+            _unitOfWork.Tasks.Update(task);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task CompleteAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
+        {
+            var task = await _unitOfWork.Tasks.GetByIdAsync(id, cancellationToken);
+            if (task == null)
+                throw new TaskNotFoundException(id);
+
+            if (task.UserId != userId)
+                throw new UnauthorizedAccessException("You don't have permission to complete this task");
+
+            task.Complete();
+
+            _unitOfWork.Tasks.Update(task);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
+        {
+            var task = await _unitOfWork.Tasks.GetByIdAsync(id, cancellationToken);
+            if (task == null)
+                throw new TaskNotFoundException(id);
+
+            if (task.UserId != userId)
+                throw new UnauthorizedAccessException("You don't have permission to delete this task");
+
+            _unitOfWork.Tasks.Delete(task);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task AddCategoryAsync(Guid taskId, Guid categoryId, Guid userId, CancellationToken cancellationToken = default)
+        {
+            var task = await _unitOfWork.Tasks.GetByIdWithCategoriesAsync(taskId, cancellationToken);
+            if (task == null)
+                throw new TaskNotFoundException(taskId);
+
+            if (task.UserId != userId)
+                throw new UnauthorizedAccessException("You don't have permission to modify this task");
+
+            var category = await _unitOfWork.Categories.GetByIdAsync(categoryId, cancellationToken);
+            if (category == null)
+                throw new CategoryNotFoundException(categoryId);
+
+            if (category.UserId != userId)
+                throw new UnauthorizedAccessException("You don't have permission to use this category");
+
+            task.AddCategory(categoryId);
+
+            _unitOfWork.Tasks.Update(task);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task RemoveCategoryAsync(Guid taskId, Guid categoryId, Guid userId, CancellationToken cancellationToken = default)
+        {
+            var task = await _unitOfWork.Tasks.GetByIdWithCategoriesAsync(taskId, cancellationToken);
+            if (task == null)
+                throw new TaskNotFoundException(taskId);
+
+            if (task.UserId != userId)
+                throw new UnauthorizedAccessException("You don't have permission to modify this task");
+
+            task.RemoveCategory(categoryId);
+
+            _unitOfWork.Tasks.Update(task);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+
+        private static TaskDto MapToDto(TaskItem task)
+        {
+            return new TaskDto
+            {
+                Id = task.Id,
+                Title = task.Title,
+                Emoji = task.Emoji,
+                Color = task.Color.Value,
+                BehaviorType = task.BehaviorType,
+                FolderId = task.FolderId,
+                Status = task.Status,
+                IsArchived = task.IsArchived,
+                CreatedAt = task.CreatedAt,
+                UpdatedAt = task.UpdatedAt
+            };
+        }
+        private static TaskDto MapToDtoWithDetails(TaskItem task)
+        {
+            return new TaskDto
+            {
+                Id = task.Id,
+                Title = task.Title,
+                Emoji = task.Emoji,
+                Color = task.Color.Value,
+                BehaviorType = task.BehaviorType,
+                FolderId = task.FolderId,
+                Status = task.Status,
+                IsArchived = task.IsArchived,
+                CreatedAt = task.CreatedAt,
+                UpdatedAt = task.UpdatedAt,
+                Categories = task.TaskCategories.Select(tc => new CategoryDto
+                {
+                    Id = tc.Category.Id,
+                    Name = tc.Category.Name,
+                    Color = tc.Category.Color.Value,
+                    CreatedAt = tc.Category.CreatedAt
+                }).ToList()
+            };
+        }
+    }
+}

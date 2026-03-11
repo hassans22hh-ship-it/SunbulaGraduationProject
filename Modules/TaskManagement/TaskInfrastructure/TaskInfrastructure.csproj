@@ -9,6 +9,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Domain\TaskDomain.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\SharedKernel\SharedKernel.csproj" />
+	  <ProjectReference Include="..\Application\Application.csproj" />
+
   </ItemGroup>
 
   <ItemGroup>

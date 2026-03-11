@@ -1,4 +1,4 @@
-﻿namespace TaskDomain.Exceptionس
+﻿namespace TaskDomain.Exceptions
 {
     public sealed class TaskNotFoundException : Exception
     {
