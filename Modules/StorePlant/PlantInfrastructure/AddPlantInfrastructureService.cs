@@ -1,7 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PlantApplication.StoreplantMappings;
+using PlantApplication.StorePlantServiceAbstraction;
+using PlantDomain.Contracts;
 using PlantInfrastructure.Persistence.Data;
+using PlantInfrastructure.Persistence.Repositories;
+using PlantInfrastructure.StorePlantServices;
 
 namespace PlantInfrastructure
 {
@@ -17,19 +22,19 @@ namespace PlantInfrastructure
                     configuration.GetConnectionString("StorePlantDb"),
                     b => b.MigrationsAssembly(typeof(StorePlantDbContext).Assembly.FullName)));
 
-            //// ── AutoMapper ─────────────────────────────────────────────
-            //services.AddAutoMapper(typeof(StorePlantMappingProfile).Assembly);
+            // ── AutoMapper ─────────────────────────────────────────────
+            services.AddAutoMapper(cfg => { }, typeof(StorePlantMappingProfile).Assembly);
 
-            //// ── Repositories ───────────────────────────────────────────
-            //services.AddScoped<IPlantRepository, PlantRepository>();
-            //services.AddScoped<IUserPlantRepository, UserPlantRepository>();
+            // ── Repositories ───────────────────────────────────────────
+            services.AddScoped<IPlantRepository, PlantRepository>();
+            services.AddScoped<IUserPlantRepository, UserPlantRepository>();
 
-            //// ── Unit of Work ───────────────────────────────────────────
-            //services.AddScoped<IUnitOfWork, UnitOfWork>();
+            // ── Unit of Work ───────────────────────────────────────────
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            //// ── Application Services ───────────────────────────────────
-            //services.AddScoped<IPlantService, PlantService>();
-            //services.AddScoped<IUserPlantService, UserPlantService>();
+            // ── Application Services ───────────────────────────────────
+            services.AddScoped<IPlantService, PlantService>();
+            services.AddScoped<IUserPlantService, UserPlantService>();
 
             return services;
         }
