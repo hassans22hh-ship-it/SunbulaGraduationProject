@@ -5,11 +5,12 @@ using PlantApplication.StorePlantDTOs;
 using PlantApplication.StorePlantServiceAbstraction;
 using PlantDomain.Enums;
 
+
 namespace PlantPresentation.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/Plant")]
+    [Route("api/store/plants")]
     public sealed class PlantController : ControllerBase
     {
         private readonly IPlantService _plantService;
