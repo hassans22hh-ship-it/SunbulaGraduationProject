@@ -1,11 +1,13 @@
 using Application.ServiceAbstraction;
 using Application.TaskManagmentDTOS;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace TaskPresentation.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/v1/[controller]")]
     public sealed class FoldersController : ControllerBase
@@ -30,7 +32,7 @@ namespace TaskPresentation.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
         {
-            var result = await _folderService.GetByIdAsync(id, ct);
+            var result = await _folderService.GetByIdAsync(id, GetUserId(), ct);
             return Ok(result);
         }
 

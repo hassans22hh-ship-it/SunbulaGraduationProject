@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlantApplication.StorePlantDTOs;
@@ -35,7 +35,8 @@ namespace PlantPresentation.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
         {
-            var result = await _userPlantService.GetByIdAsync(id, cancellationToken);
+            var userId = GetCurrentUserId();
+            var result = await _userPlantService.GetByIdAsync(id, userId, cancellationToken);
             return Ok(result);
         }
 

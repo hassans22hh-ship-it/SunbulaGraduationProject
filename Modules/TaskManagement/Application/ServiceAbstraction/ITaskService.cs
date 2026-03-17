@@ -1,12 +1,12 @@
-﻿using Application.TaskManagmentDTOS;
+using Application.TaskManagmentDTOS;
 using TaskDomain.Entities.TaskManagement.Enums;
 
 namespace Application.ServiceAbstraction
 {
     public interface ITaskService
     {
-        Task<TaskDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-        Task<TaskDto> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<TaskDto> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
+        Task<TaskDto> GetByIdWithDetailsAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
         Task<IEnumerable<TaskDto>> GetAllByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<IEnumerable<TaskDto>> GetActiveByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<IEnumerable<TaskDto>> GetArchivedByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);

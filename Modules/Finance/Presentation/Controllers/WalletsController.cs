@@ -1,4 +1,4 @@
-﻿using FinanceApplication.financedtos;
+using FinanceApplication.financedtos;
 using FinanceApplication.FinanceServiceAbs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -10,7 +10,7 @@ namespace FinancePresentation.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/financial-categories")]
+    [Route("api/wallets")]
     public sealed class WalletsController : ControllerBase
     {
         private readonly IWalletService _walletService;

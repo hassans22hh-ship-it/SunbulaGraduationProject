@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using PlantApplication.StorePlantDTOs;
 using PlantApplication.StorePlantServiceAbstraction;
 using PlantDomain.Contracts;
@@ -21,10 +21,13 @@ namespace PlantInfrastructure.StorePlantServices
             _mapper = mapper;
         }
 
-        public async Task<UserPlantDto> GetByIdAsync(Guid userPlantId, CancellationToken cancellationToken = default)
+        public async Task<UserPlantDto> GetByIdAsync(Guid userPlantId, Guid userId, CancellationToken cancellationToken = default)
         {
             var userPlant = await _unitOfWork.UserPlants.GetByIdWithDetailsAsync(userPlantId, cancellationToken)
                 ?? throw new UserPlantNotFoundException(userPlantId);
+
+            if (userPlant.UserId != userId)
+                throw new UnauthorizedAccessException("You do not own this plant.");
 
             return _mapper.Map<UserPlantDto>(userPlant);
         }
