@@ -67,8 +67,9 @@ namespace Sunbula
             {
                 options.AddPolicy("AllowAll", policy =>
                 {
-                    policy.AllowAnyOrigin()
-                          .AllowAnyMethod()
+                    policy.WithOrigins("http://localhost:4200")
+
+                            .AllowAnyMethod()
                           .AllowAnyHeader();
                 });
             });
@@ -99,6 +100,8 @@ namespace Sunbula
             }
 
             app.UseHttpsRedirection();
+            app.UseCors("AllowAll");
+
             app.UseAuthentication();    
 
             app.UseAuthorization();
