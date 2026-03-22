@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Application\TimeTrackingApplication.csproj" />
+    <ProjectReference Include="..\Domain\TimeTrackingDomain.csproj" />
+	<ProjectReference Include="..\Application\TimeTrackingApplication.csproj" />
   </ItemGroup>
 
 </Project>
