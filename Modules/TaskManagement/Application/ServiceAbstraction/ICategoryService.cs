@@ -5,6 +5,7 @@ namespace Application.ServiceAbstraction
 {
     public interface ICategoryService
     {
+
         Task<CategoryDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
         Task<IEnumerable<CategoryDto>> GetAllByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<CategoryDto> CreateAsync(CreateCategoryDto dto, Guid userId, CancellationToken cancellationToken = default);

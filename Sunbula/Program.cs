@@ -35,7 +35,7 @@ namespace Sunbula
             // ═══════════════════════════════════════════════════════════
             // SWAGGER
             // ═══════════════════════════════════════════════════════════
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerDocumentation();
 
             // ═══════════════════════════════════════════════════════════
             // JWT AUTHENTICATION
