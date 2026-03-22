@@ -1,11 +1,9 @@
-﻿namespace TimeTrackingDomain.Contracts
+﻿namespace DebtDomain.Contracts
+/// Unit of Work for Debt module.
 {
-    /// Unit of Work for TimeTracking module.
-
     public interface IUnitOfWork: IDisposable
     {
-        ITimeSessionRepository TimeSessions { get; }
-        IDailyTransactionRepository DailyTransactions { get; }
+        IDebtRepository Debts { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BeginTransactionAsync(CancellationToken cancellationToken = default);
@@ -13,4 +11,3 @@
         Task RollbackTransactionAsync(CancellationToken cancellationToken = default);
     }
 }
-
