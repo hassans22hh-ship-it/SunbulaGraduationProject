@@ -10,6 +10,12 @@ using Sunbula;
 using System.Text;
 using TaskInfrastructure;
 using TimeTrackingInfrastructure;
+using DebtApplication.DebtService;
+using FinanceApplication.FinanceServiceAbs;
+using PlantApplication.StorePlantServiceAbstraction;
+using Application.ServiceAbstraction; // TaskManagement
+using TimeTrackingApplication.TimeServiceAbstraction;
+using Application.Services.Abstraction; // UserIdentity
 
 namespace Sunbula
 {
@@ -78,6 +84,23 @@ namespace Sunbula
                           .AllowAnyMethod()
                           .AllowAnyHeader();
                 });
+            });
+
+            // ═══════════════════════════════════════════════════════════
+            // MEDIATR
+            // ═══════════════════════════════════════════════════════════
+            builder.Services.AddMediatR(cfg => 
+            {
+                // Core and Module Application Assemblies
+                cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+                cfg.RegisterServicesFromAssemblies(
+                    typeof(IDebtService).Assembly,
+                    typeof(IFinancialCategoryService).Assembly,
+                    typeof(IPlantService).Assembly,
+                    typeof(ICategoryService).Assembly,
+                    typeof(IDailyTransactionService).Assembly,
+                    typeof(IAuthenticationService).Assembly
+                );
             });
 
             // ═══════════════════════════════════════════════════════════

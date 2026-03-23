@@ -31,7 +31,7 @@ namespace TimeTrackingInfrastructure
 
             //// ── Services ───────────────────────────────────────────────
             services.AddScoped<ITimeSessionService, TimeSessionService>();
-            //services.AddScoped<IDailyTransactionService, DailyTransactionService>();
+            services.AddScoped<IDailyTransactionService, DailyTransactionService>();
 
             //// ── AutoMapper ─────────────────────────────────────────────
             services.AddAutoMapper(cfg => { }, typeof(TimeTrackingMappingProfile).Assembly);

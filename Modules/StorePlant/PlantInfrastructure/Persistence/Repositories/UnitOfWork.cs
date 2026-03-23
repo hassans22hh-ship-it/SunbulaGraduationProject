@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore.Storage;
 using PlantDomain.Contracts;
 using PlantInfrastructure.Persistence.Data;
 using System;
@@ -51,7 +51,7 @@ namespace PlantInfrastructure.Persistence.Repositories
         public void Dispose()
         {
             _transaction?.Dispose();
-            _context.Dispose();
+            // _context.Dispose(); // DI container handles disposal of Scoped DbContext
         }
     }
 }

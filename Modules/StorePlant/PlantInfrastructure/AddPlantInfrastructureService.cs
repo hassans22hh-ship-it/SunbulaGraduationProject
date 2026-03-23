@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PlantApplication.StoreplantMappings;
@@ -20,7 +20,10 @@ namespace PlantInfrastructure
             services.AddDbContext<StorePlantDbContext>(options =>
                 options.UseSqlServer(
                     configuration.GetConnectionString("StorePlantDb"),
-                    b => b.MigrationsAssembly(typeof(StorePlantDbContext).Assembly.FullName)));
+                    b => b.MigrationsAssembly(typeof(StorePlantDbContext).Assembly.FullName)
+                          .CommandTimeout(30))
+                .EnableSensitiveDataLogging()
+                .EnableDetailedErrors());
 
             // ── AutoMapper ─────────────────────────────────────────────
             services.AddAutoMapper(cfg => { }, typeof(StorePlantMappingProfile).Assembly);

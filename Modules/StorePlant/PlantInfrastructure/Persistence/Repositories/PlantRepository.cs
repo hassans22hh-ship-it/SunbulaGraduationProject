@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PlantDomain.Contracts;
 using PlantDomain.Entities;
 using PlantDomain.Enums;
@@ -66,11 +66,28 @@ namespace PlantInfrastructure.Persistence.Repositories
         // ── Custom Queries ────────────────────────────────────────────────
 
         public async Task<IEnumerable<Plant>> GetAvailablePlantsAsync(CancellationToken cancellationToken = default)
-            => await _dbSet
-                .Where(p => p.IsAvailable && !p.IsDeleted)
-                .OrderBy(p => p.Level)
-                .ThenBy(p => p.Price)
-                .ToListAsync(cancellationToken);
+        {
+            try
+            {
+                return await _dbSet
+                    .Where(p => p.IsAvailable && !p.IsDeleted)
+                    .OrderBy(p => p.Level)
+                    .ThenBy(p => p.Price)
+                    .ToListAsync(cancellationToken);
+            }
+            catch (TaskCanceledException ex)
+            {
+                // Senior Eng: Capture details when opening connection fails
+                // Log the exception details here if a logger is available, 
+                // or let the global handler catch the more detailed version from EF Core 8/9+
+                throw; 
+            }
+            catch (Exception ex)
+            {
+                // Catch potential SqlException timeouts that manifest as TaskCanceledException
+                throw;
+            }
+        }
 
         public async Task<IEnumerable<Plant>> GetByLevelAsync(PlantLevel level, CancellationToken cancellationToken = default)
             => await _dbSet

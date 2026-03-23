@@ -1,4 +1,5 @@
 using DebtDomain.Exceptions;
+using Domain.Exceptions;
 using FinanceDomain.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
@@ -30,6 +31,10 @@ namespace Sunbula
 
             var (statusCode, title) = exception switch
             {
+                UserNotFoundException => (HttpStatusCode.NotFound, "User Not Found"),
+                UnauthorizedException => (HttpStatusCode.Unauthorized, "Authentication Failed"),
+                ValidationException => (HttpStatusCode.BadRequest, "Validation Error"),
+
                 // Domain not-found exceptions
                 DebtNotFoundException => (HttpStatusCode.NotFound, "Debt not found"),
                 WalletNotFoundException => (HttpStatusCode.NotFound, "Wallet not found"),
