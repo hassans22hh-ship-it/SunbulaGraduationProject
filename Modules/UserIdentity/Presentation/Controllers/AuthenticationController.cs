@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Application.UserDTO;
 using Application.Services.Abstraction;
 using Microsoft.AspNetCore.Authorization;
@@ -105,7 +105,9 @@ namespace PresentationIdentity.Controllers
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                 ?? throw new UnauthorizedAccessException("User ID not found in token");
-            return Guid.Parse(userIdClaim);
+            if (!Guid.TryParse(userIdClaim, out var userId))
+                throw new UnauthorizedAccessException("Invalid User ID format in token.");
+            return userId;
         }
     }
 }

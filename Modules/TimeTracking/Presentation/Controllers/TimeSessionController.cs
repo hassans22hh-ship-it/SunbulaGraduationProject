@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -149,7 +149,9 @@ namespace TimeTrackingPresentation.Controllers
         {
             var claim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                 ?? throw new UnauthorizedAccessException("User ID not found in token.");
-            return Guid.Parse(claim);
+            if (!Guid.TryParse(claim, out var userId))
+                throw new UnauthorizedAccessException("Invalid User ID format in token.");
+            return userId;
         }
     }
 }

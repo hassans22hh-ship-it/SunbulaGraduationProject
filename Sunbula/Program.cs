@@ -5,8 +5,8 @@ using FinanceInfrastructure;
 using Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
 using PlantInfrastructure;
+using Sunbula;
 using System.Text;
 using TaskInfrastructure;
 using TimeTrackingInfrastructure;
@@ -19,19 +19,25 @@ namespace Sunbula
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // ═══════════════════════════════════════════════════════════
+            // CONTROLLERS — single AddControllers() with chained parts
+            // ═══════════════════════════════════════════════════════════
+            builder.Services.AddControllers()
+                .AddApplicationPart(typeof(PresentationIdentity.AssemblyReference).Assembly)
+                .AddApplicationPart(typeof(TaskPresentation.AssemblyReference).Assembly)
+                .AddApplicationPart(typeof(FinancePresentation.AssemblyReference).Assembly)
+                .AddApplicationPart(typeof(DebtPresentation.AssemblyReference).Assembly)
+                .AddApplicationPart(typeof(TimeTrackingPresentation.AssemblyReference).Assembly)
+                .AddApplicationPart(typeof(PlantPresentation.AssemblyReference).Assembly);
 
-            builder.Services.AddControllers().AddApplicationPart(typeof(PresentationIdentity.AssemblyReference).Assembly);
-            builder.Services.AddControllers().AddApplicationPart(typeof(TaskPresentation.AssemblyReference).Assembly);
-             builder.Services.AddControllers().AddApplicationPart(typeof(FinancePresentation.AssemblyReference).Assembly);
-            builder.Services.AddControllers().AddApplicationPart(typeof(DebtPresentation.AssemblyReference).Assembly);
-            builder.Services.AddControllers().AddApplicationPart(typeof(TimeTrackingPresentation.AssemblyReference).Assembly);
-            builder.Services.AddControllers().AddApplicationPart(typeof(PlantPresentation.AssemblyReference).Assembly);
+            // ═══════════════════════════════════════════════════════════
+            // GLOBAL EXCEPTION HANDLING
+            // ═══════════════════════════════════════════════════════════
+            builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+            builder.Services.AddProblemDetails();
 
-
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            //builder.Services.AddOpenApi();
             builder.Services.AddEndpointsApiExplorer();
+
             // ═══════════════════════════════════════════════════════════
             // SWAGGER
             // ═══════════════════════════════════════════════════════════
@@ -60,58 +66,49 @@ namespace Sunbula
                 });
 
             builder.Services.AddAuthorization();
+
             // ═══════════════════════════════════════════════════════════
             // CORS
             // ═══════════════════════════════════════════════════════════
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowAll", policy =>
+                options.AddPolicy("AllowFrontend", policy =>
                 {
                     policy.WithOrigins("http://localhost:4200")
-
-                            .AllowAnyMethod()
+                          .AllowAnyMethod()
                           .AllowAnyHeader();
                 });
             });
-            #region Tasks
-            builder.Services.AddTaskManagementModule(builder.Configuration);
-            #endregion
-            #region UserIdentity
-            builder.Services.AddInfrastructure(builder.Configuration);
-            #endregion
-            #region ConnectionByDb
 
+            // ═══════════════════════════════════════════════════════════
+            // MODULE REGISTRATIONS
+            // ═══════════════════════════════════════════════════════════
+            builder.Services.AddTaskManagementModule(builder.Configuration);
+            builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddDebtModule(builder.Configuration);
             builder.Services.AddFinanceModule(builder.Configuration);
-             builder.Services.AddTimeTrackingModule(builder.Configuration);
+            builder.Services.AddTimeTrackingModule(builder.Configuration);
             builder.Services.AddStorePlantModule(builder.Configuration);
-            #endregion
+
             var app = builder.Build();
-
-
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-
                 app.UseSwagger();
                 app.UseSwaggerUI();
-
             }
 
+            app.UseExceptionHandler();
             app.UseHttpsRedirection();
-            app.UseCors("AllowAll");
+            app.UseCors("AllowFrontend");
 
-            app.UseAuthentication();    
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
-           
             app.MapControllers();
 
             app.Run();
         }
-
-
     }
 }

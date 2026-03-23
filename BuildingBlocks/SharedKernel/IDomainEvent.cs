@@ -1,8 +1,10 @@
-﻿namespace SharedKernel
+using MediatR;
+
+namespace SharedKernel
 {
-    public interface IDomainEvent
+    public interface IDomainEvent : INotification
     {
         Guid Id { get; }
-        DateTime  OccurredOn { get; }
+        DateTime OccurredOn { get; }
     }
 }

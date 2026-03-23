@@ -1,12 +1,19 @@
-﻿using FinanceDomain.Entities;
+using FinanceDomain.Entities;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 
 namespace FinanceInfrastructure.Persistence.Data
 {
-    public class FinanceDbContext:DbContext
+    public class FinanceDbContext : DbContext
     {
-        public FinanceDbContext(DbContextOptions<FinanceDbContext> options) : base(options) { }
+        private readonly IMediator _mediator;
+
+        public FinanceDbContext(DbContextOptions<FinanceDbContext> options, IMediator mediator)
+            : base(options)
+        {
+            _mediator = mediator;
+        }
 
         public DbSet<Wallet> Wallets => Set<Wallet>();
         public DbSet<FinancialCategory> FinancialCategories => Set<FinancialCategory>();
@@ -39,7 +46,9 @@ namespace FinanceInfrastructure.Persistence.Data
             // Clear events after save
             entities.ForEach(e => e.ClearDomainEvents());
 
-            // TODO: Dispatch domain events via MediatR / event bus
+            // Dispatch domain events via MediatR
+            foreach (var domainEvent in domainEvents)
+                await _mediator.Publish(domainEvent, cancellationToken);
 
             return result;
         }

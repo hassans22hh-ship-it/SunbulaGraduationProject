@@ -76,8 +76,13 @@ namespace FinancePresentation.Controllers
             return NoContent();
         }
 
-        private Guid GetUserId() =>
-            Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)
-                ?? throw new UnauthorizedAccessException("User ID not found in token."));
+        private Guid GetUserId()
+        {
+            var claim = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? throw new UnauthorizedAccessException("User ID not found in token.");
+            if (!Guid.TryParse(claim, out var userId))
+                throw new UnauthorizedAccessException("Invalid User ID format in token.");
+            return userId;
+        }
     }
 }

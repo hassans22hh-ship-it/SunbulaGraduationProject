@@ -1,15 +1,20 @@
-﻿
+
 using DebtDomain.Entities;
 using DebtDomain.ValueObjects;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using SharedKernel;
 
 namespace DebtInfrastructure.Persistenece.Data
 {
     public sealed class DebtDbContext : DbContext
     {
+        private readonly IMediator _mediator;
 
-        public DebtDbContext(DbContextOptions<DebtDbContext> options)
+        public DebtDbContext(DbContextOptions<DebtDbContext> options, IMediator mediator)
             : base(options)
         {
+            _mediator = mediator;
         }
 
         public DbSet<DebtDomain.Entities.Debt> Debts => Set<DebtDomain.Entities.Debt>();
@@ -25,8 +30,12 @@ namespace DebtInfrastructure.Persistenece.Data
             // Global query filter for soft delete
             modelBuilder.Entity<DebtDomain.Entities.Debt>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<DebtPayment>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Ignore<Money>();
 
+            // Map Money value objects as owned types
+            modelBuilder.Entity<DebtDomain.Entities.Debt>().OwnsOne(d => d.Amount, m =>
+                m.Property(p => p.Value).HasColumnName("Amount"));
+            modelBuilder.Entity<DebtDomain.Entities.Debt>().OwnsOne(d => d.RemainingAmount, m =>
+                m.Property(p => p.Value).HasColumnName("RemainingAmount"));
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -48,7 +57,9 @@ namespace DebtInfrastructure.Persistenece.Data
                 .ToList()
                 .ForEach(e => e.ClearDomainEvents());
 
-            // TODO: Dispatch domain events (MediatR integration)
+            // Dispatch domain events via MediatR
+            foreach (var domainEvent in domainEvents)
+                await _mediator.Publish(domainEvent, cancellationToken);
 
             return result;
         }
