@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TimeTrackingApplication.TimeDtos;
@@ -6,8 +7,10 @@ using TimeTrackingApplication.TimeServiceAbstraction;
 
 namespace TimeTrackingPresentation.Controllers
 {
+    [Authorize]
     /// Provides daily summaries, timeline data, and streak information.
-
+    [Route("api/[controller]")]
+    [ApiController]
     public class DailyTransactionController: ControllerBase
     {
         private readonly IDailyTransactionService _dailyService;

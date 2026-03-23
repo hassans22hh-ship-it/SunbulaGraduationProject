@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TimeTrackingApplication.TimeDtos;
@@ -6,8 +7,10 @@ using TimeTrackingApplication.TimeServiceAbstraction;
 
 namespace TimeTrackingPresentation.Controllers
 {
+    [Authorize]
     /// Manages time tracking sessions — start, stop, manual entry, and timeline queries.
-
+    [Route("api/[controller]")]
+    [ApiController]
     public class TimeSessionController: ControllerBase
     {
         private readonly ITimeSessionService _sessionService;
