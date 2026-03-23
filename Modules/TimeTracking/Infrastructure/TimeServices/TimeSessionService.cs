@@ -77,13 +77,17 @@ namespace TimeTrackingInfrastructure.TimeServices
 
             if (session.UserId != userId)
                 throw new UnauthorizedAccessException("You don't have permission to stop this session.");
+
             if (!session.IsActive)
-                throw new InvalidOperationException("Session is already stopped.");
+            {
+                return _mapper.Map<TimeSessionDto>(session);
+            }
 
             session.Stop();
             await UpdateDailyTransactionAsync(session, cancellationToken);
             _unitOfWork.TimeSessions.Update(session);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
             return _mapper.Map<TimeSessionDto>(session);
         }
 
