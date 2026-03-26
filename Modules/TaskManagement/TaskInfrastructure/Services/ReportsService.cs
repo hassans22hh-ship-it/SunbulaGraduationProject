@@ -20,7 +20,7 @@ namespace TaskInfrastructure.Services
 
         public async Task<TaskReportDto> GetUserSummaryReportAsync(Guid userId, CancellationToken cancellationToken = default)
         {
-            var tasks = await _unitOfWork.Tasks.GetByUserIdAsync(userId, cancellationToken);
+            var (tasks, totalTaskCount) = await _unitOfWork.Tasks.GetByUserIdAsync(userId, 1, 1000, cancellationToken);
             var taskList = tasks.ToList();
 
             var last7Days = await _dailyTransactionService.GetLastNDaysAsync(userId, 7, cancellationToken);
