@@ -191,6 +191,30 @@ namespace TaskInfrastructure.Persistence.Repositories
             return await query.AnyAsync(cancellationToken);
         }
 
+        public async Task<IEnumerable<TaskItem>> SearchByTitleAsync(
+            Guid userId,
+            string query,
+            CancellationToken cancellationToken = default)
+        {
+            var lowercaseQuery = query.ToLower();
+            return await _dbSet
+                .Where(t => t.UserId == userId && !t.IsDeleted && t.Title.ToLower().Contains(lowercaseQuery))
+                .OrderBy(t => t.Title)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<IEnumerable<TaskItem>> GetRecentAsync(
+            Guid userId,
+            int count = 10,
+            CancellationToken cancellationToken = default)
+        {
+            return await _dbSet
+                .Where(t => t.UserId == userId && !t.IsDeleted)
+                .OrderByDescending(t => t.UpdatedAt ?? t.CreatedAt)
+                .Take(count)
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<int> CountByFolderIdAsync(Guid folderId, CancellationToken cancellationToken = default)
         {
             return await _dbSet

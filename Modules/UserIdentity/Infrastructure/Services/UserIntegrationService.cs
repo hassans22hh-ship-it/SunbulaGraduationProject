@@ -23,5 +23,16 @@ namespace UserIdentityInfrastructure.Services
             _unitOfWork.Users.Update(user);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
+
+        public async Task SpendCoinsAsync(Guid userId, int amount, string reason, CancellationToken cancellationToken = default)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(userId, cancellationToken)
+                ?? throw new UserNotFoundException(userId);
+
+            user.SpendCoins(amount, reason);
+
+            _unitOfWork.Users.Update(user);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
     }
 }

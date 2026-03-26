@@ -13,7 +13,10 @@ namespace Application.ServiceAbstraction
         Task<IEnumerable<TaskDto>> GetByFolderIdAsync(Guid folderId, Guid userId, CancellationToken cancellationToken = default);
         Task<IEnumerable<TaskDto>> GetByCategoryIdAsync(Guid categoryId, Guid userId, CancellationToken cancellationToken = default);
         Task<IEnumerable<TaskDto>> GetByBehaviorTypeAsync(Guid userId, BehaviorCategory behaviorType, CancellationToken cancellationToken = default);
+        Task<IEnumerable<TaskDto>> SearchAsync(string query, Guid userId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<TaskDto>> GetRecentAsync(Guid userId, int count = 10, CancellationToken cancellationToken = default);
         Task<TaskDto> CreateAsync(CreateTaskDto dto, Guid userId, CancellationToken cancellationToken = default);
+        Task<TaskDto> DuplicateAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
         Task<TaskDto> UpdateAsync(Guid id, UpdateTaskDto dto, Guid userId, CancellationToken cancellationToken = default);
         Task ArchiveAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
         Task UnarchiveAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);

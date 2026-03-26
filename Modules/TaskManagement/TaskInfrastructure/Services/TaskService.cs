@@ -90,6 +90,21 @@ namespace TaskInfrastructure.Services
             return tasks.Select(MapToDto);
         }
 
+        public async Task<IEnumerable<TaskDto>> SearchAsync(string query, Guid userId, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return Array.Empty<TaskDto>();
+
+            var tasks = await _unitOfWork.Tasks.SearchByTitleAsync(userId, query, cancellationToken);
+            return tasks.Select(MapToDto);
+        }
+
+        public async Task<IEnumerable<TaskDto>> GetRecentAsync(Guid userId, int count = 10, CancellationToken cancellationToken = default)
+        {
+            var tasks = await _unitOfWork.Tasks.GetRecentAsync(userId, count, cancellationToken);
+            return tasks.Select(MapToDto);
+        }
+
         public async Task<TaskDto> CreateAsync(CreateTaskDto dto, Guid userId, CancellationToken cancellationToken = default)
         {
             // Check if title exists
@@ -134,6 +149,40 @@ namespace TaskInfrastructure.Services
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return MapToDto(task);
+        }
+
+        public async Task<TaskDto> DuplicateAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
+        {
+            var task = await _unitOfWork.Tasks.GetByIdWithCategoriesAsync(id, cancellationToken);
+            if (task == null)
+                throw new TaskNotFoundException(id);
+
+            if (task.UserId != userId)
+                throw new UnauthorizedAccessException("You don't have permission to duplicate this task");
+
+            var duplicate = task.Duplicate();
+
+            // Ensure title uniqueness
+            var baseTitle = duplicate.Title;
+            var finalTitle = baseTitle;
+            var counter = 1;
+            while (await _unitOfWork.Tasks.TitleExistsAsync(userId, finalTitle, cancellationToken: cancellationToken))
+            {
+                finalTitle = $"{baseTitle} ({counter++})";
+                if (finalTitle.Length > 200) finalTitle = finalTitle.Substring(0, 200);
+                // Note: using reflection or Update to change title if needed, 
+                // but Duplicate() uses private constructor. We can just Update it.
+            }
+            
+            if (finalTitle != baseTitle)
+            {
+                duplicate.Update(finalTitle, duplicate.Emoji, duplicate.Color.Value, duplicate.BehaviorType, duplicate.FolderId);
+            }
+
+            await _unitOfWork.Tasks.AddAsync(duplicate, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            return MapToDtoWithDetails(duplicate);
         }
 
         public async Task<TaskDto> UpdateAsync(Guid id, UpdateTaskDto dto, Guid userId, CancellationToken cancellationToken = default)

@@ -1,4 +1,4 @@
-﻿using SharedKernel;
+using SharedKernel;
 using TaskDomain.Entities.TaskManagement;
 using TaskDomain.Entities.TaskManagement.Enums;
 using TaskDomain.Entities.TaskManagement.Events;
@@ -180,6 +180,36 @@ namespace Domain.Entities.TaskManagement
                 BehaviorCategory.Negative => -1,
                 _ => 0
             };
+        }
+
+        /// <summary>
+        /// Creates a duplicate of this task.
+        /// </summary>
+        public TaskItem Duplicate()
+        {
+            var newTitle = $"{Title} - Copy";
+            if (newTitle.Length > 200) 
+            {
+                newTitle = newTitle.Substring(0, 200);
+            }
+
+            var duplicate = new TaskItem(
+                Guid.NewGuid(), 
+                UserId, 
+                newTitle, 
+                Emoji, 
+                Color, 
+                BehaviorType, 
+                FolderId);
+
+            foreach (var category in _taskCategories)
+            {
+                duplicate.AddCategory(category.CategoryId);
+            }
+
+            duplicate.RaiseDomainEvent(new TaskCreatedEvent(duplicate.Id, duplicate.UserId, duplicate.BehaviorType));
+
+            return duplicate;
         }
 
         // ═══════════════════════════════════════════════════════════════

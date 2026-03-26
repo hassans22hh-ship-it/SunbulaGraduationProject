@@ -86,12 +86,37 @@ namespace TaskPresentation.Controllers
             return Ok(result);
         }
 
+        [HttpGet("search")]
+        [ProducesResponseType(typeof(IEnumerable<TaskDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Search([FromQuery] string query, CancellationToken ct)
+        {
+            var result = await _taskService.SearchAsync(query ?? string.Empty, GetUserId(), ct);
+            return Ok(result);
+        }
+
+        [HttpGet("recent")]
+        [ProducesResponseType(typeof(IEnumerable<TaskDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetRecent(CancellationToken ct)
+        {
+            var result = await _taskService.GetRecentAsync(GetUserId(), 10, ct);
+            return Ok(result);
+        }
+
         [HttpPost]
         [ProducesResponseType(typeof(TaskDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromBody] CreateTaskDto dto, CancellationToken ct)
         {
             var result = await _taskService.CreateAsync(dto, GetUserId(), ct);
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+        }
+
+        [HttpPost("{id:guid}/duplicate")]
+        [ProducesResponseType(typeof(TaskDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Duplicate(Guid id, CancellationToken ct)
+        {
+            var result = await _taskService.DuplicateAsync(id, GetUserId(), ct);
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
 

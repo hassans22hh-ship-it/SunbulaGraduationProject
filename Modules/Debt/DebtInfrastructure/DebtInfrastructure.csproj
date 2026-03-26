@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Application\DebtApplication.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\SharedKernel\SharedKernel.csproj" />
+    <ProjectReference Include="..\..\UserIdentity\Application\ApplicationIdentity.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿using Domain.Entities;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 
@@ -12,6 +12,7 @@ namespace Infrastructure.Persistence.Data
         }
         public DbSet<User> Users => Set<User>();
         public DbSet<UserRefreshToken> UserRefreshTokens => Set<UserRefreshToken>();
+        public DbSet<UserSettings> UserSettings => Set<UserSettings>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

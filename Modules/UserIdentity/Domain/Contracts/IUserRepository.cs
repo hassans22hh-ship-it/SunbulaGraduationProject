@@ -1,4 +1,4 @@
-﻿using Domain.Entities;
+using Domain.Entities;
 using Domain.Entities.ValueOpjects;
 using SharedKernel;
 
@@ -11,5 +11,6 @@ namespace Domain.Contracts
         Task<User?> GetByIdWithRefreshTokensAsync(Guid id, CancellationToken cancellationToken = default);
         Task<bool> EmailExistsAsync(Email email, CancellationToken cancellationToken = default);
         Task<User?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
+        Task<User?> GetByIdWithSettingsAsync(Guid id, CancellationToken cancellationToken = default);
     }
 }

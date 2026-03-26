@@ -61,6 +61,7 @@ namespace Domain.Entities
         public DateTime? LastStreakDate { get; private set; }
         public string AwardedMilestones { get; private set; } = string.Empty;
         // Navigation properties
+        public UserSettings? Settings { get; private set; }
         public IReadOnlyCollection<UserRefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
         //Factory method 
         public static User Create(Email email, string firstName, string lastName, string passwordHash, string? phoneNumber)
@@ -216,6 +217,14 @@ namespace Domain.Entities
             {
                 RaiseDomainEvent(new CoinBalanceChangedEvent(Id, previousBalance, 0, -previousBalance, "User Reset Coins"));
             }
+        }
+
+        public void InitializeSettings()
+        {
+            if (Settings != null)
+                throw new InvalidOperationException("Settings already initialized");
+            
+            Settings = UserSettings.Create(Id);
         }
     }
 }

@@ -45,6 +45,16 @@ namespace TaskDomain.Contracts
             Guid? excludeTaskId = null,
             CancellationToken cancellationToken = default);
 
+        Task<IEnumerable<TaskItem>> SearchByTitleAsync(
+            Guid userId,
+            string query,
+            CancellationToken cancellationToken = default);
+
+        Task<IEnumerable<TaskItem>> GetRecentAsync(
+            Guid userId,
+            int count = 10,
+            CancellationToken cancellationToken = default);
+
         Task<int> CountByFolderIdAsync(
             Guid folderId,
             CancellationToken cancellationToken = default);

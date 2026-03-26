@@ -1,4 +1,4 @@
-﻿using Domain.Contracts;
+using Domain.Contracts;
 using Domain.Entities;
 using Domain.Entities.ValueOpjects;
 using Infrastructure.Persistence.Data;
@@ -90,6 +90,14 @@ namespace UserIdentityInfrastructure.Persistence.Repositories
         {
             return await _dbSet
                 .Include(u => u.RefreshTokens) // Eager loading
+                .Where(u => !u.IsDeleted)
+                .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+        }
+
+        public async Task<User?> GetByIdWithSettingsAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return await _dbSet
+                .Include(u => u.Settings)
                 .Where(u => !u.IsDeleted)
                 .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
         }
