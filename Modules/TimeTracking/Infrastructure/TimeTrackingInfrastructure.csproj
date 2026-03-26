@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Application\TimeTrackingApplication.csproj" />
     <ProjectReference Include="..\Domain\TimeTrackingDomain.csproj" />
+    <ProjectReference Include="..\..\UserIdentity\Application\ApplicationIdentity.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\SharedKernel\SharedKernel.csproj" />
   </ItemGroup>
 

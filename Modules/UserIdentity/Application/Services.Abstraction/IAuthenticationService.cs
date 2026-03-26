@@ -13,5 +13,6 @@ namespace Application.Services.Abstraction
         Task ConfirmEmailAsync(string token, CancellationToken cancellationToken = default);
         Task ChangePasswordAsync(Guid userId, ChangePasswordDto dto, CancellationToken cancellationToken = default);
         Task DeleteAccountAsync(Guid userId, DeleteAccountDto dto, CancellationToken cancellationToken = default);
+        Task<UserDto> ResetCoinsAsync(Guid userId, ResetCoinsDto dto, CancellationToken cancellationToken = default);
     }
 }

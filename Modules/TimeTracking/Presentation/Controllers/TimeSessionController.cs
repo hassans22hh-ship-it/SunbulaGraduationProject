@@ -14,10 +14,12 @@ namespace TimeTrackingPresentation.Controllers
     public class TimeSessionController: ControllerBase
     {
         private readonly ITimeSessionService _sessionService;
+        private readonly IDailyTransactionService _dailyTransactionService;
 
-        public TimeSessionController(ITimeSessionService sessionService)
+        public TimeSessionController(ITimeSessionService sessionService, IDailyTransactionService dailyTransactionService)
         {
             _sessionService = sessionService;
+            _dailyTransactionService = dailyTransactionService;
         }
 
         [HttpGet]
@@ -92,6 +94,7 @@ namespace TimeTrackingPresentation.Controllers
         {
             var userId = GetCurrentUserId();
             var result = await _sessionService.StopAsync(id, userId, cancellationToken);
+            await _dailyTransactionService.CheckAndAwardStreakBonusAsync(userId, cancellationToken);
             return Ok(result);
         }
 
@@ -132,6 +135,7 @@ namespace TimeTrackingPresentation.Controllers
         {
             var userId = GetCurrentUserId();
             var result = await _sessionService.CreateManualAsync(dto, userId, cancellationToken);
+            await _dailyTransactionService.CheckAndAwardStreakBonusAsync(userId, cancellationToken);
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
 

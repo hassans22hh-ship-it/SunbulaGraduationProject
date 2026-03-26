@@ -284,6 +284,21 @@ namespace UserIdentityInfrastructure.Services
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
         #endregion
+        #region ResetCoins
+        public async Task<UserDto> ResetCoinsAsync(Guid userId, ResetCoinsDto dto, CancellationToken cancellationToken)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(userId, cancellationToken)
+                ?? throw new UserNotFoundException(userId);
+
+            if (!_passwordHasher.VerifyPassword(dto.Password, user.PasswordHash))
+                throw new UnauthorizedException("Invalid password. External verification failed.");
+
+            user.ResetCoins();
+            
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            return _mapper.Map<UserDto>(user);
+        }
+        #endregion
     }
 
 }

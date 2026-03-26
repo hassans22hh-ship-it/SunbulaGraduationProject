@@ -149,6 +149,22 @@ namespace PresentationIdentity.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Resets the user's coin balance to zero.
+        /// </summary>
+        [Authorize]
+        [HttpPost("reset-coins")]
+        [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> ResetCoins(
+            [FromBody] ResetCoinsDto dto,
+            CancellationToken cancellationToken)
+        {
+            var userId = GetCurrentUserId();
+            var result = await _authenticationService.ResetCoinsAsync(userId, dto, cancellationToken);
+            return Ok(result);
+        }
+
         private Guid GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value

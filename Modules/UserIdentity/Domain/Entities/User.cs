@@ -205,5 +205,17 @@ namespace Domain.Entities
 
             RaiseDomainEvent(new CoinBalanceChangedEvent(Id, previousBalance, CoinBalance, -amount, reason));
         }
+
+        public void ResetCoins()
+        {
+            var previousBalance = CoinBalance;
+            CoinBalance = 0;
+            MarkAsUpdated();
+
+            if (previousBalance > 0)
+            {
+                RaiseDomainEvent(new CoinBalanceChangedEvent(Id, previousBalance, 0, -previousBalance, "User Reset Coins"));
+            }
+        }
     }
 }

@@ -1,4 +1,8 @@
-﻿using AutoMapper;
+using Application.Services.Abstraction; // IUserIntegrationService
+using MediatR;
+using SharedKernel;
+using TimeTrackingDomain.Events;
+using AutoMapper;
 using TimeTrackingApplication.TimeDtos;
 using TimeTrackingApplication.TimeServiceAbstraction;
 using TimeTrackingDomain.Contracts;
@@ -9,11 +13,15 @@ namespace TimeTrackingInfrastructure.TimeServices
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IUserIntegrationService _userIntegrationService;
+        private readonly IPublisher _publisher;
 
-        public DailyTransactionService(IUnitOfWork unitOfWork, IMapper mapper)
+        public DailyTransactionService(IUnitOfWork unitOfWork, IMapper mapper, IUserIntegrationService userIntegrationService, IPublisher publisher)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _userIntegrationService = userIntegrationService;
+            _publisher = publisher;
         }
 
         public async Task<DailyTransactionDto?> GetByDateAsync(
@@ -82,6 +90,22 @@ namespace TimeTrackingInfrastructure.TimeServices
 
             var transactions = await _unitOfWork.DailyTransactions.GetLastNDaysAsync(userId, days, cancellationToken);
             return _mapper.Map<IEnumerable<DailyTransactionDto>>(transactions);
+        }
+
+        public async Task CheckAndAwardStreakBonusAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            var streak = await GetCurrentStreakAsync(userId, cancellationToken);
+
+            int coinsToAward = 0;
+            if (streak == 3) coinsToAward = 50;
+            else if (streak == 7) coinsToAward = 150;
+            else if (streak == 30) coinsToAward = 700;
+
+            if (coinsToAward > 0)
+            {
+                await _userIntegrationService.AwardStreakMilestoneAsync(userId, streak, coinsToAward, cancellationToken);
+                await _publisher.Publish(new CoinsEarnedEvent(userId, coinsToAward, Guid.Empty), cancellationToken);
+            }
         }
     }
 }

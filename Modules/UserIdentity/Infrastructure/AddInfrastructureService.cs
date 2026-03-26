@@ -38,6 +38,7 @@ namespace Infrastructure
                 configuration.GetSection("EmailSettings"));
 
             services.AddScoped<IEmailService, SmtpEmailService>();
+            services.AddScoped<IUserIntegrationService, UserIntegrationService>();
 
             return services;
         }
