@@ -1,16 +1,17 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlantApplication.StorePlantDTOs;
 using PlantApplication.StorePlantServiceAbstraction;
 using PlantDomain.Enums;
+using SharedKernel.Constants;
 
 
 namespace PlantPresentation.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/store/plants")]
+    [Route("api/v1/store/plants")]
     public sealed class PlantController : ControllerBase
     {
         private readonly IPlantService _plantService;
@@ -59,6 +60,7 @@ namespace PlantPresentation.Controllers
 
         /// <summary>Add a new plant to the store catalog (Admin).</summary>
         [HttpPost]
+        [Authorize(Roles = Roles.Admin)]
         [ProducesResponseType(typeof(PlantDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromBody] CreatePlantDto dto, CancellationToken cancellationToken)
@@ -69,6 +71,7 @@ namespace PlantPresentation.Controllers
 
         /// <summary>Update plant store information (Admin).</summary>
         [HttpPut("{id:guid}")]
+        [Authorize(Roles = Roles.Admin)]
         [ProducesResponseType(typeof(PlantDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePlantDto dto, CancellationToken cancellationToken)
@@ -79,6 +82,7 @@ namespace PlantPresentation.Controllers
 
         /// <summary>Toggle plant availability in the store (Admin).</summary>
         [HttpPatch("{id:guid}/availability")]
+        [Authorize(Roles = Roles.Admin)]
         [ProducesResponseType(typeof(PlantDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> SetAvailability(Guid id, [FromQuery] bool isAvailable, CancellationToken cancellationToken)
@@ -89,6 +93,7 @@ namespace PlantPresentation.Controllers
 
         /// <summary>Soft-delete a plant from the store (Admin).</summary>
         [HttpDelete("{id:guid}")]
+        [Authorize(Roles = Roles.Admin)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)

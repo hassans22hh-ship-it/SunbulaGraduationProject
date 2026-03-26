@@ -9,7 +9,7 @@ namespace TimeTrackingPresentation.Controllers
 {
     [Authorize]
     /// Manages time tracking sessions — start, stop, manual entry, and timeline queries.
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     [ApiController]
     public class TimeSessionController: ControllerBase
     {

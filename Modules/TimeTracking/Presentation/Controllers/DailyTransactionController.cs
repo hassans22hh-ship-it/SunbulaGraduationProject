@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -9,7 +9,7 @@ namespace TimeTrackingPresentation.Controllers
 {
     [Authorize]
     /// Provides daily summaries, timeline data, and streak information.
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     [ApiController]
     public class DailyTransactionController: ControllerBase
     {

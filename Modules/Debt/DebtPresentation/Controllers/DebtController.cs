@@ -9,7 +9,7 @@ namespace DebtPresentation.Controllers
 {
     [ApiController]
     [Authorize]
-    [Route("api/v1/debt")]
+    [Route("api/v1/[controller]")]
     public sealed class DebtController : ControllerBase
     {
         private readonly IDebtService _debtService;

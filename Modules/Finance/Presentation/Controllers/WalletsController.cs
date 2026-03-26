@@ -10,7 +10,7 @@ namespace FinancePresentation.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/wallets")]
+    [Route("api/v1/[controller]")]
     public sealed class WalletsController : ControllerBase
     {
         private readonly IWalletService _walletService;

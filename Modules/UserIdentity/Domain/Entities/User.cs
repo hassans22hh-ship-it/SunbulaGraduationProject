@@ -1,4 +1,5 @@
 using Domain.Entities.ValueOpjects;
+using Domain.Enums;
 using SharedKernel;
 
 namespace Domain.Entities
@@ -28,7 +29,7 @@ namespace Domain.Entities
         }
         private User() { }
 
-        private User(Guid id, Email email, string firstName, string passwordHash, string lastName, string? phoneNumber)
+        private User(Guid id, Email email, string firstName, string passwordHash, string lastName, string? phoneNumber, UserRole role = UserRole.User)
             : base(id)
         {
             Email = email;
@@ -40,6 +41,7 @@ namespace Domain.Entities
             CoinBalance = 0;
             ConsecutiveStreakDays = 0;
             PasswordHash = passwordHash;
+            Role = role;
         }
 
         public Email Email
@@ -60,6 +62,7 @@ namespace Domain.Entities
         public int ConsecutiveStreakDays { get; private set; }
         public DateTime? LastStreakDate { get; private set; }
         public string AwardedMilestones { get; private set; } = string.Empty;
+        public UserRole Role { get; private set; }
         // Navigation properties
         public UserSettings? Settings { get; private set; }
         public IReadOnlyCollection<UserRefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();

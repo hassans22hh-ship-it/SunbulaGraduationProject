@@ -1,6 +1,7 @@
-﻿using Application.Options;
+using Application.Options;
 using Application.Services.Abstraction;
 using Domain.Entities;
+using Domain.Entities.ValueOpjects;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -64,7 +65,8 @@ namespace UserIdentityInfrastructure.Services
             new(ClaimTypes.Surname, user.LastName),
             new("IsEmailConfirmed", user.IsEmailConfirmed.ToString()),
             new("IsActive", user.IsActive.ToString()),
-            new("CoinBalance", user.CoinBalance.ToString())
+            new("CoinBalance", user.CoinBalance.ToString()),
+            new(ClaimTypes.Role, user.Role.ToString())
         };
         }
     }

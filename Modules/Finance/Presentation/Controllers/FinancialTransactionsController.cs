@@ -9,7 +9,7 @@ namespace FinancePresentation.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/transactions")]
+    [Route("api/v1/[controller]")]
     public sealed class FinancialTransactionsController : ControllerBase
     {
         private readonly IFinancialTransactionService _txService;

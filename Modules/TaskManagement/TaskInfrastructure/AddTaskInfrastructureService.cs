@@ -1,4 +1,4 @@
-﻿using Application.ServiceAbstraction;
+using Application.ServiceAbstraction;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +30,7 @@ namespace TaskInfrastructure
             services.AddScoped<ITaskService, TaskService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IFolderService, FolderService>();
+            services.AddScoped<IReportsService, ReportsService>();
 
             return services;
         }

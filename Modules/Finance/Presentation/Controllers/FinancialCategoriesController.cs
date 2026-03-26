@@ -9,7 +9,7 @@ namespace FinancePresentation.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/financial-categories")]
+    [Route("api/v1/[controller]")]
     public sealed class FinancialCategoriesController : ControllerBase
     {
         private readonly IFinancialCategoryService _categoryService;

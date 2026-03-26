@@ -9,7 +9,7 @@ namespace PlantPresentation.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/garden")]
+    [Route("api/v1/[controller]")]
     public sealed class GardenController : ControllerBase
     {
         private readonly IUserPlantService _userPlantService;

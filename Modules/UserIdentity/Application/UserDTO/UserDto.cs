@@ -1,4 +1,4 @@
-﻿namespace Application.UserDTO
+namespace Application.UserDTO
 {
     public class UserDto
     {
@@ -14,5 +14,6 @@
         public int ConsecutiveStreakDays { get; init; }
         public DateTime CreatedAt { get; init; }
         public DateTime? LastLoginAt { get; init; }
+        public string Role { get; init; } = string.Empty;
     }
 }
