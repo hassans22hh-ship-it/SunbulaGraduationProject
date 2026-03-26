@@ -2,8 +2,8 @@
 using DebtDomain.Entities;
 using DebtDomain.ValueObjects;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using SharedKernel;
+using DebtInfrastructure.Persistenece.Configurations;
 
 namespace DebtInfrastructure.Persistenece.Data
 {
@@ -24,18 +24,13 @@ namespace DebtInfrastructure.Persistenece.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Apply all configurations
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(DebtDbContext).Assembly);
+            // Apply configuration explicitly
+            modelBuilder.ApplyConfiguration(new DebtConfiguration());
+            modelBuilder.ApplyConfiguration(new DebtPaymentConfiguration());
 
             // Global query filter for soft delete
             modelBuilder.Entity<DebtDomain.Entities.Debt>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<DebtPayment>().HasQueryFilter(e => !e.IsDeleted);
-
-            // Map Money value objects as owned types
-            modelBuilder.Entity<DebtDomain.Entities.Debt>().OwnsOne(d => d.Amount, m =>
-                m.Property(p => p.Value).HasColumnName("Amount"));
-            modelBuilder.Entity<DebtDomain.Entities.Debt>().OwnsOne(d => d.RemainingAmount, m =>
-                m.Property(p => p.Value).HasColumnName("RemainingAmount"));
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

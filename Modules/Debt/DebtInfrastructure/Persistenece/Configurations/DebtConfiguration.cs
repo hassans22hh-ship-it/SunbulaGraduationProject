@@ -1,9 +1,10 @@
-﻿
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using DebtDomain.ValueObjects;
 
 namespace DebtInfrastructure.Persistenece.Configurations
 {
-    public sealed  class DebtConfigurationIEntityTypeConfiguration<Debt>
+    public sealed class DebtConfiguration : IEntityTypeConfiguration<DebtDomain.Entities.Debt>
     {
         public void Configure(EntityTypeBuilder<DebtDomain.Entities.Debt> builder)
         {
@@ -22,18 +23,16 @@ namespace DebtInfrastructure.Persistenece.Configurations
             builder.Property(e => e.UserId)
                 .IsRequired();
 
-            // Value Object conversions
+            // Mapping via HasConversion (Robust for same-type multiple properties)
             builder.Property(e => e.Amount)
-                .HasConversion(
-                    money => money.Value,
-                    value => Money.Create(value))
+                .HasConversion(v => v.Value, v => Money.Create(v))
+                .HasColumnName("Amount")
                 .HasColumnType("decimal(18,2)")
                 .IsRequired();
 
             builder.Property(e => e.RemainingAmount)
-                .HasConversion(
-                    money => money.Value,
-                    value => Money.Create(value))
+                .HasConversion(v => v.Value, v => Money.Create(v))
+                .HasColumnName("RemainingAmount")
                 .HasColumnType("decimal(18,2)")
                 .IsRequired();
 

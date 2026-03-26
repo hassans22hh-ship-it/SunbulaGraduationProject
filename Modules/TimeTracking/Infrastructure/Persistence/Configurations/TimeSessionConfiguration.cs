@@ -43,11 +43,8 @@ namespace TimeTrackingInfrastructure.Persistence.Configurations
             builder.Property(e => e.Notes)
                 .HasMaxLength(500);
 
-            builder.Property(e => e.PausedAt);
-
-            builder.Property(e => e.TotalPausedDuration)
-                .IsRequired()
-                .HasDefaultValue(TimeSpan.Zero);
+            builder.Ignore(e => e.PausedAt);
+            builder.Ignore(e => e.TotalPausedDuration);
 
             // Audit
             builder.Property(e => e.CreatedAt).IsRequired();

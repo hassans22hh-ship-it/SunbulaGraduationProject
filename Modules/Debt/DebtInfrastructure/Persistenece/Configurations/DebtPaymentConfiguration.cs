@@ -1,4 +1,4 @@
-﻿
+
 
 using DebtDomain.Entities;
 using DebtDomain.ValueObjects;
@@ -21,12 +21,13 @@ namespace DebtInfrastructure.Persistenece.Configurations
             builder.Property(e => e.DebtId)
                 .IsRequired();
 
+            // Mapping via HasConversion
             builder.Property(e => e.Amount)
-                .HasConversion(
-                    money => money.Value,
-                    value => Money.Create(value))
+                .HasConversion(v => v.Value, v => Money.Create(v))
+                .HasColumnName("Amount")
                 .HasColumnType("decimal(18,2)")
                 .IsRequired();
+            
 
 
             builder.Property(e => e.PaymentDate)
