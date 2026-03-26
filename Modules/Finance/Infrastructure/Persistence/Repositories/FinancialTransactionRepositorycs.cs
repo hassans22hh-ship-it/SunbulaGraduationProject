@@ -1,4 +1,4 @@
-﻿using FinanceDomain.contracts;
+using FinanceDomain.contracts;
 using FinanceDomain.Entities;
 using FinanceDomain.Enums;
 using FinanceInfrastructure.Persistence.Data;
@@ -124,7 +124,10 @@ namespace FinanceInfrastructure.Persistence.Repositories
 
             return await query.SumAsync(t => t.Amount, ct);
         }
+
+        public async Task HardDeleteByUserIdAsync(Guid userId, CancellationToken ct = default)
+        {
+            await _dbSet.Where(t => t.UserId == userId).ExecuteDeleteAsync(ct);
+        }
     }
-
-
 }

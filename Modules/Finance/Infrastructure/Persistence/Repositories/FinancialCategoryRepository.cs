@@ -1,4 +1,4 @@
-﻿using FinanceDomain.contracts;
+using FinanceDomain.contracts;
 using FinanceDomain.Entities;
 using FinanceInfrastructure.Persistence.Data;
 using Microsoft.EntityFrameworkCore;
@@ -68,8 +68,12 @@ namespace FinanceInfrastructure.Persistence.Repositories
         public async Task<bool> NameExistsAsync(Guid userId, string name, CancellationToken ct = default) =>
             await _dbSet.AnyAsync(c => c.UserId == userId && c.Name == name, ct);
 
-        public async Task<bool> HasTransactionsAsync(Guid categoryId, CancellationToken ct = default) =>
-            await _ctx.FinancialTransactions
-                .AnyAsync(t => t.FinancialCategoryId == categoryId, ct);
+        public async Task<bool> HasTransactionsAsync(Guid categoryId, CancellationToken ct = default)
+            => await _ctx.FinancialTransactions.AnyAsync(t => t.FinancialCategoryId == categoryId, ct);
+
+        public async Task HardDeleteByUserIdAsync(Guid userId, CancellationToken ct = default)
+        {
+            await _dbSet.Where(c => c.UserId == userId).ExecuteDeleteAsync(ct);
+        }
     }
 }

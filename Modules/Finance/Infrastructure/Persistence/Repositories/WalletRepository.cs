@@ -1,7 +1,8 @@
-﻿using FinanceDomain.contracts;
+using FinanceDomain.contracts;
 using FinanceDomain.Entities;
 using FinanceInfrastructure.Persistence.Data;
 using Microsoft.EntityFrameworkCore;
+using SharedKernel;
 using System.Linq.Expressions;
 
 namespace FinanceInfrastructure.Persistence.Repositories
@@ -75,10 +76,14 @@ namespace FinanceInfrastructure.Persistence.Repositories
         public async Task<bool> NameExistsAsync(Guid userId, string name, CancellationToken ct = default) =>
             await _dbSet.AnyAsync(w => w.UserId == userId && w.Name == name, ct);
 
-        public async Task<decimal> GetTotalBalanceByUserIdAsync(
-            Guid userId, string currency, CancellationToken ct = default) =>
-            await _dbSet
-                .Where(w => w.UserId == userId && w.Balance.Currency == currency)
+        public async Task<decimal> GetTotalBalanceByUserIdAsync(Guid userId, string currency, CancellationToken ct = default)
+            => await _dbSet
+                .Where(w => w.UserId == userId && w.Balance.Currency == currency && !w.IsDeleted)
                 .SumAsync(w => w.Balance.Amount, ct);
+
+        public async Task HardDeleteByUserIdAsync(Guid userId, CancellationToken ct = default)
+        {
+            await _dbSet.Where(w => w.UserId == userId).ExecuteDeleteAsync(ct);
+        }
     }
 }

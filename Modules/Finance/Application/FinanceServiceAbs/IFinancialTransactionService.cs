@@ -1,4 +1,4 @@
-﻿using FinanceApplication.financedtos;
+using FinanceApplication.financedtos;
 
 namespace FinanceApplication.FinanceServiceAbs
 {
@@ -12,5 +12,6 @@ namespace FinanceApplication.FinanceServiceAbs
         Task<FinancialTransactionDto> CreateAsync(CreateFinancialTransactionDto dto, Guid userId, CancellationToken ct = default);
         Task<FinancialTransactionDto> UpdateAsync(Guid id, UpdateFinancialTransactionDto dto, Guid userId, CancellationToken ct = default);
         Task DeleteAsync(Guid id, Guid userId, CancellationToken ct = default);
+        Task DeleteUserDataAsync(Guid userId, CancellationToken ct = default);
     }
 }

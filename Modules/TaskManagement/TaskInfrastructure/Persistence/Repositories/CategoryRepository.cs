@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using TaskDomain.Contracts;
 using TaskDomain.Entities.TaskManagement;
@@ -136,6 +136,11 @@ namespace TaskInfrastructure.Persistence.Repositories
             }
 
             return await query.AnyAsync(cancellationToken);
+        }
+
+        public async Task HardDeleteByUserIdAsync(Guid userId, CancellationToken ct = default)
+        {
+            await _dbSet.Where(c => c.UserId == userId).ExecuteDeleteAsync(ct);
         }
     }
 }

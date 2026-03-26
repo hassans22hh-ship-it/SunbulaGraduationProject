@@ -1,4 +1,4 @@
-﻿using DebtDomain.Enums;
+using DebtDomain.Enums;
 using SharedKernel;
 
 namespace DebtDomain.Contracts
@@ -61,5 +61,6 @@ namespace DebtDomain.Contracts
             DebtType debtType,
             CancellationToken cancellationToken = default);
 
+        Task HardDeleteByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
     }
 }

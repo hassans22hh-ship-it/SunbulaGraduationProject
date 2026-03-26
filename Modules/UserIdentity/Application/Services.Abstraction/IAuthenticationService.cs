@@ -1,4 +1,4 @@
-﻿using Application.UserDTO;
+using Application.UserDTO;
 
 namespace Application.Services.Abstraction
 {
@@ -10,5 +10,8 @@ namespace Application.Services.Abstraction
         Task LogoutAsync(Guid UserId,string? refreshToken=null,CancellationToken cancellationToken = default); 
         Task <UserDto> GetUserProfileAsync (Guid userId,CancellationToken cancellationToken=default);
         Task<UserDto> UpdateProfileAsync (Guid userId, UpdateProfileDto updateProfileDto,CancellationToken cancellationToken=default);
+        Task ConfirmEmailAsync(string token, CancellationToken cancellationToken = default);
+        Task ChangePasswordAsync(Guid userId, ChangePasswordDto dto, CancellationToken cancellationToken = default);
+        Task DeleteAccountAsync(Guid userId, DeleteAccountDto dto, CancellationToken cancellationToken = default);
     }
 }

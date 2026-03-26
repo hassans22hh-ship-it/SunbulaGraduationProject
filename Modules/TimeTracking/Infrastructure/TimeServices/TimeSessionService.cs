@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using TimeTrackingApplication.TimeDtos;
 using TimeTrackingApplication.TimeServiceAbstraction;
 using TimeTrackingDomain.Contracts;
@@ -103,6 +103,36 @@ namespace TimeTrackingInfrastructure.TimeServices
             return _mapper.Map<TimeSessionDto>(session);
         }
 
+        public async Task<TimeSessionDto> PauseAsync(Guid sessionId, Guid userId, CancellationToken cancellationToken = default)
+        {
+            var session = await _unitOfWork.TimeSessions.GetByIdAsync(sessionId, cancellationToken)
+                ?? throw new TimeSessionNotFoundException(sessionId);
+
+            if (session.UserId != userId)
+                throw new UnauthorizedAccessException("You don't have permission to pause this session.");
+
+            session.Pause();
+            _unitOfWork.TimeSessions.Update(session);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            return _mapper.Map<TimeSessionDto>(session);
+        }
+
+        public async Task<TimeSessionDto> ResumeAsync(Guid sessionId, Guid userId, CancellationToken cancellationToken = default)
+        {
+            var session = await _unitOfWork.TimeSessions.GetByIdAsync(sessionId, cancellationToken)
+                ?? throw new TimeSessionNotFoundException(sessionId);
+
+            if (session.UserId != userId)
+                throw new UnauthorizedAccessException("You don't have permission to resume this session.");
+
+            session.Resume();
+            _unitOfWork.TimeSessions.Update(session);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            return _mapper.Map<TimeSessionDto>(session);
+        }
+
         public async Task<TimeSessionDto> CreateManualAsync(CreateTimeSessionDto dto, Guid userId, CancellationToken cancellationToken = default)
         {
             var overlapping = await _unitOfWork.TimeSessions.GetOverlappingSessionsAsync(userId, dto.StartTime, dto.EndTime, cancellationToken: cancellationToken);
@@ -172,6 +202,13 @@ namespace TimeTrackingInfrastructure.TimeServices
             _unitOfWork.TimeSessions.Update(session);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             return _mapper.Map<TimeSessionDto>(session);
+        }
+
+        public async Task DeleteUserDataAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            await _unitOfWork.TimeSessions.HardDeleteByUserIdAsync(userId, cancellationToken);
+            await _unitOfWork.DailyTransactions.HardDeleteByUserIdAsync(userId, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
 
         private async Task UpdateDailyTransactionAsync(TimeSession session, CancellationToken cancellationToken)

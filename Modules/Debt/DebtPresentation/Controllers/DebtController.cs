@@ -3,10 +3,14 @@ using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 using DebtApplication.Dtos;
 using DebtApplication.DebtService;
+using Microsoft.AspNetCore.Authorization;
 using DebtDomain.Enums;
 namespace DebtPresentation.Controllers
 {
-    public sealed class DebtController: ControllerBase
+    [ApiController]
+    [Authorize]
+    [Route("api/v1/debt")]
+    public sealed class DebtController : ControllerBase
     {
         private readonly IDebtService _debtService;
 

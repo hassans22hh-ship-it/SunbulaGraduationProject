@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Http;
 namespace PresentationIdentity.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     public class AuthenticationController : ControllerBase
     {
         private readonly IAuthenticationService _authenticationService;
@@ -86,6 +86,21 @@ namespace PresentationIdentity.Controllers
         }
 
         /// <summary>
+        /// Confirm email address.
+        /// </summary>
+        [HttpPost("confirm-email")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] string token, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                return BadRequest("Token is required.");
+
+            await _authenticationService.ConfirmEmailAsync(token, cancellationToken);
+            return Ok(new { message = "Email confirmed successfully." });
+        }
+
+        /// <summary>
         /// Update user profile.
         /// </summary>
         [Authorize]
@@ -99,6 +114,39 @@ namespace PresentationIdentity.Controllers
             var userId = GetCurrentUserId();
             var result = await _authenticationService.UpdateProfileAsync(userId, dto, cancellationToken);
             return Ok(result);
+        }
+
+        /// <summary>
+        /// Change user password.
+        /// </summary>
+        [Authorize]
+        [HttpPost("change-password")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> ChangePassword(
+            [FromBody] ChangePasswordDto dto,
+            CancellationToken cancellationToken)
+        {
+            var userId = GetCurrentUserId();
+            await _authenticationService.ChangePasswordAsync(userId, dto, cancellationToken);
+            return Ok(new { message = "Password changed successfully." });
+        }
+
+        /// <summary>
+        /// Deletes the user account and all associated data.
+        /// </summary>
+        [Authorize]
+        [HttpDelete("account")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> DeleteAccount(
+            [FromBody] DeleteAccountDto dto,
+            CancellationToken cancellationToken)
+        {
+            var userId = GetCurrentUserId();
+            await _authenticationService.DeleteAccountAsync(userId, dto, cancellationToken);
+            return NoContent();
         }
 
         private Guid GetCurrentUserId()

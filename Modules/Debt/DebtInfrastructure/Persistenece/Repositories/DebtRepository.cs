@@ -1,4 +1,4 @@
-﻿using DebtInfrastructure.Persistenece.Data;
+using DebtInfrastructure.Persistenece.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using DebtDomain.Entities;
@@ -189,13 +189,13 @@ namespace DebtInfrastructure.Persistenece.Repositories
             Guid userId,
             DebtType debtType,
             CancellationToken cancellationToken = default)
-        {
-            var total = await _dbSet
-                .Where(d => d.UserId == userId && d.DebtType == debtType && !d.IsPaid && !d.IsDeleted)
+            => await _dbSet
+                .Where(d => d.UserId == userId && d.DebtType == debtType && !d.IsDeleted)
                 .SumAsync(d => d.RemainingAmount.Value, cancellationToken);
 
-            return total;
+        public async Task HardDeleteByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            await _dbSet.Where(d => d.UserId == userId).ExecuteDeleteAsync(cancellationToken);
         }
     }
 }
-

@@ -1,4 +1,4 @@
-﻿using SharedKernel;
+using SharedKernel;
 using TimeTrackingDomain.Entities;
 
 namespace TimeTrackingDomain.Contracts
@@ -8,7 +8,8 @@ namespace TimeTrackingDomain.Contracts
         Task<DailyTransaction?> GetByUserAndDateAsync(Guid userId, DateOnly date, CancellationToken cancellationToken = default);
         Task<IEnumerable<DailyTransaction>> GetByUserAndDateRangeAsync(Guid userId, DateOnly from, DateOnly to, CancellationToken cancellationToken = default);
         Task<int> GetCurrentStreakAsync(Guid userId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<DailyTransaction>> GetRecentByUserIdAsync(Guid userId, int days, CancellationToken ct = default);
         Task<IEnumerable<DailyTransaction>> GetLastNDaysAsync(Guid userId, int days, CancellationToken cancellationToken = default);
+        Task HardDeleteByUserIdAsync(Guid userId, CancellationToken ct = default);
     }
 }
-

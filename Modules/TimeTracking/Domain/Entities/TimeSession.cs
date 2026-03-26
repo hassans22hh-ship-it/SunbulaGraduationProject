@@ -1,4 +1,4 @@
-﻿using SharedKernel;
+using SharedKernel;
 using TimeTrackingDomain.Enums;
 using TimeTrackingDomain.Events;
 using TimeTrackingDomain.ValueObjects;
@@ -32,6 +32,8 @@ namespace TimeTrackingDomain.Entities
             EndTime = null;
             DurationMinutes = 0;
             CoinsEarned = 0;
+            PausedAt = null;
+            TotalPausedDuration = TimeSpan.Zero;
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -52,6 +54,8 @@ namespace TimeTrackingDomain.Entities
         public bool IsActive { get; private set; }
         public bool ManuallyAdded { get; private set; }
         public string? Notes { get; private set; }
+        public DateTime? PausedAt { get; private set; }
+        public TimeSpan TotalPausedDuration { get; private set; }
 
         // ═══════════════════════════════════════════════════════════════
         // FACTORY METHODS
@@ -109,6 +113,8 @@ namespace TimeTrackingDomain.Entities
             session.DurationMinutes = duration.TotalMinutes;
             session.CoinsEarned = coins;
             session.IsActive = false;
+            session.PausedAt = null;
+            session.TotalPausedDuration = TimeSpan.Zero;
 
             session.RaiseDomainEvent(new TimeSessionEndedEvent(session.Id, session.UserId, coins, duration.TotalMinutes));
             return session;
@@ -126,8 +132,15 @@ namespace TimeTrackingDomain.Entities
             if (!IsActive)
                 throw new InvalidOperationException("Cannot stop a session that is not active.");
 
+            if (PausedAt.HasValue)
+            {
+                TotalPausedDuration += DateTime.UtcNow - PausedAt.Value;
+                PausedAt = null;
+            }
+
             var endTime = DateTime.UtcNow;
-            var duration = Duration.FromTimeRange(StartTime, endTime);
+            var actualDurationSpan = (endTime - StartTime) - TotalPausedDuration;
+            var duration = Duration.FromTimeRange(StartTime, StartTime.Add(actualDurationSpan));
             var coins = duration.CalculateCoins(BehaviorType);
 
             EndTime = endTime;
@@ -140,6 +153,35 @@ namespace TimeTrackingDomain.Entities
 
             if (coins != 0)
                 RaiseDomainEvent(new CoinsEarnedEvent(UserId, coins, Id));
+        }
+
+        public void Pause()
+        {
+            if (!IsActive)
+                throw new InvalidOperationException("Cannot pause a session that is not active.");
+
+            if (PausedAt.HasValue)
+                throw new InvalidOperationException("Session is already paused.");
+
+            PausedAt = DateTime.UtcNow;
+            
+            MarkAsUpdated();
+            RaiseDomainEvent(new TimeSessionPausedEvent(Id, UserId));
+        }
+
+        public void Resume()
+        {
+            if (!IsActive)
+                throw new InvalidOperationException("Cannot resume a session that is not active.");
+
+            if (!PausedAt.HasValue)
+                throw new InvalidOperationException("Session is not paused.");
+
+            var pausedTime = DateTime.UtcNow - PausedAt.Value;
+            TotalPausedDuration += pausedTime;
+            PausedAt = null;
+
+            MarkAsUpdated();
         }
 
         /// <summary>
@@ -183,10 +225,17 @@ namespace TimeTrackingDomain.Entities
             if (!IsActive)
                 throw new InvalidOperationException("Session is not active, cannot recover.");
 
+            if (PausedAt.HasValue)
+            {
+                TotalPausedDuration += recoveryTime > PausedAt.Value ? recoveryTime - PausedAt.Value : TimeSpan.Zero;
+                PausedAt = null;
+            }
+
             // Cap at 24 hours max
             var maxEnd = StartTime.AddHours(24);
             var endTime = recoveryTime > maxEnd ? maxEnd : recoveryTime;
-            var duration = Duration.FromTimeRange(StartTime, endTime);
+            var actualDurationSpan = (endTime - StartTime) - TotalPausedDuration;
+            var duration = Duration.FromTimeRange(StartTime, StartTime.Add(actualDurationSpan));
             var coins = duration.CalculateCoins(BehaviorType);
 
             EndTime = endTime;

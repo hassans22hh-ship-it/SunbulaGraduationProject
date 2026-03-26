@@ -4,21 +4,20 @@ using PlantApplication.StorePlantServiceAbstraction;
 using PlantDomain.Contracts;
 using PlantDomain.Entities;
 using PlantDomain.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace PlantInfrastructure.StorePlantServices
 {
-    public class UserPlantService:IUserPlantService
+    public class UserPlantService : IUserPlantService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly PlantDomain.Contracts.IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly Domain.Contracts.IUserRepository _userRepository;
 
-        public UserPlantService(IUnitOfWork unitOfWork, IMapper mapper)
+        public UserPlantService(PlantDomain.Contracts.IUnitOfWork unitOfWork, IMapper mapper, Domain.Contracts.IUserRepository userRepository)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _userRepository = userRepository;
         }
 
         public async Task<UserPlantDto> GetByIdAsync(Guid userPlantId, Guid userId, CancellationToken cancellationToken = default)
@@ -52,7 +51,6 @@ namespace PlantInfrastructure.StorePlantServices
         public async Task<UserPlantDto> PurchasePlantAsync(
             PurchasePlantDto dto,
             Guid userId,
-            int userCoinBalance,
             CancellationToken cancellationToken = default)
         {
             await _unitOfWork.BeginTransactionAsync(cancellationToken);
@@ -72,6 +70,11 @@ namespace PlantInfrastructure.StorePlantServices
                     throw new DuplicatePlantPurchaseException(userId, dto.PlantId);
 
                 // 3. Business rule: sufficient coin balance
+                var user = await _userRepository.GetByIdAsync(userId, cancellationToken)
+                    ?? throw new UnauthorizedAccessException("User not found.");
+
+                var userCoinBalance = user.CoinBalance;
+
                 if (userCoinBalance < plant.Price)
                     throw new InsufficientCoinsException(plant.Price, userCoinBalance);
 
@@ -113,6 +116,12 @@ namespace PlantInfrastructure.StorePlantServices
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return _mapper.Map<UserPlantDto>(userPlant);
+        }
+
+        public async Task DeleteUserDataAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            await _unitOfWork.UserPlants.HardDeleteByUserIdAsync(userId, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 }

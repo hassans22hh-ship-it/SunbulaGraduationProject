@@ -1,4 +1,4 @@
-﻿using Domain.Entities.TaskManagement;
+using Domain.Entities.TaskManagement;
 using SharedKernel;
 using TaskDomain.Entities.TaskManagement.Enums;
 
@@ -48,5 +48,7 @@ namespace TaskDomain.Contracts
         Task<int> CountByFolderIdAsync(
             Guid folderId,
             CancellationToken cancellationToken = default);
+
+        Task HardDeleteByUserIdAsync(Guid userId, CancellationToken ct = default);
     }
 }

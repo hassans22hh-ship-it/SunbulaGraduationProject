@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PlantDomain.Contracts;
 using PlantDomain.Entities;
 using PlantInfrastructure.Persistence.Data;
@@ -105,6 +105,9 @@ namespace PlantInfrastructure.Persistence.Repositories
                 .Where(up => up.UserId == userId && !up.IsDeleted)
                 .SumAsync(up => up.CoinsSpent, cancellationToken);
 
-
+        public async Task HardDeleteByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            await _dbSet.Where(up => up.UserId == userId).ExecuteDeleteAsync(cancellationToken);
+        }
     }
 }

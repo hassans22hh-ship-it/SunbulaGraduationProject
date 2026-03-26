@@ -1,4 +1,4 @@
-﻿using DebtApplication.Dtos;
+using DebtApplication.Dtos;
 using DebtDomain.Enums;
 
 namespace DebtApplication.DebtService
@@ -18,6 +18,6 @@ namespace DebtApplication.DebtService
         Task MarkAsPaidAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
         Task ReopenAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
         Task DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
+        Task DeleteUserDataAsync(Guid userId, CancellationToken cancellationToken = default);
     }
 }
-

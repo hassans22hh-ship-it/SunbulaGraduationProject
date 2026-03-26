@@ -21,5 +21,6 @@ namespace Application.ServiceAbstraction
         Task DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
         Task AddCategoryAsync(Guid taskId, Guid categoryId, Guid userId, CancellationToken cancellationToken = default);
         Task RemoveCategoryAsync(Guid taskId, Guid categoryId, Guid userId, CancellationToken cancellationToken = default);
+        Task DeleteUserDataAsync(Guid userId, CancellationToken cancellationToken = default);
     }
 }

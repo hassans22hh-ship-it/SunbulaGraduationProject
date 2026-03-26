@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
 using PlantDomain.Contracts;
 using PlantInfrastructure.Persistence.Data;
 using System;
@@ -12,10 +13,10 @@ namespace PlantInfrastructure.Persistence.Repositories
         private readonly StorePlantDbContext _context;
         private IDbContextTransaction? _transaction;
 
-        public UnitOfWork(StorePlantDbContext context)
+        public UnitOfWork(StorePlantDbContext context, ILogger<PlantRepository> plantRepositoryLogger)
         {
             _context = context;
-            Plants = new PlantRepository(context);
+            Plants = new PlantRepository(context, plantRepositoryLogger);
             UserPlants = new UserPlantRepository(context);
         }
 

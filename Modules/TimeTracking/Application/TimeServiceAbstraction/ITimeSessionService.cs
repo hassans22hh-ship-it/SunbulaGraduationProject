@@ -1,4 +1,4 @@
-﻿using TimeTrackingApplication.TimeDtos;
+using TimeTrackingApplication.TimeDtos;
 
 namespace TimeTrackingApplication.TimeServiceAbstraction
 {
@@ -22,14 +22,17 @@ namespace TimeTrackingApplication.TimeServiceAbstraction
         /// <summary>Stops any active session for the user (for task switching).</summary>
         Task<TimeSessionDto?> StopActiveSessionAsync(Guid userId, CancellationToken cancellationToken = default);
 
+        Task<TimeSessionDto> PauseAsync(Guid sessionId, Guid userId, CancellationToken cancellationToken = default);
+        Task<TimeSessionDto> ResumeAsync(Guid sessionId, Guid userId, CancellationToken cancellationToken = default);
+
         /// <summary>Creates a manually added session.</summary>
         Task<TimeSessionDto> CreateManualAsync(CreateTimeSessionDto dto, Guid userId, CancellationToken cancellationToken = default);
 
         Task<TimeSessionDto> UpdateAsync(Guid id, UpdateTimeSessionDto dto, Guid userId, CancellationToken cancellationToken = default);
         Task DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
 
-        /// <summary>Recovers a session that was active when browser was closed.</summary>
         Task<TimeSessionDto> RecoverSessionAsync(Guid sessionId, Guid userId, CancellationToken cancellationToken = default);
+        Task DeleteUserDataAsync(Guid userId, CancellationToken cancellationToken = default);
     }
 }
 

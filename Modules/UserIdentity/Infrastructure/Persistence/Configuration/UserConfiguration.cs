@@ -1,4 +1,4 @@
-﻿using Domain.Entities;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -55,6 +55,11 @@ namespace Infrastructure.Persistence.Configuration
                 .HasDefaultValue(0);
 
             builder.Property(u => u.LastStreakDate);
+            
+            builder.Property(u => u.AwardedMilestones)
+                .HasMaxLength(255)
+                .IsRequired()
+                .HasDefaultValue(string.Empty);
 
             builder.Property(u => u.CreatedAt)
                 .IsRequired();

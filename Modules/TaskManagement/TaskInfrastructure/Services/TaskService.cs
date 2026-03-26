@@ -1,4 +1,4 @@
-﻿using Application.ServiceAbstraction;
+using Application.ServiceAbstraction;
 using Application.TaskManagmentDTOS;
 using Domain.Entities.TaskManagement;
 using TaskDomain.Contracts;
@@ -264,6 +264,16 @@ namespace TaskInfrastructure.Services
             task.RemoveCategory(categoryId);
 
             _unitOfWork.Tasks.Update(task);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task DeleteUserDataAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            // Delete tasks first (they may refer to folders/categories)
+            await _unitOfWork.Tasks.HardDeleteByUserIdAsync(userId, cancellationToken);
+            await _unitOfWork.Folders.HardDeleteByUserIdAsync(userId, cancellationToken);
+            await _unitOfWork.Categories.HardDeleteByUserIdAsync(userId, cancellationToken);
+            
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
 

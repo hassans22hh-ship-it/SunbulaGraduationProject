@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using TimeTrackingDomain.Contracts;
 using TimeTrackingDomain.Entities;
@@ -50,6 +50,16 @@ namespace TimeTrackingInfrastructure.Persistence.Repositories
         public void Update(TimeSession entity) => _dbSet.Update(entity);
         public void Delete(TimeSession entity) => entity.MarkAsDeleted();
         public void DeleteRange(IEnumerable<TimeSession> entities) { foreach (var entity in entities) entity.MarkAsDeleted(); }
+
+        public async Task<int> GetTotalMinutesByUserIdAndDateAsync(Guid userId, DateOnly date, CancellationToken ct = default)
+            => await _dbSet
+                .Where(ts => ts.UserId == userId && !ts.IsDeleted && DateOnly.FromDateTime(ts.StartTime) == date)
+                .SumAsync(ts => ts.DurationMinutes, ct);
+
+        public async Task HardDeleteByUserIdAsync(Guid userId, CancellationToken ct = default)
+        {
+            await _dbSet.Where(ts => ts.UserId == userId).ExecuteDeleteAsync(ct);
+        }
 
         public async Task<IEnumerable<TimeSession>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
             => await _dbSet.Where(e => e.UserId == userId && !e.IsDeleted).OrderByDescending(e => e.StartTime).ToListAsync(cancellationToken);

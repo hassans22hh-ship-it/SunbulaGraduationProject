@@ -1,4 +1,4 @@
-﻿using Domain.Entities.TaskManagement;
+using Domain.Entities.TaskManagement;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using TaskDomain.Contracts;
@@ -144,6 +144,11 @@ namespace TaskInfrastructure.Persistence.Repositories
                 .FirstOrDefaultAsync(f => f.Id == folderId && !f.IsDeleted, cancellationToken);
 
             return folder?.Tasks.Count ?? 0;
+        }
+
+        public async Task HardDeleteByUserIdAsync(Guid userId, CancellationToken ct = default)
+        {
+            await _dbSet.Where(f => f.UserId == userId).ExecuteDeleteAsync(ct);
         }
     }
 }

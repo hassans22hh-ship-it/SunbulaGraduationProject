@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FinanceApplication.financedtos;
 using FinanceApplication.FinanceServiceAbs;
 using FinanceDomain.contracts;
@@ -187,6 +187,26 @@ namespace FinanceInfrastructure.financeSService
 
                 _uow.Wallets.Update(wallet);
                 _uow.Transactions.Delete(tx);
+                await _uow.SaveChangesAsync(ct);
+                await _uow.CommitTransactionAsync(ct);
+            }
+            catch
+            {
+                await _uow.RollbackTransactionAsync(ct);
+                throw;
+            }
+        }
+
+        public async Task DeleteUserDataAsync(Guid userId, CancellationToken ct = default)
+        {
+            await _uow.BeginTransactionAsync(ct);
+            try
+            {
+                // Delete in order to respect FK constraints
+                await _uow.Transactions.HardDeleteByUserIdAsync(userId, ct);
+                await _uow.Wallets.HardDeleteByUserIdAsync(userId, ct);
+                await _uow.FinancialCategories.HardDeleteByUserIdAsync(userId, ct);
+
                 await _uow.SaveChangesAsync(ct);
                 await _uow.CommitTransactionAsync(ct);
             }

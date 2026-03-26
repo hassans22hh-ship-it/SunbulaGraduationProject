@@ -1,4 +1,4 @@
-﻿using PlantDomain.Entities;
+using PlantDomain.Entities;
 using SharedKernel;
 using System.Linq.Expressions;
 
@@ -17,5 +17,6 @@ namespace PlantDomain.Contracts
         Task<UserPlant?> GetFirstPurchasedAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<UserPlant?> GetMostExpensiveAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<int> GetTotalCoinsSpentAsync(Guid userId, CancellationToken cancellationToken = default);
+        Task HardDeleteByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
     }
 }

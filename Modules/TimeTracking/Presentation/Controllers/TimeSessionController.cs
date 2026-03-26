@@ -105,6 +105,26 @@ namespace TimeTrackingPresentation.Controllers
             return result == null ? NoContent() : Ok(result);
         }
 
+        [HttpPost("{id:guid}/pause")]
+        [ProducesResponseType(typeof(TimeSessionDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Pause(Guid id, CancellationToken cancellationToken)
+        {
+            var userId = GetCurrentUserId();
+            var result = await _sessionService.PauseAsync(id, userId, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpPost("{id:guid}/resume")]
+        [ProducesResponseType(typeof(TimeSessionDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Resume(Guid id, CancellationToken cancellationToken)
+        {
+            var userId = GetCurrentUserId();
+            var result = await _sessionService.ResumeAsync(id, userId, cancellationToken);
+            return Ok(result);
+        }
+
         [HttpPost("manual")]
         [ProducesResponseType(typeof(TimeSessionDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]

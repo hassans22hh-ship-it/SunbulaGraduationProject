@@ -51,11 +51,10 @@ namespace PlantPresentation.Controllers
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> Purchase(
             [FromBody] PurchasePlantDto dto,
-            [FromHeader(Name = "X-User-Coin-Balance")] int userCoinBalance,
             CancellationToken cancellationToken)
         {
             var userId = GetCurrentUserId();
-            var result = await _userPlantService.PurchasePlantAsync(dto, userId, userCoinBalance, cancellationToken);
+            var result = await _userPlantService.PurchasePlantAsync(dto, userId, cancellationToken);
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
 

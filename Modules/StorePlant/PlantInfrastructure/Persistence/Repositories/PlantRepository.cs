@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using PlantDomain.Contracts;
 using PlantDomain.Entities;
 using PlantDomain.Enums;
@@ -14,11 +15,13 @@ namespace PlantInfrastructure.Persistence.Repositories
     {
         private readonly StorePlantDbContext _context;
         private readonly DbSet<Plant> _dbSet;
+        private readonly ILogger<PlantRepository> _logger;
 
-        public PlantRepository(StorePlantDbContext context)
+        public PlantRepository(StorePlantDbContext context, ILogger<PlantRepository> logger)
         {
             _context = context;
             _dbSet = context.Set<Plant>();
+            _logger = logger;
         }
 
         // ── IRepository<Plant> ────────────────────────────────────────────
@@ -78,13 +81,13 @@ namespace PlantInfrastructure.Persistence.Repositories
             catch (TaskCanceledException ex)
             {
                 // Senior Eng: Capture details when opening connection fails
-                // Log the exception details here if a logger is available, 
-                // or let the global handler catch the more detailed version from EF Core 8/9+
+                _logger.LogError(ex, "Timeout fetching plants. Context: {db}", _context.Database.GetConnectionString());
                 throw; 
             }
             catch (Exception ex)
             {
                 // Catch potential SqlException timeouts that manifest as TaskCanceledException
+                _logger.LogError(ex, "Exception fetching plants. Context: {db}", _context.Database.GetConnectionString());
                 throw;
             }
         }

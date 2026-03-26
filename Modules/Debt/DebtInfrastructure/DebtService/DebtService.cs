@@ -1,4 +1,4 @@
-﻿using DebtApplication.Dtos;
+using DebtApplication.Dtos;
 using DebtApplication.DebtService;
 using DebtDomain.Enums;
 using DebtDomain.Contracts;
@@ -222,6 +222,12 @@ namespace DebtInfrastructure.DebtService
                 throw new UnauthorizedAccessException("You don't have permission to delete this debt");
 
             _unitOfWork.Debts.Delete(debt);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task DeleteUserDataAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            await _unitOfWork.Debts.HardDeleteByUserIdAsync(userId, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
 

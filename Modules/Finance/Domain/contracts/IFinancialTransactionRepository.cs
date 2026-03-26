@@ -1,4 +1,4 @@
-﻿using FinanceDomain.Entities;
+using FinanceDomain.Entities;
 using FinanceDomain.Enums;
 using SharedKernel;
 
@@ -14,5 +14,6 @@ namespace FinanceDomain.contracts
         Task<IEnumerable<FinancialTransaction>> GetByTypeAsync(Guid userId, TransactionType type, CancellationToken cancellationToken = default);
         Task<IEnumerable<FinancialTransaction>> GetByCategoryAsync(Guid userId, Guid categoryId, CancellationToken cancellationToken = default);
         Task<decimal> GetTotalByTypeAsync(Guid userId, TransactionType type, DateTime? from = null, DateTime? to = null, CancellationToken cancellationToken = default);
+        Task HardDeleteByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
     }
 }

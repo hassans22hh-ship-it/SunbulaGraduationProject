@@ -1,4 +1,4 @@
-﻿using Domain.Entities.ValueOpjects;
+using Domain.Entities.ValueOpjects;
 using SharedKernel;
 
 namespace Domain.Entities
@@ -59,6 +59,7 @@ namespace Domain.Entities
         public int CoinBalance { get; private set; }
         public int ConsecutiveStreakDays { get; private set; }
         public DateTime? LastStreakDate { get; private set; }
+        public string AwardedMilestones { get; private set; } = string.Empty;
         // Navigation properties
         public IReadOnlyCollection<UserRefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
         //Factory method 
@@ -175,6 +176,19 @@ namespace Domain.Entities
             MarkAsUpdated();
 
             RaiseDomainEvent(new CoinBalanceChangedEvent(Id, previousBalance, CoinBalance, amount, reason));
+        }
+
+        public void AwardStreakMilestone(int milestoneDays, int coins)
+        {
+            var milestoneStr = milestoneDays.ToString();
+            var awarded = AwardedMilestones.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            if (awarded.Contains(milestoneStr)) return; // Already awarded
+
+            AwardedMilestones = string.IsNullOrEmpty(AwardedMilestones) 
+                ? milestoneStr 
+                : $"{AwardedMilestones},{milestoneStr}";
+                
+            AddCoins(coins, $"Streak Bonus: {milestoneDays} days");
         }
 
         public void SpendCoins(int amount, string reason)

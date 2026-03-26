@@ -1,4 +1,4 @@
-﻿using Application.Mappings;
+using Application.Mappings;
 using Application.Options;
 using Application.Services.Abstraction;
 using Domain.Contracts;
@@ -34,6 +34,11 @@ namespace Infrastructure
             // Options
             services.Configure<JwtOptions>(
                 configuration.GetSection(JwtOptions.SectionName));
+            services.Configure<EmailOptions>(
+                configuration.GetSection("EmailSettings"));
+
+            services.AddScoped<IEmailService, SmtpEmailService>();
+
             return services;
         }
     }

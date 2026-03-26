@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using TimeTrackingDomain.Contracts;
 using TimeTrackingDomain.Entities;
@@ -50,6 +50,18 @@ namespace TimeTrackingInfrastructure.Persistence.Repositories
         public void Update(DailyTransaction entity) => _dbSet.Update(entity);
         public void Delete(DailyTransaction entity) => entity.MarkAsDeleted();
         public void DeleteRange(IEnumerable<DailyTransaction> entities) { foreach (var entity in entities) entity.MarkAsDeleted(); }
+
+        public async Task<IEnumerable<DailyTransaction>> GetRecentByUserIdAsync(Guid userId, int days, CancellationToken ct = default) =>
+            await _dbSet
+                .Where(dt => dt.UserId == userId && !dt.IsDeleted)
+                .OrderByDescending(dt => dt.Date)
+                .Take(days)
+                .ToListAsync(ct);
+
+        public async Task HardDeleteByUserIdAsync(Guid userId, CancellationToken ct = default)
+        {
+            await _dbSet.Where(dt => dt.UserId == userId).ExecuteDeleteAsync(ct);
+        }
 
         public async Task<DailyTransaction?> GetByUserAndDateAsync(Guid userId, DateOnly date, CancellationToken cancellationToken = default)
             => await _dbSet.FirstOrDefaultAsync(e => e.UserId == userId && e.Date == date && !e.IsDeleted, cancellationToken);

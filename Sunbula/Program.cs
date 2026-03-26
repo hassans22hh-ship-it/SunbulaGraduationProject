@@ -1,5 +1,5 @@
-
 using Application.Options;
+using Sunbula.Middleware;
 using DebtInfrastructure;
 using FinanceInfrastructure;
 using Infrastructure;
@@ -99,7 +99,14 @@ namespace Sunbula
                     typeof(IPlantService).Assembly,
                     typeof(ICategoryService).Assembly,
                     typeof(IDailyTransactionService).Assembly,
-                    typeof(IAuthenticationService).Assembly
+                    typeof(IAuthenticationService).Assembly,
+                    // Infrastructure assemblies for Integration Event Handlers
+                    typeof(DebtInfrastructure.AssemblyReference).Assembly,
+                    typeof(FinanceInfrastructure.AssemblyReference).Assembly,
+                    typeof(PlantInfrastructure.AssemblyReference).Assembly,
+                    typeof(TaskInfrastructure.AssemblyReference).Assembly,
+                    typeof(TimeTrackingInfrastructure.AssemblyReference).Assembly,
+                    typeof(UserIdentityInfrastructure.Services.AuthenticationService).Assembly
                 );
             });
 
@@ -127,6 +134,7 @@ namespace Sunbula
             app.UseCors("AllowFrontend");
 
             app.UseAuthentication();
+            app.UseMiddleware<RequireEmailConfirmedMiddleware>();
             app.UseAuthorization();
 
             app.MapControllers();
