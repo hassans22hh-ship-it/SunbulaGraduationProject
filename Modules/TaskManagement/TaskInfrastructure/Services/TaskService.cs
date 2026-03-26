@@ -4,7 +4,6 @@ using Domain.Entities.TaskManagement;
 using TaskDomain.Contracts;
 using TaskDomain.Entities.TaskManagement.Enums;
 using TaskDomain.Exceptions;
-using TaskDomain.Exceptionس;
 
 namespace TaskInfrastructure.Services
 {
@@ -35,25 +34,43 @@ namespace TaskInfrastructure.Services
             return MapToDtoWithDetails(task);
         }
 
-        public async Task<IEnumerable<TaskDto>> GetAllByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+        public async Task<PagedResultDto<TaskDto>> GetAllByUserIdAsync(Guid userId, PaginationParams pagination, CancellationToken cancellationToken = default)
         {
-            var tasks = await _unitOfWork.Tasks.GetByUserIdAsync(userId, cancellationToken);
-            return tasks.Select(MapToDto);
+            var (tasks, totalCount) = await _unitOfWork.Tasks.GetByUserIdAsync(userId, pagination.PageNumber, pagination.PageSize, cancellationToken);
+            return new PagedResultDto<TaskDto>
+            {
+                Items = tasks.Select(MapToDto),
+                TotalCount = totalCount,
+                PageNumber = pagination.PageNumber,
+                PageSize = pagination.PageSize
+            };
         }
 
-        public async Task<IEnumerable<TaskDto>> GetActiveByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+        public async Task<PagedResultDto<TaskDto>> GetActiveByUserIdAsync(Guid userId, PaginationParams pagination, CancellationToken cancellationToken = default)
         {
-            var tasks = await _unitOfWork.Tasks.GetActiveByUserIdAsync(userId, cancellationToken);
-            return tasks.Select(MapToDto);
+            var (tasks, totalCount) = await _unitOfWork.Tasks.GetActiveByUserIdAsync(userId, pagination.PageNumber, pagination.PageSize, cancellationToken);
+            return new PagedResultDto<TaskDto>
+            {
+                Items = tasks.Select(MapToDto),
+                TotalCount = totalCount,
+                PageNumber = pagination.PageNumber,
+                PageSize = pagination.PageSize
+            };
         }
 
-        public async Task<IEnumerable<TaskDto>> GetArchivedByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+        public async Task<PagedResultDto<TaskDto>> GetArchivedByUserIdAsync(Guid userId, PaginationParams pagination, CancellationToken cancellationToken = default)
         {
-            var tasks = await _unitOfWork.Tasks.GetArchivedByUserIdAsync(userId, cancellationToken);
-            return tasks.Select(MapToDto);
+            var (tasks, totalCount) = await _unitOfWork.Tasks.GetArchivedByUserIdAsync(userId, pagination.PageNumber, pagination.PageSize, cancellationToken);
+            return new PagedResultDto<TaskDto>
+            {
+                Items = tasks.Select(MapToDto),
+                TotalCount = totalCount,
+                PageNumber = pagination.PageNumber,
+                PageSize = pagination.PageSize
+            };
         }
 
-        public async Task<IEnumerable<TaskDto>> GetByFolderIdAsync(Guid folderId, Guid userId, CancellationToken cancellationToken = default)
+        public async Task<PagedResultDto<TaskDto>> GetByFolderIdAsync(Guid folderId, Guid userId, PaginationParams pagination, CancellationToken cancellationToken = default)
         {
             // Verify folder belongs to user
             var folder = await _unitOfWork.Folders.GetByIdAsync(folderId, cancellationToken);
@@ -63,11 +80,17 @@ namespace TaskInfrastructure.Services
             if (folder.UserId != userId)
                 throw new UnauthorizedAccessException("You don't have permission to access this folder");
 
-            var tasks = await _unitOfWork.Tasks.GetByFolderIdAsync(folderId, cancellationToken);
-            return tasks.Select(MapToDto);
+            var (tasks, totalCount) = await _unitOfWork.Tasks.GetByFolderIdAsync(folderId, pagination.PageNumber, pagination.PageSize, cancellationToken);
+            return new PagedResultDto<TaskDto>
+            {
+                Items = tasks.Select(MapToDto),
+                TotalCount = totalCount,
+                PageNumber = pagination.PageNumber,
+                PageSize = pagination.PageSize
+            };
         }
 
-        public async Task<IEnumerable<TaskDto>> GetByCategoryIdAsync(Guid categoryId, Guid userId, CancellationToken cancellationToken = default)
+        public async Task<PagedResultDto<TaskDto>> GetByCategoryIdAsync(Guid categoryId, Guid userId, PaginationParams pagination, CancellationToken cancellationToken = default)
         {
             // Verify category belongs to user
             var category = await _unitOfWork.Categories.GetByIdAsync(categoryId, cancellationToken);
@@ -77,26 +100,45 @@ namespace TaskInfrastructure.Services
             if (category.UserId != userId)
                 throw new UnauthorizedAccessException("You don't have permission to access this category");
 
-            var tasks = await _unitOfWork.Tasks.GetByCategoryIdAsync(categoryId, cancellationToken);
-            return tasks.Select(MapToDto);
+            var (tasks, totalCount) = await _unitOfWork.Tasks.GetByCategoryIdAsync(categoryId, pagination.PageNumber, pagination.PageSize, cancellationToken);
+            return new PagedResultDto<TaskDto>
+            {
+                Items = tasks.Select(MapToDto),
+                TotalCount = totalCount,
+                PageNumber = pagination.PageNumber,
+                PageSize = pagination.PageSize
+            };
         }
 
-        public async Task<IEnumerable<TaskDto>> GetByBehaviorTypeAsync(
+        public async Task<PagedResultDto<TaskDto>> GetByBehaviorTypeAsync(
             Guid userId,
             BehaviorCategory behaviorType,
+            PaginationParams pagination,
             CancellationToken cancellationToken = default)
         {
-            var tasks = await _unitOfWork.Tasks.GetByBehaviorTypeAsync(userId, behaviorType, cancellationToken);
-            return tasks.Select(MapToDto);
+            var (tasks, totalCount) = await _unitOfWork.Tasks.GetByBehaviorTypeAsync(userId, behaviorType, pagination.PageNumber, pagination.PageSize, cancellationToken);
+            return new PagedResultDto<TaskDto>
+            {
+                Items = tasks.Select(MapToDto),
+                TotalCount = totalCount,
+                PageNumber = pagination.PageNumber,
+                PageSize = pagination.PageSize
+            };
         }
 
-        public async Task<IEnumerable<TaskDto>> SearchAsync(string query, Guid userId, CancellationToken cancellationToken = default)
+        public async Task<PagedResultDto<TaskDto>> SearchAsync(string query, Guid userId, PaginationParams pagination, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(query))
-                return Array.Empty<TaskDto>();
+                return new PagedResultDto<TaskDto> { PageNumber = pagination.PageNumber, PageSize = pagination.PageSize };
 
-            var tasks = await _unitOfWork.Tasks.SearchByTitleAsync(userId, query, cancellationToken);
-            return tasks.Select(MapToDto);
+            var (tasks, totalCount) = await _unitOfWork.Tasks.SearchByTitleAsync(userId, query, pagination.PageNumber, pagination.PageSize, cancellationToken);
+            return new PagedResultDto<TaskDto>
+            {
+                Items = tasks.Select(MapToDto),
+                TotalCount = totalCount,
+                PageNumber = pagination.PageNumber,
+                PageSize = pagination.PageSize
+            };
         }
 
         public async Task<IEnumerable<TaskDto>> GetRecentAsync(Guid userId, int count = 10, CancellationToken cancellationToken = default)

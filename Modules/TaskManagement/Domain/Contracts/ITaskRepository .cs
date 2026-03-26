@@ -14,29 +14,41 @@ namespace TaskDomain.Contracts
             Guid id,
             CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<TaskItem>> GetByUserIdAsync(
+        Task<(IEnumerable<TaskItem> Items, int TotalCount)> GetByUserIdAsync(
             Guid userId,
+            int pageNumber = 1,
+            int pageSize = 10,
             CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<TaskItem>> GetActiveByUserIdAsync(
+        Task<(IEnumerable<TaskItem> Items, int TotalCount)> GetActiveByUserIdAsync(
             Guid userId,
+            int pageNumber = 1,
+            int pageSize = 10,
             CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<TaskItem>> GetArchivedByUserIdAsync(
+        Task<(IEnumerable<TaskItem> Items, int TotalCount)> GetArchivedByUserIdAsync(
             Guid userId,
+            int pageNumber = 1,
+            int pageSize = 10,
             CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<TaskItem>> GetByFolderIdAsync(
+        Task<(IEnumerable<TaskItem> Items, int TotalCount)> GetByFolderIdAsync(
             Guid folderId,
+            int pageNumber = 1,
+            int pageSize = 10,
             CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<TaskItem>> GetByCategoryIdAsync(
+        Task<(IEnumerable<TaskItem> Items, int TotalCount)> GetByCategoryIdAsync(
             Guid categoryId,
+            int pageNumber = 1,
+            int pageSize = 10,
             CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<TaskItem>> GetByBehaviorTypeAsync(
+        Task<(IEnumerable<TaskItem> Items, int TotalCount)> GetByBehaviorTypeAsync(
             Guid userId,
             BehaviorCategory behaviorType,
+            int pageNumber = 1,
+            int pageSize = 10,
             CancellationToken cancellationToken = default);
 
         Task<bool> TitleExistsAsync(
@@ -45,9 +57,11 @@ namespace TaskDomain.Contracts
             Guid? excludeTaskId = null,
             CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<TaskItem>> SearchByTitleAsync(
+        Task<(IEnumerable<TaskItem> Items, int TotalCount)> SearchByTitleAsync(
             Guid userId,
             string query,
+            int pageNumber = 1,
+            int pageSize = 10,
             CancellationToken cancellationToken = default);
 
         Task<IEnumerable<TaskItem>> GetRecentAsync(

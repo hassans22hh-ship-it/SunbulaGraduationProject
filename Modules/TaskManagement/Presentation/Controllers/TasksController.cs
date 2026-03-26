@@ -21,26 +21,26 @@ namespace TaskPresentation.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<TaskDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAll(CancellationToken ct)
+        [ProducesResponseType(typeof(PagedResultDto<TaskDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAll([FromQuery] PaginationParams pagination, CancellationToken ct)
         {
-            var result = await _taskService.GetAllByUserIdAsync(GetUserId(), ct);
+            var result = await _taskService.GetAllByUserIdAsync(GetUserId(), pagination, ct);
             return Ok(result);
         }
 
         [HttpGet("active")]
-        [ProducesResponseType(typeof(IEnumerable<TaskDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetActive(CancellationToken ct)
+        [ProducesResponseType(typeof(PagedResultDto<TaskDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetActive([FromQuery] PaginationParams pagination, CancellationToken ct)
         {
-            var result = await _taskService.GetActiveByUserIdAsync(GetUserId(), ct);
+            var result = await _taskService.GetActiveByUserIdAsync(GetUserId(), pagination, ct);
             return Ok(result);
         }
 
         [HttpGet("archived")]
-        [ProducesResponseType(typeof(IEnumerable<TaskDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetArchived(CancellationToken ct)
+        [ProducesResponseType(typeof(PagedResultDto<TaskDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetArchived([FromQuery] PaginationParams pagination, CancellationToken ct)
         {
-            var result = await _taskService.GetArchivedByUserIdAsync(GetUserId(), ct);
+            var result = await _taskService.GetArchivedByUserIdAsync(GetUserId(), pagination, ct);
             return Ok(result);
         }
 
@@ -63,34 +63,34 @@ namespace TaskPresentation.Controllers
         }
 
         [HttpGet("folder/{folderId:guid}")]
-        [ProducesResponseType(typeof(IEnumerable<TaskDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetByFolder(Guid folderId, CancellationToken ct)
+        [ProducesResponseType(typeof(PagedResultDto<TaskDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetByFolder(Guid folderId, [FromQuery] PaginationParams pagination, CancellationToken ct)
         {
-            var result = await _taskService.GetByFolderIdAsync(folderId, GetUserId(), ct);
+            var result = await _taskService.GetByFolderIdAsync(folderId, GetUserId(), pagination, ct);
             return Ok(result);
         }
 
         [HttpGet("category/{categoryId:guid}")]
-        [ProducesResponseType(typeof(IEnumerable<TaskDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetByCategory(Guid categoryId, CancellationToken ct)
+        [ProducesResponseType(typeof(PagedResultDto<TaskDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetByCategory(Guid categoryId, [FromQuery] PaginationParams pagination, CancellationToken ct)
         {
-            var result = await _taskService.GetByCategoryIdAsync(categoryId, GetUserId(), ct);
+            var result = await _taskService.GetByCategoryIdAsync(categoryId, GetUserId(), pagination, ct);
             return Ok(result);
         }
 
         [HttpGet("behavior/{behaviorType}")]
-        [ProducesResponseType(typeof(IEnumerable<TaskDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetByBehavior(BehaviorCategory behaviorType, CancellationToken ct)
+        [ProducesResponseType(typeof(PagedResultDto<TaskDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetByBehavior(BehaviorCategory behaviorType, [FromQuery] PaginationParams pagination, CancellationToken ct)
         {
-            var result = await _taskService.GetByBehaviorTypeAsync(GetUserId(), behaviorType, ct);
+            var result = await _taskService.GetByBehaviorTypeAsync(GetUserId(), behaviorType, pagination, ct);
             return Ok(result);
         }
 
         [HttpGet("search")]
-        [ProducesResponseType(typeof(IEnumerable<TaskDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Search([FromQuery] string query, CancellationToken ct)
+        [ProducesResponseType(typeof(PagedResultDto<TaskDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Search([FromQuery] string query, [FromQuery] PaginationParams pagination, CancellationToken ct)
         {
-            var result = await _taskService.SearchAsync(query ?? string.Empty, GetUserId(), ct);
+            var result = await _taskService.SearchAsync(query ?? string.Empty, GetUserId(), pagination, ct);
             return Ok(result);
         }
 

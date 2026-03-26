@@ -7,13 +7,13 @@ namespace Application.ServiceAbstraction
     {
         Task<TaskDto> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
         Task<TaskDto> GetByIdWithDetailsAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
-        Task<IEnumerable<TaskDto>> GetAllByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
-        Task<IEnumerable<TaskDto>> GetActiveByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
-        Task<IEnumerable<TaskDto>> GetArchivedByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
-        Task<IEnumerable<TaskDto>> GetByFolderIdAsync(Guid folderId, Guid userId, CancellationToken cancellationToken = default);
-        Task<IEnumerable<TaskDto>> GetByCategoryIdAsync(Guid categoryId, Guid userId, CancellationToken cancellationToken = default);
-        Task<IEnumerable<TaskDto>> GetByBehaviorTypeAsync(Guid userId, BehaviorCategory behaviorType, CancellationToken cancellationToken = default);
-        Task<IEnumerable<TaskDto>> SearchAsync(string query, Guid userId, CancellationToken cancellationToken = default);
+        Task<PagedResultDto<TaskDto>> GetAllByUserIdAsync(Guid userId, PaginationParams pagination, CancellationToken cancellationToken = default);
+        Task<PagedResultDto<TaskDto>> GetActiveByUserIdAsync(Guid userId, PaginationParams pagination, CancellationToken cancellationToken = default);
+        Task<PagedResultDto<TaskDto>> GetArchivedByUserIdAsync(Guid userId, PaginationParams pagination, CancellationToken cancellationToken = default);
+        Task<PagedResultDto<TaskDto>> GetByFolderIdAsync(Guid folderId, Guid userId, PaginationParams pagination, CancellationToken cancellationToken = default);
+        Task<PagedResultDto<TaskDto>> GetByCategoryIdAsync(Guid categoryId, Guid userId, PaginationParams pagination, CancellationToken cancellationToken = default);
+        Task<PagedResultDto<TaskDto>> GetByBehaviorTypeAsync(Guid userId, BehaviorCategory behaviorType, PaginationParams pagination, CancellationToken cancellationToken = default);
+        Task<PagedResultDto<TaskDto>> SearchAsync(string query, Guid userId, PaginationParams pagination, CancellationToken cancellationToken = default);
         Task<IEnumerable<TaskDto>> GetRecentAsync(Guid userId, int count = 10, CancellationToken cancellationToken = default);
         Task<TaskDto> CreateAsync(CreateTaskDto dto, Guid userId, CancellationToken cancellationToken = default);
         Task<TaskDto> DuplicateAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);

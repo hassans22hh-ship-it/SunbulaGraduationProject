@@ -1,5 +1,6 @@
-﻿using FinanceDomain.Enums;
+using FinanceDomain.Enums;
 using FinanceDomain.Events;
+using FinanceDomain.Exceptions;
 using FinanceDomain.ValueObjects;
 using SharedKernel;
 
@@ -81,6 +82,12 @@ namespace FinanceDomain.Entities
         /// </summary>
         public void ApplyTransaction(decimal amount, TransactionType transactionType)
         {
+            if (transactionType == TransactionType.Expense || transactionType == TransactionType.Transfer)
+            {
+                if (Balance.Amount < amount)
+                    throw new InsufficientBalanceException(Name, Balance.Amount, amount);
+            }
+
             Balance = transactionType switch
             {
                 TransactionType.Income => Balance.Add(amount),
@@ -96,6 +103,12 @@ namespace FinanceDomain.Entities
         /// </summary>
         public void ReverseTransaction(decimal amount, TransactionType transactionType)
         {
+            if (transactionType == TransactionType.Income)
+            {
+                if (Balance.Amount < amount)
+                    throw new InsufficientBalanceException(Name, Balance.Amount, amount);
+            }
+
             Balance = transactionType switch
             {
                 TransactionType.Income => Balance.Subtract(amount),
