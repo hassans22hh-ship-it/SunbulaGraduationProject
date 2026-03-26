@@ -39,6 +39,7 @@ namespace Infrastructure
 
             services.AddScoped<IEmailService, SmtpEmailService>();
             services.AddScoped<IUserIntegrationService, UserIntegrationService>();
+            services.AddScoped<IUserSettingsService, UserSettingsService>();
 
             return services;
         }
