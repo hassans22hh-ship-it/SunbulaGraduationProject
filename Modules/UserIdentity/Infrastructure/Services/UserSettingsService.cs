@@ -50,7 +50,11 @@ namespace UserIdentityInfrastructure.Services
                 user.InitializeSettings();
             }
 
-            user.Settings!.Update(dto.IsDailyReminderEnabled, dto.DefaultTaskView, dto.Language, dto.Theme);
+            var defaultTaskView = string.IsNullOrWhiteSpace(dto.DefaultTaskView) ? "List" : dto.DefaultTaskView;
+            var language = string.IsNullOrWhiteSpace(dto.Language) ? "en" : dto.Language;
+            var theme = string.IsNullOrWhiteSpace(dto.Theme) ? "System" : dto.Theme;
+
+            user.Settings!.Update(dto.IsDailyReminderEnabled, defaultTaskView, language, theme);
 
             _unitOfWork.Users.Update(user);
             await _unitOfWork.SaveChangesAsync(cancellationToken);

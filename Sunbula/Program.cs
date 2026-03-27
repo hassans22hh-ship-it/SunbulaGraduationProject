@@ -21,7 +21,7 @@ namespace Sunbula
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -121,6 +121,11 @@ namespace Sunbula
             builder.Services.AddStorePlantModule(builder.Configuration);
 
             var app = builder.Build();
+
+            // ═══════════════════════════════════════════════════════════
+            // DATABASE MIGRATIONS
+            // ═══════════════════════════════════════════════════════════
+            await app.Services.MigrateDatabasesAsync();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
