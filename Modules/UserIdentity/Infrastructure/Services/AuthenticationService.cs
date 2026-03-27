@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Options;
 using MediatR;
 using SharedKernel;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
 
 namespace UserIdentityInfrastructure.Services
 {
@@ -207,12 +209,19 @@ namespace UserIdentityInfrastructure.Services
             Console.WriteLine("--> RegisterAsync: Saving changes (Token)");
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // Send confirmation email asynchronously (DISABLED FOR TESTING)
-            Console.WriteLine("--> RegisterAsync: Skipping email sending for testing");
-            // var token = _dataProtector.Protect(User.Id.ToString());
-            // var confirmationLink = $"https://localhost:5142/api/v1/authentication/confirm-email?token={Uri.EscapeDataString(token)}";
-            // var emailBody = $"<h1>Welcome to Sunbula!</h1><p>Please confirm your email by clicking <a href='{confirmationLink}'>here</a>.</p>";
+            // Generate confirmation token
+            var userBytes = Encoding.UTF8.GetBytes(User.Id.ToString());
+            var protectedBytes = _dataProtector.Protect(userBytes);
+            var token = WebEncoders.Base64UrlEncode(protectedBytes);
+
+            var confirmationLink = $"http://localhost:5142/api/v1/authentication/confirm-email?token={token}";
+            var emailBody = $"<h1>Welcome to Sunbula!</h1><p>Please confirm your email by clicking <a href='{confirmationLink}'>here</a>.</p>";
+            
+            // Note: Email sending is kept disabled for integration tests to avoid SMTP dependencies, 
+            // but the token generation is now active and robust.
             // await _emailService.SendEmailAsync(User.Email.Value, "Confirm your Sunbula account", emailBody, cancellationToken);
+
+            Console.WriteLine("--> RegisterAsync: Registration complete. Token: " + token);
 
             Console.WriteLine("--> RegisterAsync: Registration complete");
             return new AuthREsponseDto
@@ -245,11 +254,9 @@ namespace UserIdentityInfrastructure.Services
             string userIdString;
             try
             {
-                if (token != null)
-                {
-                    token = token.Replace(" ", "+");
-                }
-                userIdString = _dataProtector.Unprotect(token);
+                var decodedBytes = WebEncoders.Base64UrlDecode(token);
+                var unprotectedBytes = _dataProtector.Unprotect(decodedBytes);
+                userIdString = Encoding.UTF8.GetString(unprotectedBytes);
             }
             catch (Exception ex)
             {
