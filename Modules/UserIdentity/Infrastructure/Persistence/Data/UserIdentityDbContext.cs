@@ -6,9 +6,12 @@ namespace Infrastructure.Persistence.Data
 {
     public class UserIdentityDbContext : DbContext
     {
-        public UserIdentityDbContext(DbContextOptions<UserIdentityDbContext> options) : base(options)
-        {
+        private readonly MediatR.IMediator _mediator;
 
+        public UserIdentityDbContext(DbContextOptions<UserIdentityDbContext> options, MediatR.IMediator mediator) 
+            : base(options)
+        {
+            _mediator = mediator;
         }
         public DbSet<User> Users => Set<User>();
         public DbSet<UserRefreshToken> UserRefreshTokens => Set<UserRefreshToken>();
@@ -43,8 +46,11 @@ namespace Infrastructure.Persistence.Data
                 .ToList()
                 .ForEach(e => e.ClearDomainEvents());
 
-            // TODO: Dispatch domain events to handlers (MediatR integration)
-            // For now, events are collected but not dispatched
+            // Dispatch domain events to handlers
+            foreach (var domainEvent in domainEvents)
+            {
+                await _mediator.Publish(domainEvent, cancellationToken);
+            }
 
             return result;
         }

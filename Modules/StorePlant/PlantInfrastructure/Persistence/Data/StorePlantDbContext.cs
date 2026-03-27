@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PlantDomain.Entities;
 using SharedKernel;
 
@@ -6,8 +6,13 @@ namespace PlantInfrastructure.Persistence.Data
 {
     public sealed class StorePlantDbContext:DbContext
     {
-        public StorePlantDbContext(DbContextOptions<StorePlantDbContext> options)
-        : base(options) { }
+        private readonly MediatR.IMediator _mediator;
+
+        public StorePlantDbContext(DbContextOptions<StorePlantDbContext> options, MediatR.IMediator mediator)
+            : base(options) 
+        {
+            _mediator = mediator;
+        }
 
         public DbSet<Plant> Plants => Set<Plant>();
         public DbSet<UserPlant> UserPlants => Set<UserPlant>();
@@ -41,7 +46,11 @@ namespace PlantInfrastructure.Persistence.Data
                 .ToList()
                 .ForEach(e => e.ClearDomainEvents());
 
-            // TODO: Dispatch domain events via MediatR
+            // Dispatch domain events via MediatR
+            foreach (var domainEvent in domainEvents)
+            {
+                await _mediator.Publish(domainEvent, cancellationToken);
+            }
 
             return result;
         }

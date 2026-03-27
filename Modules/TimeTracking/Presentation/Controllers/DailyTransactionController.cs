@@ -29,6 +29,13 @@ namespace TimeTrackingPresentation.Controllers
             return Ok(result);
         }
 
+        [HttpGet("summary")]
+        [ProducesResponseType(typeof(DailySummaryDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetTodaySummaryAlias(CancellationToken cancellationToken)
+        {
+            return await GetTodaySummary(cancellationToken);
+        }
+
         [HttpGet("today/summary")]
         [ProducesResponseType(typeof(DailySummaryDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetTodaySummary(CancellationToken cancellationToken)
@@ -46,6 +53,13 @@ namespace TimeTrackingPresentation.Controllers
             var userId = GetCurrentUserId();
             var result = await _dailyService.GetByDateRangeAsync(userId, from, to, cancellationToken);
             return Ok(result);
+        }
+
+        [HttpGet("history")]
+        [ProducesResponseType(typeof(IEnumerable<DailyTransactionDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetLastNDaysAlias([FromQuery] int days, CancellationToken cancellationToken)
+        {
+            return await GetLastNDays(days, cancellationToken);
         }
 
         [HttpGet("last/{days:int}")]

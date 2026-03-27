@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 using TimeTrackingDomain.Entities;
 
@@ -6,8 +6,13 @@ namespace TimeTrackingInfrastructure.Persistence.Data
 {
     public sealed  class TimeTrackingDbContext : DbContext
     {
-        public TimeTrackingDbContext(DbContextOptions<TimeTrackingDbContext> options)
-        : base(options) { }
+        private readonly MediatR.IMediator _mediator;
+
+        public TimeTrackingDbContext(DbContextOptions<TimeTrackingDbContext> options, MediatR.IMediator mediator)
+            : base(options) 
+        {
+            _mediator = mediator;
+        }
 
         public DbSet<TimeSession> TimeSessions => Set<TimeSession>();
         public DbSet<DailyTransaction> DailyTransactions => Set<DailyTransaction>();
@@ -41,7 +46,11 @@ namespace TimeTrackingInfrastructure.Persistence.Data
                 .ToList()
                 .ForEach(e => e.ClearDomainEvents());
 
-            // TODO: Dispatch domain events via MediatR/EventBus
+            // Dispatch domain events via MediatR/EventBus
+            foreach (var domainEvent in domainEvents)
+            {
+                await _mediator.Publish(domainEvent, cancellationToken);
+            }
 
             return result;
         }

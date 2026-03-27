@@ -86,10 +86,10 @@ namespace PresentationIdentity.Controllers
         }
 
         /// <summary>
-        /// Confirm email address.
+        /// Confirm email address (Redirects to frontend).
         /// </summary>
-        [HttpPost("confirm-email")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [HttpGet("confirm-email")]
+        [ProducesResponseType(StatusCodes.Status302Found)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> ConfirmEmail([FromQuery] string token, CancellationToken cancellationToken)
         {
@@ -97,7 +97,9 @@ namespace PresentationIdentity.Controllers
                 return BadRequest("Token is required.");
 
             await _authenticationService.ConfirmEmailAsync(token, cancellationToken);
-            return Ok(new { message = "Email confirmed successfully." });
+            
+            // Redirect to frontend dashboard or a success page
+            return Redirect("http://localhost:4200/dashboard?verified=true");
         }
 
         /// <summary>
@@ -163,6 +165,17 @@ namespace PresentationIdentity.Controllers
             var userId = GetCurrentUserId();
             var result = await _authenticationService.ResetCoinsAsync(userId, dto, cancellationToken);
             return Ok(result);
+        }
+
+        [Authorize]
+        [HttpPost("resend-confirmation")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> ResendConfirmation(CancellationToken cancellationToken)
+        {
+            var userId = GetCurrentUserId();
+            await _authenticationService.ResendConfirmationEmailAsync(userId, cancellationToken);
+            return Ok(new { message = "Confirmation email resent." });
         }
 
         private Guid GetCurrentUserId()

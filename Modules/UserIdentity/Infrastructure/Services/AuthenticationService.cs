@@ -143,7 +143,23 @@ namespace UserIdentityInfrastructure.Services
             }
 
             // Validate token
-            token.Validate();
+            try
+            {
+                token.Validate();
+            }
+            catch (InvalidOperationException ex) when (ex.Message == "Token has been revoked")
+            {
+                // Security: Token reuse detected. This could be a replay attack.
+                // Revoke all active tokens for this user across all devices.
+                User.RevokeAllRefreshTokens();
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+                throw new UnauthorizedException("Refresh token reuse detected. All sessions have been revoked for security.", ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new System.ComponentModel.DataAnnotations.ValidationException(ex.Message, ex);
+            }
 
             if (!User.IsActive)
                 throw new UnauthorizedException("User account is deactivated");
@@ -217,9 +233,8 @@ namespace UserIdentityInfrastructure.Services
             var confirmationLink = $"http://localhost:5142/api/v1/authentication/confirm-email?token={token}";
             var emailBody = $"<h1>Welcome to Sunbula!</h1><p>Please confirm your email by clicking <a href='{confirmationLink}'>here</a>.</p>";
             
-            // Note: Email sending is kept disabled for integration tests to avoid SMTP dependencies, 
-            // but the token generation is now active and robust.
-            // await _emailService.SendEmailAsync(User.Email.Value, "Confirm your Sunbula account", emailBody, cancellationToken);
+            // Email sending is now enabled with SMTP configuration
+            await _emailService.SendEmailAsync(User.Email.Value, "Confirm your Sunbula account", emailBody, cancellationToken);
 
             Console.WriteLine("--> RegisterAsync: Registration complete. Token: " + token);
 
@@ -322,6 +337,25 @@ namespace UserIdentityInfrastructure.Services
             
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             return _mapper.Map<UserDto>(user);
+        }
+        public async Task ResendConfirmationEmailAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(userId, cancellationToken)
+                ?? throw new UserNotFoundException(userId);
+
+            if (user.IsEmailConfirmed)
+                throw new System.ComponentModel.DataAnnotations.ValidationException("Email is already confirmed.");
+
+            var userBytes = Encoding.UTF8.GetBytes(user.Id.ToString());
+            var protectedBytes = _dataProtector.Protect(userBytes);
+            var token = WebEncoders.Base64UrlEncode(protectedBytes);
+
+            var confirmationLink = $"http://localhost:5142/api/v1/authentication/confirm-email?token={token}";
+            var emailBody = $"<h1>Confirm your Sunbula account</h1><p>Please confirm your email by clicking <a href='{confirmationLink}'>here</a>.</p>";
+
+            // Email sending is now enabled with SMTP configuration
+            Console.WriteLine($"[EMAIL] Resending confirmation to {user.Email.Value}. Token: {token}");
+            await _emailService.SendEmailAsync(user.Email.Value, "Confirm your Sunbula account", emailBody, cancellationToken);
         }
         #endregion
     }
