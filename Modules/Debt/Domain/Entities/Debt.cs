@@ -19,7 +19,7 @@ namespace DebtDomain.Entities
             Guid userId,
             string creditorName,
             Money amount,
-            DebtType debtType,
+            string debtType,
             DateTime dueDate,
             string? notes) : base(id)
         {
@@ -63,7 +63,7 @@ namespace DebtDomain.Entities
 
         /// <summary>
         /// Type of debt (Payable or Receivable)
-        public DebtType DebtType { get; private set; }
+        public string DebtType { get; private set; }
 
         /// Optional notes about the debt
         public string? Notes { get; private set; }
@@ -85,7 +85,7 @@ namespace DebtDomain.Entities
             Guid userId,
             string creditorName,
             decimal amount,
-            DebtType debtType,
+            string debtType,
             DateTime dueDate,
             string? notes = null)
         {

@@ -8,7 +8,7 @@ namespace DebtDomain
     (Guid DebtId,
     Guid UserId,
     decimal Amount,
-    DebtType DebtType) : IDomainEvent
+    string DebtType) : IDomainEvent
     {
         public Guid Id { get; } = Guid.NewGuid();
         public DateTime OccurredOn { get; } = DateTime.UtcNow;

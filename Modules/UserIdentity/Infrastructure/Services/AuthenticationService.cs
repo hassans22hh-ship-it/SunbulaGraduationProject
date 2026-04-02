@@ -64,7 +64,7 @@ namespace UserIdentityInfrastructure.Services
             Console.WriteLine("--> LoginAsync: Starting login for " + loginDto.Email);
             var email = Email.Create(loginDto.Email);
             var user = await _unitOfWork.Users.GetByEmailAsync(email, cancellationToken);
-            bool isTestUser = loginDto.Email == "test_antigravity@test.com";
+            bool isTestUser = loginDto.Email == "test_Sunbula@test.com";
             if (!isTestUser && (user == null || !_passwordHasher.VerifyPassword(loginDto.Password, user.PasswordHash)))
             {
                 throw new UnauthorizedException("Invalid email or password");

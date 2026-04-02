@@ -10,7 +10,7 @@ namespace DebtApplication.DebtService
         Task<IEnumerable<DebtDto>> GetAllByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<IEnumerable<DebtDto>> GetUnpaidByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<IEnumerable<DebtDto>> GetOverdueByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
-        Task<IEnumerable<DebtDto>> GetByTypeAsync(Guid userId, DebtType debtType, CancellationToken cancellationToken = default);
+        Task<IEnumerable<DebtDto>> GetByTypeAsync(Guid userId, string debtType, CancellationToken cancellationToken = default);
         Task<DebtSummaryDto> GetDebtSummaryAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<DebtDto> CreateAsync(CreateDebtDto dto, Guid userId, CancellationToken cancellationToken = default);
         Task<DebtDto> UpdateAsync(Guid id, UpdateDebtDto dto, Guid userId, CancellationToken cancellationToken = default);

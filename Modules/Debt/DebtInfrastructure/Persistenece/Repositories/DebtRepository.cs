@@ -159,7 +159,7 @@ namespace DebtInfrastructure.Persistenece.Repositories
 
         public async Task<IEnumerable<Debt>> GetByTypeAsync(
             Guid userId,
-            DebtType debtType,
+            string debtType,
             CancellationToken cancellationToken = default)
         {
             return await _dbSet
@@ -170,7 +170,7 @@ namespace DebtInfrastructure.Persistenece.Repositories
 
         public async Task<decimal> GetTotalDebtAmountAsync(
             Guid userId,
-            DebtType debtType,
+            string debtType,
             bool unpaidOnly = true,
             CancellationToken cancellationToken = default)
         {
@@ -180,18 +180,18 @@ namespace DebtInfrastructure.Persistenece.Repositories
             if (unpaidOnly)
                 query = query.Where(d => !d.IsPaid);
 
-            var total = await query.SumAsync(d => d.Amount.Value, cancellationToken);
+            var total = await query.SumAsync(d =>(decimal) d.Amount , cancellationToken);
 
             return total;
         }
 
         public async Task<decimal> GetTotalRemainingAmountAsync(
             Guid userId,
-            DebtType debtType,
+            string debtType,
             CancellationToken cancellationToken = default)
             => await _dbSet
                 .Where(d => d.UserId == userId && d.DebtType == debtType && !d.IsDeleted)
-                .SumAsync(d => d.RemainingAmount.Value, cancellationToken);
+                .SumAsync(d => (decimal)d.RemainingAmount, cancellationToken);
 
         public async Task HardDeleteByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
         {

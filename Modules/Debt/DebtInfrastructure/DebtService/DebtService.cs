@@ -70,7 +70,7 @@ namespace DebtInfrastructure.DebtService
 
         public async Task<IEnumerable<DebtDto>> GetByTypeAsync(
             Guid userId,
-            DebtType debtType,
+            string debtType,
             CancellationToken cancellationToken = default)
         {
             var debts = await _unitOfWork.Debts.GetByTypeAsync(userId, debtType, cancellationToken);
@@ -85,34 +85,34 @@ namespace DebtInfrastructure.DebtService
             var unpaidDebts = await _unitOfWork.Debts.GetUnpaidByUserIdAsync(userId, cancellationToken);
             var overdueDebts = await _unitOfWork.Debts.GetOverdueByUserIdAsync(userId, cancellationToken);
 
-            var totalPayable = await _unitOfWork.Debts.GetTotalDebtAmountAsync(
-                userId,
-                DebtType.Payable,
-                unpaidOnly: false,
-                cancellationToken);
+            //var totalPayable = await _unitOfWork.Debts.GetTotalDebtAmountAsync(
+            //    userId,
+            //    DebtType.Payable,
+            //    unpaidOnly: false,
+            //    cancellationToken);
 
-            var totalReceivable = await _unitOfWork.Debts.GetTotalDebtAmountAsync(
-                userId,
-                DebtType.Receivable,
-                unpaidOnly: false,
-                cancellationToken);
+            //var totalReceivable = await _unitOfWork.Debts.GetTotalDebtAmountAsync(
+            //    userId,
+            //    DebtType.Receivable,
+            //    unpaidOnly: false,
+            //    cancellationToken);
 
-            var totalRemainingPayable = await _unitOfWork.Debts.GetTotalRemainingAmountAsync(
-                userId,
-                DebtType.Payable,
-                cancellationToken);
+            //var totalRemainingPayable = await _unitOfWork.Debts.GetTotalRemainingAmountAsync(
+            //    userId,
+            //    DebtType.Payable,
+            //    cancellationToken);
 
-            var totalRemainingReceivable = await _unitOfWork.Debts.GetTotalRemainingAmountAsync(
-                userId,
-                DebtType.Receivable,
-                cancellationToken);
+            //var totalRemainingReceivable = await _unitOfWork.Debts.GetTotalRemainingAmountAsync(
+            //    userId,
+            //    DebtType.Receivable,
+            //    cancellationToken);
 
             return new DebtSummaryDto
             {
-                TotalPayable = totalPayable,
-                TotalReceivable = totalReceivable,
-                TotalRemainingPayable = totalRemainingPayable,
-                TotalRemainingReceivable = totalRemainingReceivable,
+                //TotalPayable = totalPayable,
+                //TotalReceivable = totalReceivable,
+                //TotalRemainingPayable = totalRemainingPayable,
+                //TotalRemainingReceivable = totalRemainingReceivable,
                 TotalDebtsCount = allDebts.Count(),
                 UnpaidDebtsCount = unpaidDebts.Count(),
                 OverdueDebtsCount = overdueDebts.Count()

@@ -17,7 +17,7 @@ namespace DebtApplication.Dtos
         public decimal Amount { get; init; }
 
         [Required(ErrorMessage = "Debt type is required")]
-        public DebtType DebtType { get; init; }
+        public string DebtType { get; init; }
 
         [Required(ErrorMessage = "Due date is required")]
         public DateTime DueDate { get; init; }

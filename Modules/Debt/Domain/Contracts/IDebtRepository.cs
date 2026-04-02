@@ -41,7 +41,7 @@ namespace DebtDomain.Contracts
         /// </summary>
         Task<IEnumerable<Entities.Debt>> GetByTypeAsync(
             Guid userId,
-            DebtType debtType,
+            string debtType,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace DebtDomain.Contracts
         /// </summary>
         Task<decimal> GetTotalDebtAmountAsync(
             Guid userId,
-            DebtType debtType,
+            string debtType,
             bool unpaidOnly = true,
             CancellationToken cancellationToken = default);
 
@@ -58,7 +58,7 @@ namespace DebtDomain.Contracts
         /// </summary>
         Task<decimal> GetTotalRemainingAmountAsync(
             Guid userId,
-            DebtType debtType,
+            string debtType,
             CancellationToken cancellationToken = default);
 
         Task HardDeleteByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);

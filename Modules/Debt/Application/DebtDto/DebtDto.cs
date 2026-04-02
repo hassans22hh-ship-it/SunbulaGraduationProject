@@ -13,7 +13,7 @@ namespace DebtApplication.Dtos
         public required DateTime DueDate { get; init; }
         public required bool IsPaid { get; init; }
         public required bool IsOverdue { get; init; }
-        public required DebtType DebtType { get; init; }
+        public required string DebtType { get; init; }
         public string? Notes { get; init; }
         public required DateTime CreatedAt { get; init; }
         public DateTime? UpdatedAt { get; init; }

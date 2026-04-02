@@ -84,7 +84,7 @@ namespace DebtPresentation.Controllers
         /// </summary>
         [HttpGet("by-type/{debtType}")]
         [ProducesResponseType(typeof(IEnumerable<DebtDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetByType(DebtType debtType, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetByType(string debtType, CancellationToken cancellationToken)
         {
             var userId = GetCurrentUserId();
             var result = await _debtService.GetByTypeAsync(userId, debtType, cancellationToken);
