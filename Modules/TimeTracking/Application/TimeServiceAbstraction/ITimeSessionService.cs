@@ -13,6 +13,9 @@ namespace TimeTrackingApplication.TimeServiceAbstraction
         Task<(IEnumerable<TimeSessionDto> Sessions, int TotalCount)> GetPagedAsync(Guid userId, int page, int pageSize, CancellationToken cancellationToken = default);
         Task<TimeSessionDto?> GetActiveSessionAsync(Guid userId, CancellationToken cancellationToken = default);
 
+        /// <summary>Returns ALL active sessions for the user (one per task at most).</summary>
+        Task<IEnumerable<TimeSessionDto>> GetActiveSessionsAsync(Guid userId, CancellationToken cancellationToken = default);
+
         /// <summary>Starts a live tracking session. Throws if one already exists.</summary>
         Task<TimeSessionDto> StartAsync(StartSessionDto dto, Guid userId, CancellationToken cancellationToken = default);
 

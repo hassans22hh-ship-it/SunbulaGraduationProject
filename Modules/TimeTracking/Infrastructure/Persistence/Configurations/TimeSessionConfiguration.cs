@@ -43,8 +43,11 @@ namespace TimeTrackingInfrastructure.Persistence.Configurations
             builder.Property(e => e.Notes)
                 .HasMaxLength(500);
 
-            builder.Ignore(e => e.PausedAt);
-            builder.Ignore(e => e.TotalPausedDuration);
+            // PausedAt and TotalPausedDuration are persisted (columns added in 20260326230212_AddPauseFields)
+            builder.Property(e => e.PausedAt);
+            builder.Property(e => e.TotalPausedDuration)
+                .HasColumnType("time")
+                .HasDefaultValue(TimeSpan.Zero);
 
             // Audit
             builder.Property(e => e.CreatedAt).IsRequired();
@@ -66,6 +69,10 @@ namespace TimeTrackingInfrastructure.Persistence.Configurations
 
             builder.HasIndex(e => e.StartTime)
                 .HasDatabaseName("IX_TimeSessions_StartTime");
+
+            // BR-02: Filtered unique index — prevents duplicate active session for same (User, Task)
+            // Applied in SQL directly (EF filtered index with WHERE clause)
+            // See migration: AddUniqueActiveSessionIndex
 
             builder.Ignore(e => e.DomainEvents);
         }

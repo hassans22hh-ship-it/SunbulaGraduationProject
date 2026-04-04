@@ -59,13 +59,13 @@ namespace TimeTrackingPresentation.Controllers
         }
 
         [HttpGet("active")]
-        [ProducesResponseType(typeof(TimeSessionDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(IEnumerable<TimeSessionDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
         {
             var userId = GetCurrentUserId();
-            var session = await _sessionService.GetActiveSessionAsync(userId, cancellationToken);
-            return session == null ? NoContent() : Ok(session);
+            // Returns all active sessions (one per task at most) — empty list if none
+            var sessions = await _sessionService.GetActiveSessionsAsync(userId, cancellationToken);
+            return Ok(sessions);
         }
 
         [HttpGet("{id:guid}")]

@@ -88,6 +88,12 @@ namespace TimeTrackingInfrastructure.Persistence.Repositories
         public async Task<TimeSession?> GetActiveSessionByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
             => await _dbSet.FirstOrDefaultAsync(e => e.UserId == userId && e.IsActive && !e.IsDeleted, cancellationToken);
 
+        public async Task<TimeSession?> GetActiveSessionByUserAndTaskAsync(Guid userId, Guid taskId, CancellationToken cancellationToken = default)
+            => await _dbSet.FirstOrDefaultAsync(e => e.UserId == userId && e.TaskId == taskId && e.IsActive && !e.IsDeleted, cancellationToken);
+
+        public async Task<IEnumerable<TimeSession>> GetActiveSessionsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+            => await _dbSet.Where(e => e.UserId == userId && e.IsActive && !e.IsDeleted).OrderBy(e => e.StartTime).ToListAsync(cancellationToken);
+
         public async Task<bool> HasActiveSessionAsync(Guid userId, CancellationToken cancellationToken = default)
             => await _dbSet.AnyAsync(e => e.UserId == userId && e.IsActive && !e.IsDeleted, cancellationToken);
 

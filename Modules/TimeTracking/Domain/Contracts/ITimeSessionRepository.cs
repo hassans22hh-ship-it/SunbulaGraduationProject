@@ -13,6 +13,8 @@ namespace TimeTrackingDomain.Contracts
         Task<IEnumerable<TimeSession>> GetByUserAndDateAsync(Guid userId, DateOnly date, CancellationToken cancellationToken = default);
         Task<IEnumerable<TimeSession>> GetByUserAndDateRangeAsync(Guid userId, DateOnly from, DateOnly to, CancellationToken cancellationToken = default);
         Task<TimeSession?> GetActiveSessionByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+        Task<TimeSession?> GetActiveSessionByUserAndTaskAsync(Guid userId, Guid taskId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<TimeSession>> GetActiveSessionsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<bool> HasActiveSessionAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<IEnumerable<TimeSession>> GetOverlappingSessionsAsync(Guid userId, DateTime startTime, DateTime endTime, Guid? excludeSessionId = null, CancellationToken cancellationToken = default);
         Task<int> GetSessionCountByTaskIdAsync(Guid taskId, CancellationToken cancellationToken = default);

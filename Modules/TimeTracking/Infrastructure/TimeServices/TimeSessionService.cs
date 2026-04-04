@@ -58,11 +58,20 @@ namespace TimeTrackingInfrastructure.TimeServices
             return session == null ? null : _mapper.Map<TimeSessionDto>(session);
         }
 
+        public async Task<IEnumerable<TimeSessionDto>> GetActiveSessionsAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            var sessions = await _unitOfWork.TimeSessions.GetActiveSessionsByUserIdAsync(userId, cancellationToken);
+            return _mapper.Map<IEnumerable<TimeSessionDto>>(sessions);
+        }
+
         public async Task<TimeSessionDto> StartAsync(StartSessionDto dto, Guid userId, CancellationToken cancellationToken = default)
         {
-            var activeSession = await _unitOfWork.TimeSessions.GetActiveSessionByUserIdAsync(userId, cancellationToken);
-            if (activeSession != null)
-                throw new ActiveSessionExistsException(activeSession.Id);
+            // BR-02: Only block if this specific Task already has an active session.
+            // BR-01: Multiple active sessions for DIFFERENT tasks are allowed.
+            var sameTaskSession = await _unitOfWork.TimeSessions
+                .GetActiveSessionByUserAndTaskAsync(userId, dto.TaskId, cancellationToken);
+            if (sameTaskSession != null)
+                throw new ActiveSessionExistsException(sameTaskSession.Id);
 
             var session = TimeSession.Start(userId, dto.TaskId, dto.BehaviorType, dto.Notes);
             await _unitOfWork.TimeSessions.AddAsync(session, cancellationToken);

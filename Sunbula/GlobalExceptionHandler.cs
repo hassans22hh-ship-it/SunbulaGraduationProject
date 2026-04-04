@@ -1,6 +1,7 @@
 using DebtDomain.Exceptions;
 using Domain.Exceptions;
 using FinanceDomain.Exceptions;
+using TimeTrackingDomain.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -46,6 +47,11 @@ namespace Sunbula
                 PaymentExceedsRemainingAmountException => (HttpStatusCode.BadRequest, "Payment exceeds remaining amount"),
                 InvalidPaymentDateException => (HttpStatusCode.BadRequest, "Invalid payment date"),
                 InsufficientBalanceException => (HttpStatusCode.BadRequest, "Insufficient balance"),
+
+                // Time Tracking Exceptions
+                ActiveSessionExistsException => (HttpStatusCode.Conflict, "Active session exists"),
+                OverlappingSessionException => (HttpStatusCode.Conflict, "Overlapping session"),
+                TimeSessionNotFoundException => (HttpStatusCode.NotFound, "Time session not found"),
 
                 // Auth exceptions
                 UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "Unauthorized"),
