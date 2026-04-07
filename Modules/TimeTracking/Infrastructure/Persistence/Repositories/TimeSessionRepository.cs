@@ -97,9 +97,10 @@ namespace TimeTrackingInfrastructure.Persistence.Repositories
         public async Task<bool> HasActiveSessionAsync(Guid userId, CancellationToken cancellationToken = default)
             => await _dbSet.AnyAsync(e => e.UserId == userId && e.IsActive && !e.IsDeleted, cancellationToken);
 
-        public async Task<IEnumerable<TimeSession>> GetOverlappingSessionsAsync(Guid userId, DateTime startTime, DateTime endTime, Guid? excludeSessionId = null, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<TimeSession>> GetOverlappingSessionsAsync(Guid userId, DateTime startTime, DateTime endTime, Guid? taskId = null, Guid? excludeSessionId = null, CancellationToken cancellationToken = default)
         {
             var query = _dbSet.Where(e => e.UserId == userId && !e.IsDeleted && !e.IsActive && e.EndTime != null && e.StartTime < endTime && e.EndTime > startTime);
+            if (taskId.HasValue) query = query.Where(e => e.TaskId == taskId.Value);
             if (excludeSessionId.HasValue) query = query.Where(e => e.Id != excludeSessionId.Value);
             return await query.ToListAsync(cancellationToken);
         }

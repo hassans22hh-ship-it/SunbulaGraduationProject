@@ -131,7 +131,34 @@ namespace Domain.Entities
         }
         public void RecordLogin()
         {
-            LastLoginAt = DateTime.UtcNow;
+            var now = DateTime.UtcNow;
+            var today = now.Date;
+
+            if (LastStreakDate.HasValue)
+            {
+                var lastDate = LastStreakDate.Value.Date;
+                var daysSinceLastStreak = (today - lastDate).TotalDays;
+
+                if (daysSinceLastStreak == 1)
+                {
+                    // Consecutive day - increment streak
+                    ConsecutiveStreakDays++;
+                }
+                else if (daysSinceLastStreak > 1)
+                {
+                    // Streak broken (more than 1 day since last login)
+                    ConsecutiveStreakDays = 1;
+                }
+                // If daysSinceLastStreak == 0, user already logged in today, don't increment
+            }
+            else
+            {
+                // First login ever or first since streak tracks
+                ConsecutiveStreakDays = 1;
+            }
+
+            LastStreakDate = today;
+            LastLoginAt = now;
             MarkAsUpdated();
             RaiseDomainEvent(new UserLoggedInEvent(Id, Email.Value, LastLoginAt.Value));
         }

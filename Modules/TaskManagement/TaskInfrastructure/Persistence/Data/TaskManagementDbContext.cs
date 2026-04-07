@@ -1,6 +1,7 @@
+using Domain.Entities.TaskManagement;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Domain.Entities.TaskManagement;
+using Microsoft.Extensions.Configuration;
 using TaskDomain.Entities.TaskManagement;
 
 namespace TaskInfrastructure.Persistence.Data
@@ -58,8 +59,17 @@ namespace TaskInfrastructure.Persistence.Data
     {
         public TaskManagementDbContext CreateDbContext(string[] args)
         {
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+
             var optionsBuilder = new DbContextOptionsBuilder<TaskManagementDbContext>();
-            optionsBuilder.UseSqlServer("Server=.;Database=TaskManagement;Trusted_Connection=True;TrustServerCertificate=True");
+
+            var connectionString = configuration.GetConnectionString("TaskManagementDb");
+
+            optionsBuilder.UseSqlServer(connectionString);
+
             return new TaskManagementDbContext(optionsBuilder.Options, null!);
         }
     }

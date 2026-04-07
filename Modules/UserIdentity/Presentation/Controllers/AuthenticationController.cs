@@ -178,6 +178,60 @@ namespace PresentationIdentity.Controllers
             return Ok(new { message = "Confirmation email resent." });
         }
 
+        /// <summary>
+        /// Listen to real-time changes in the user's coin balance using Server-Sent Events (SSE).
+        /// </summary>
+        [Authorize]
+        [HttpGet("coins/listen")]
+        [Produces("text/event-stream")]
+        public async Task ListenToCoins(
+            [FromServices] ICoinStreamManager coinStreamManager,
+            CancellationToken cancellationToken)
+        {
+            var userId = GetCurrentUserId();
+
+            Response.Headers.Append("Content-Type", "text/event-stream");
+            Response.Headers.Append("Cache-Control", "no-cache");
+            Response.Headers.Append("Connection", "keep-alive");
+
+            // Flush headers to establish SSE connection
+            await Response.Body.FlushAsync(cancellationToken);
+
+            var channel = coinStreamManager.Subscribe(userId);
+            
+            try
+            {
+                var jsonOptions = new System.Text.Json.JsonSerializerOptions 
+                { 
+                    PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase 
+                };
+
+                await foreach (var coinEvent in channel.Reader.ReadAllAsync(cancellationToken))
+                {
+                    var payload = new 
+                    { 
+                        coinEvent.NewBalance, 
+                        coinEvent.Change, 
+                        coinEvent.Reason, 
+                        coinEvent.PreviousBalance, 
+                        coinEvent.UserId 
+                    };
+                    
+                    var dataLine = $"data: {System.Text.Json.JsonSerializer.Serialize(payload, jsonOptions)}\n\n";
+                    await Response.WriteAsync(dataLine, cancellationToken);
+                    await Response.Body.FlushAsync(cancellationToken);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Client disconnected
+            }
+            finally
+            {
+                coinStreamManager.Unsubscribe(userId, channel);
+            }
+        }
+
         private Guid GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value

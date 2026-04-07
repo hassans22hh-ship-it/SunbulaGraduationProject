@@ -41,6 +41,9 @@ namespace Infrastructure
             services.AddScoped<IUserIntegrationService, UserIntegrationService>();
             services.AddScoped<IUserSettingsService, UserSettingsService>();
 
+            // Coin Stream Manager
+            services.AddSingleton<ICoinStreamManager, CoinStreamManager>();
+
             return services;
         }
     }

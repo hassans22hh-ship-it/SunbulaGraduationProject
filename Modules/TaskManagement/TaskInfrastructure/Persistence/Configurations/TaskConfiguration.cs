@@ -1,4 +1,4 @@
-﻿using Task = Domain.Entities.TaskManagement.TaskItem;
+using Task = Domain.Entities.TaskManagement.TaskItem;
 using Category = Domain.Entities.TaskManagement;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -80,7 +80,6 @@ namespace TaskInfrastructure.Persistence.Configurations
                 .HasDatabaseName("IX_Tasks_UserId");
 
             builder.HasIndex(t => new { t.UserId, t.Title })
-                .IsUnique()
                 .HasDatabaseName("IX_Tasks_UserId_Title");
 
             builder.HasIndex(t => t.FolderId)

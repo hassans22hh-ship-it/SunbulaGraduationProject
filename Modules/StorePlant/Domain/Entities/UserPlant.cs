@@ -1,4 +1,4 @@
-﻿using PlantDomain.Enums;
+using PlantDomain.Enums;
 using PlantDomain.Events;
 using SharedKernel;
 

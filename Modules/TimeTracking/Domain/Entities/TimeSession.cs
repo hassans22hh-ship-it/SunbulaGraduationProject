@@ -117,6 +117,10 @@ namespace TimeTrackingDomain.Entities
             session.TotalPausedDuration = TimeSpan.Zero;
 
             session.RaiseDomainEvent(new TimeSessionEndedEvent(session.Id, session.UserId, coins, duration.TotalMinutes));
+            
+            if (coins != 0)
+                session.RaiseDomainEvent(new CoinsEarnedEvent(userId, coins, session.Id));
+
             return session;
         }
 
@@ -193,6 +197,8 @@ namespace TimeTrackingDomain.Entities
             if (IsActive)
                 throw new InvalidOperationException("Cannot update an active session. Stop it first.");
 
+            var previousCoins = CoinsEarned;
+            
             var timeRange = TimeRange.Create(startTime, endTime);
             var duration = Duration.FromTimeRange(timeRange.StartTime, timeRange.EndTime);
             var coins = duration.CalculateCoins(behaviorType);
@@ -205,6 +211,12 @@ namespace TimeTrackingDomain.Entities
             Notes = notes;
 
             MarkAsUpdated();
+
+            var coinDifference = CoinsEarned - previousCoins;
+            if (coinDifference != 0)
+            {
+                RaiseDomainEvent(new CoinsEarnedEvent(UserId, coinDifference, Id));
+            }
         }
 
         /// <summary>
@@ -245,6 +257,9 @@ namespace TimeTrackingDomain.Entities
 
             MarkAsUpdated();
             RaiseDomainEvent(new TimeSessionEndedEvent(Id, UserId, coins, duration.TotalMinutes));
+
+            if (coins != 0)
+                RaiseDomainEvent(new CoinsEarnedEvent(UserId, coins, Id));
         }
 
         // ═══════════════════════════════════════════════════════════════

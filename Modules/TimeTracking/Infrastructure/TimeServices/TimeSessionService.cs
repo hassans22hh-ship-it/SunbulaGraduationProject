@@ -144,7 +144,7 @@ namespace TimeTrackingInfrastructure.TimeServices
 
         public async Task<TimeSessionDto> CreateManualAsync(CreateTimeSessionDto dto, Guid userId, CancellationToken cancellationToken = default)
         {
-            var overlapping = await _unitOfWork.TimeSessions.GetOverlappingSessionsAsync(userId, dto.StartTime, dto.EndTime, cancellationToken: cancellationToken);
+            var overlapping = await _unitOfWork.TimeSessions.GetOverlappingSessionsAsync(userId, dto.StartTime, dto.EndTime, taskId: dto.TaskId, cancellationToken: cancellationToken);
             if (overlapping.Any()) throw new OverlappingSessionException(dto.StartTime, dto.EndTime);
 
             var session = TimeSession.CreateManual(userId, dto.TaskId, dto.StartTime, dto.EndTime, dto.BehaviorType, dto.Notes);
@@ -162,7 +162,7 @@ namespace TimeTrackingInfrastructure.TimeServices
             if (session.UserId != userId)
                 throw new UnauthorizedAccessException("You don't have permission to update this session.");
 
-            var overlapping = await _unitOfWork.TimeSessions.GetOverlappingSessionsAsync(userId, dto.StartTime, dto.EndTime, id, cancellationToken);
+            var overlapping = await _unitOfWork.TimeSessions.GetOverlappingSessionsAsync(userId, dto.StartTime, dto.EndTime, taskId: session.TaskId, excludeSessionId: id, cancellationToken: cancellationToken);
             if (overlapping.Any()) throw new OverlappingSessionException(dto.StartTime, dto.EndTime);
 
             var oldDuration = session.DurationMinutes;

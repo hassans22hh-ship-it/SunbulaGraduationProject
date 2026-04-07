@@ -151,8 +151,8 @@ namespace TaskInfrastructure.Services
         {
             // Check if title exists
             var titleExists = await _unitOfWork.Tasks.TitleExistsAsync(userId, dto.Title, cancellationToken: cancellationToken);
-            if (titleExists)
-                throw new InvalidOperationException($"Task with title '{dto.Title}' already exists");
+            //if (titleExists)
+            //    throw new InvalidOperationException($"Task with title '{dto.Title}' already exists");
 
             // Verify folder if provided
             if (dto.FolderId.HasValue)
@@ -237,12 +237,12 @@ namespace TaskInfrastructure.Services
                 throw new UnauthorizedAccessException("You don't have permission to update this task");
 
             // Check if new title conflicts with existing
-            if (task.Title != dto.Title)
-            {
-                var titleExists = await _unitOfWork.Tasks.TitleExistsAsync(userId, dto.Title, id, cancellationToken);
-                if (titleExists)
-                    throw new InvalidOperationException($"Task with title '{dto.Title}' already exists");
-            }
+            // if (task.Title != dto.Title)
+            // {
+            //     var titleExists = await _unitOfWork.Tasks.TitleExistsAsync(userId, dto.Title, id, cancellationToken);
+            //     if (titleExists)
+            //         throw new InvalidOperationException($"Task with title '{dto.Title}' already exists");
+            // }
 
             // Verify folder if provided
             if (dto.FolderId.HasValue)
