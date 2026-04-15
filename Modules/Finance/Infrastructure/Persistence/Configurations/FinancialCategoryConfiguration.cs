@@ -1,4 +1,4 @@
-﻿using FinanceDomain.Entities;
+using FinanceDomain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -18,6 +18,10 @@ namespace FinanceInfrastructure.Persistence.Configurations
             builder.Property(c => c.Name)
                 .IsRequired()
                 .HasMaxLength(50);
+
+            builder.Property(c => c.Icon)
+                .IsRequired(false)
+                .HasMaxLength(10);
 
             builder.Property(c => c.CreatedAt).IsRequired();
             builder.Property(c => c.UpdatedAt);

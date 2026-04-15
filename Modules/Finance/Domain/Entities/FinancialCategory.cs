@@ -1,4 +1,4 @@
-﻿using SharedKernel;
+using SharedKernel;
 
 namespace FinanceDomain.Entities
 {
@@ -10,10 +10,11 @@ namespace FinanceDomain.Entities
 
         private FinancialCategory() { }
 
-        private FinancialCategory(Guid id, Guid userId, string name) : base(id)
+        private FinancialCategory(Guid id, Guid userId, string name, string? icon) : base(id)
         {
             UserId = userId;
             Name = name;
+            Icon = icon;
         }
 
         /// <summary>Owner user ID (cross-module reference).</summary>
@@ -22,16 +23,19 @@ namespace FinanceDomain.Entities
         /// <summary>Category name (e.g., "Food", "Rent", "Salary").</summary>
         public string Name { get; private set; } = string.Empty;
 
+        /// <summary>Optional emoji icon for the category (e.g., "🍔", "🏠", "💰").</summary>
+        public string? Icon { get; private set; }
+
         /// <summary>Transactions using this category.</summary>
         public IReadOnlyCollection<FinancialTransaction> Transactions => _transactions.AsReadOnly();
 
         // ─── Factory ────────────────────────────────────────────────────────────
 
         /// <summary>Creates a new financial category for a user.</summary>
-        public static FinancialCategory Create(Guid userId, string name)
+        public static FinancialCategory Create(Guid userId, string name, string? icon = null)
         {
             ValidateName(name);
-            return new FinancialCategory(Guid.NewGuid(), userId, name);
+            return new FinancialCategory(Guid.NewGuid(), userId, name, icon);
         }
 
         // ─── Domain Methods ─────────────────────────────────────────────────────
@@ -41,6 +45,13 @@ namespace FinanceDomain.Entities
         {
             ValidateName(newName);
             Name = newName;
+            MarkAsUpdated();
+        }
+
+        /// <summary>Updates the emoji icon for this category.</summary>
+        public void UpdateIcon(string? icon)
+        {
+            Icon = icon;
             MarkAsUpdated();
         }
 

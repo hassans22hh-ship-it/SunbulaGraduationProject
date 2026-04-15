@@ -1,4 +1,4 @@
-﻿using FinanceDomain.Enums;
+using FinanceDomain.Enums;
 
 namespace FinanceApplication.financedtos
 {
@@ -11,6 +11,7 @@ namespace FinanceApplication.financedtos
         public string? DestinationWalletName { get; init; }
         public Guid? FinancialCategoryId { get; init; }
         public string? CategoryName { get; init; }
+        public string? CategoryIcon { get; init; }
         public required TransactionType Type { get; init; }
         public required decimal Amount { get; init; }
         public required string Currency { get; init; }

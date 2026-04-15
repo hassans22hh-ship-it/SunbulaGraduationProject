@@ -56,6 +56,16 @@ namespace FinancePresentation.Controllers
             return Ok(result);
         }
 
+        /// <summary>Update the emoji icon of a financial category.</summary>
+        [HttpPatch("{id:guid}/icon")]
+        [ProducesResponseType(typeof(FinancialCategoryDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateIcon(Guid id, [FromQuery] string? icon, CancellationToken ct)
+        {
+            var result = await _categoryService.UpdateIconAsync(id, icon, GetUserId(), ct);
+            return Ok(result);
+        }
+
         /// <summary>Delete a financial category (soft delete).</summary>
         [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]

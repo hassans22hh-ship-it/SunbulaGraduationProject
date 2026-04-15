@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FinanceApplication.financedtos;
 using FinanceApplication.FinanceServiceAbs;
 using FinanceDomain.contracts;
@@ -40,7 +40,7 @@ namespace FinanceInfrastructure.financeSService
             if (exists)
                 throw new InvalidOperationException($"A category named '{dto.Name}' already exists.");
 
-            var category = FinancialCategory.Create(userId, dto.Name);
+            var category = FinancialCategory.Create(userId, dto.Name, dto.Icon);
             await _uow.FinancialCategories.AddAsync(category, ct);
             await _uow.SaveChangesAsync(ct);
 
@@ -76,6 +76,21 @@ namespace FinanceInfrastructure.financeSService
             // Soft-delete: transactions will have FK set to NULL (OnDelete.SetNull)
             _uow.FinancialCategories.Delete(category);
             await _uow.SaveChangesAsync(ct);
+        }
+
+        public async Task<FinancialCategoryDto> UpdateIconAsync(
+            Guid id, string? icon, Guid userId, CancellationToken ct = default)
+        {
+            var category = await _uow.FinancialCategories.GetByIdAsync(id, ct)
+                ?? throw new FinancialCategoryNotFoundException(id);
+
+            EnsureOwnership(category.UserId, userId);
+
+            category.UpdateIcon(icon);
+            _uow.FinancialCategories.Update(category);
+            await _uow.SaveChangesAsync(ct);
+
+            return _mapper.Map<FinancialCategoryDto>(category);
         }
 
         private static void EnsureOwnership(Guid ownerId, Guid requesterId)

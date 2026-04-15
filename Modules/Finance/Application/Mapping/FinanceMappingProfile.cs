@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FinanceApplication.financedtos;
 using FinanceDomain.Entities;
 
@@ -26,6 +26,8 @@ namespace FinanceApplication.Mapping
                     opt => opt.MapFrom(src => src.Wallet != null ? src.Wallet.Name : null))
                 .ForMember(dest => dest.CategoryName,
                     opt => opt.MapFrom(src => src.FinancialCategory != null ? src.FinancialCategory.Name : null))
+                .ForMember(dest => dest.CategoryIcon,
+                    opt => opt.MapFrom(src => src.FinancialCategory != null ? src.FinancialCategory.Icon : null))
                 // DestinationWalletName must be populated by the service (second wallet lookup)
                 .ForMember(dest => dest.DestinationWalletName, opt => opt.Ignore());
         }
