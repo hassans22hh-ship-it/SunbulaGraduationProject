@@ -1,4 +1,4 @@
-﻿using TimeTrackingDomain.Enums;
+using TimeTrackingDomain.Enums;
 
 namespace TimeTrackingApplication.TimeDtos
 {
@@ -11,7 +11,7 @@ namespace TimeTrackingApplication.TimeDtos
         public required Guid TaskId { get; init; }
         public required DateTime StartTime { get; init; }
         public DateTime? EndTime { get; init; }
-        public required int DurationMinutes { get; init; }
+        public required decimal DurationMinutes { get; init; }
         public required decimal CoinsEarned { get; init; }
         public required BehaviorType BehaviorType { get; init; }
         public required string BehaviorTypeName { get; init; }
@@ -21,7 +21,7 @@ namespace TimeTrackingApplication.TimeDtos
         public required DateTime CreatedAt { get; init; }
 
         // Computed for display
-        public string FormattedDuration => $"{DurationMinutes / 60}h {DurationMinutes % 60}m";
+        public string FormattedDuration => $"{(int)DurationMinutes / 60}h {(int)DurationMinutes % 60}m";
     }
 }
 

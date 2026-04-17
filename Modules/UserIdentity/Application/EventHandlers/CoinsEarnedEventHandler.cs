@@ -24,10 +24,15 @@ namespace Application.EventHandlers
         public async Task Handle(CoinsEarnedEvent notification, CancellationToken cancellationToken)
         {
             var user = await _unitOfWork.Users.GetByIdAsync(notification.UserId, cancellationToken);
-            if (user == null) return;
+            
+            if (user == null)
+            {
+                // In a production app, we would log this critical error. 
+                // A session exists for a user ID that doesn't exist.
+                return;
+            }
 
-            // Business Rule: Convert decimal coins from TimeTracking to integer for UserIdentity balance
-            int amount = (int)Math.Round(notification.CoinsAmount, MidpointRounding.AwayFromZero);
+            int amount = notification.CoinsAmount;
 
             if (amount > 0)
             {

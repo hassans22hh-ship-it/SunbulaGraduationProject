@@ -49,7 +49,7 @@ namespace TimeTrackingDomain.Entities
         public DateTime StartTime { get; private set; }
         public DateTime? EndTime { get; private set; }
         public int DurationMinutes { get; private set; }
-        public decimal CoinsEarned { get; private set; }
+        public int CoinsEarned { get; private set; }
         public BehaviorType BehaviorType { get; private set; }
         public bool IsActive { get; private set; }
         public bool ManuallyAdded { get; private set; }
@@ -110,13 +110,13 @@ namespace TimeTrackingDomain.Entities
                 notes: notes);
 
             session.EndTime = timeRange.EndTime;
-            session.DurationMinutes = duration.TotalMinutes;
+            session.DurationMinutes = (int)Math.Round(duration.TotalMinutes, MidpointRounding.AwayFromZero);
             session.CoinsEarned = coins;
             session.IsActive = false;
             session.PausedAt = null;
             session.TotalPausedDuration = TimeSpan.Zero;
 
-            session.RaiseDomainEvent(new TimeSessionEndedEvent(session.Id, session.UserId, coins, duration.TotalMinutes));
+            session.RaiseDomainEvent(new TimeSessionEndedEvent(session.Id, session.UserId, coins, session.DurationMinutes));
             
             if (coins != 0)
                 session.RaiseDomainEvent(new CoinsEarnedEvent(userId, coins, session.Id));
@@ -148,15 +148,17 @@ namespace TimeTrackingDomain.Entities
             var coins = duration.CalculateCoins(BehaviorType);
 
             EndTime = endTime;
-            DurationMinutes = duration.TotalMinutes;
+            DurationMinutes = (int)Math.Round(duration.TotalMinutes, MidpointRounding.AwayFromZero);
             CoinsEarned = coins;
             IsActive = false;
 
             MarkAsUpdated();
-            RaiseDomainEvent(new TimeSessionEndedEvent(Id, UserId, coins, duration.TotalMinutes));
+            RaiseDomainEvent(new TimeSessionEndedEvent(Id, UserId, coins, DurationMinutes));
 
             if (coins != 0)
-                RaiseDomainEvent(new CoinsEarnedEvent(UserId, coins, Id));
+            {
+                // Event handled directly via Integration Service in the application layer
+            }
         }
 
         public void Pause()
@@ -206,7 +208,7 @@ namespace TimeTrackingDomain.Entities
             StartTime = timeRange.StartTime;
             EndTime = timeRange.EndTime;
             BehaviorType = behaviorType;
-            DurationMinutes = duration.TotalMinutes;
+            DurationMinutes = (int)Math.Round(duration.TotalMinutes, MidpointRounding.AwayFromZero);
             CoinsEarned = coins;
             Notes = notes;
 
@@ -215,7 +217,7 @@ namespace TimeTrackingDomain.Entities
             var coinDifference = CoinsEarned - previousCoins;
             if (coinDifference != 0)
             {
-                RaiseDomainEvent(new CoinsEarnedEvent(UserId, coinDifference, Id));
+                // Event handled directly via Integration Service in the application layer
             }
         }
 
@@ -251,12 +253,12 @@ namespace TimeTrackingDomain.Entities
             var coins = duration.CalculateCoins(BehaviorType);
 
             EndTime = endTime;
-            DurationMinutes = duration.TotalMinutes;
+            DurationMinutes = (int)Math.Round(duration.TotalMinutes, MidpointRounding.AwayFromZero);
             CoinsEarned = coins;
             IsActive = false;
 
             MarkAsUpdated();
-            RaiseDomainEvent(new TimeSessionEndedEvent(Id, UserId, coins, duration.TotalMinutes));
+            RaiseDomainEvent(new TimeSessionEndedEvent(Id, UserId, coins, DurationMinutes));
 
             if (coins != 0)
                 RaiseDomainEvent(new CoinsEarnedEvent(UserId, coins, Id));

@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using Domain.Entities.ValueOpjects;
+using Domain.Entities.ValueObjects;
 
 namespace Application.Services.Abstraction
 {

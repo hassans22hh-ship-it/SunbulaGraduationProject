@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Services.Abstraction;
-using Domain.Entities.ValueOpjects;
+using Domain.Entities.ValueObjects;
 using MediatR;
 
 namespace Application.EventHandlers

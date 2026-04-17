@@ -1,6 +1,6 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 
-namespace Domain.Entities.ValueOpjects
+namespace Domain.Entities.ValueObjects
 {
     public sealed class Email : IEquatable<Email>
     {

@@ -1,11 +1,11 @@
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace UserIdentityInfrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class FixBugs : Migration
+    public partial class addCoincorrect : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

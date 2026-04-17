@@ -11,11 +11,13 @@ namespace TimeTrackingInfrastructure.TimeServices
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly Application.Services.Abstraction.IUserIntegrationService _userIntegrationService;
 
-        public TimeSessionService(IUnitOfWork unitOfWork, IMapper mapper)
+        public TimeSessionService(IUnitOfWork unitOfWork, IMapper mapper, Application.Services.Abstraction.IUserIntegrationService userIntegrationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _userIntegrationService = userIntegrationService;
         }
 
         public async Task<TimeSessionDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -97,6 +99,12 @@ namespace TimeTrackingInfrastructure.TimeServices
             _unitOfWork.TimeSessions.Update(session);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+            // Directly award coins to ensure database update
+            if (session.CoinsEarned > 0)
+            {
+                await _userIntegrationService.AddCoinsAsync(userId, session.CoinsEarned, "Time Tracking Session Reward", cancellationToken);
+            }
+
             return _mapper.Map<TimeSessionDto>(session);
         }
 
@@ -109,6 +117,13 @@ namespace TimeTrackingInfrastructure.TimeServices
             await UpdateDailyTransactionAsync(session, cancellationToken);
             _unitOfWork.TimeSessions.Update(session);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            // Directly award coins
+            if (session.CoinsEarned > 0)
+            {
+                await _userIntegrationService.AddCoinsAsync(userId, session.CoinsEarned, "Time Tracking Session Reward", cancellationToken);
+            }
+
             return _mapper.Map<TimeSessionDto>(session);
         }
 
@@ -151,6 +166,13 @@ namespace TimeTrackingInfrastructure.TimeServices
             await UpdateDailyTransactionAsync(session, cancellationToken);
             await _unitOfWork.TimeSessions.AddAsync(session, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            // Directly award coins
+            if (session.CoinsEarned > 0)
+            {
+                await _userIntegrationService.AddCoinsAsync(userId, session.CoinsEarned, "Manual Focus Session Reward", cancellationToken);
+            }
+
             return _mapper.Map<TimeSessionDto>(session);
         }
 
@@ -176,6 +198,24 @@ namespace TimeTrackingInfrastructure.TimeServices
 
             _unitOfWork.TimeSessions.Update(session);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            // Synchronize coins direct adjustment
+            var coinDiff = session.CoinsEarned - oldCoins;
+            if (coinDiff != 0)
+            {
+                var amount = Math.Abs(coinDiff);
+                if (coinDiff > 0)
+                {
+                    Console.WriteLine($"[SYNC] Awarding {amount} coins for session update (diff: {coinDiff})");
+                    await _userIntegrationService.AddCoinsAsync(userId, amount, "Session Adjustment (Increase)", cancellationToken);
+                }
+                else
+                {
+                    Console.WriteLine($"[SYNC] Deducting {amount} coins for session update (diff: {coinDiff})");
+                    await _userIntegrationService.SpendCoinsAsync(userId, amount, "Session Adjustment (Decrease)", cancellationToken);
+                }
+            }
+
             return _mapper.Map<TimeSessionDto>(session);
         }
 
@@ -196,6 +236,12 @@ namespace TimeTrackingInfrastructure.TimeServices
 
             _unitOfWork.TimeSessions.Delete(session);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            // Revert coins directly
+            if (session.CoinsEarned > 0)
+            {
+                await _userIntegrationService.SpendCoinsAsync(userId, session.CoinsEarned, "Session Deleted", cancellationToken);
+            }
         }
 
         public async Task<TimeSessionDto> RecoverSessionAsync(Guid sessionId, Guid userId, CancellationToken cancellationToken = default)
@@ -210,6 +256,13 @@ namespace TimeTrackingInfrastructure.TimeServices
             await UpdateDailyTransactionAsync(session, cancellationToken);
             _unitOfWork.TimeSessions.Update(session);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            // Award coins directly on recovery
+            if (session.CoinsEarned > 0)
+            {
+                await _userIntegrationService.AddCoinsAsync(userId, session.CoinsEarned, "Recovered Focus Reward", cancellationToken);
+            }
+
             return _mapper.Map<TimeSessionDto>(session);
         }
 

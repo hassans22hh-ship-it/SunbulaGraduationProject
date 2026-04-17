@@ -1,5 +1,5 @@
 using Domain.Entities;
-using Domain.Entities.ValueOpjects;
+using Domain.Entities.ValueObjects;
 using SharedKernel;
 
 namespace Domain.Contracts

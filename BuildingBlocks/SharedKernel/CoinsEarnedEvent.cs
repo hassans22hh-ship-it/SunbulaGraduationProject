@@ -10,7 +10,7 @@ namespace SharedKernel
     /// </summary>
     public record CoinsEarnedEvent(
         Guid UserId,
-        decimal CoinsAmount,
+        int CoinsAmount,
         Guid SessionId) : IDomainEvent
     {
         public Guid Id { get; } = Guid.NewGuid();

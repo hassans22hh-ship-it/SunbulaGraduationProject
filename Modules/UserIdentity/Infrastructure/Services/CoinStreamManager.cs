@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Application.Services.Abstraction;
-using Domain.Entities.ValueOpjects;
+using Domain.Entities.ValueObjects;
 
 namespace UserIdentityInfrastructure.Services
 {

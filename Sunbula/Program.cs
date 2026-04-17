@@ -69,6 +69,22 @@ namespace Sunbula
                             Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
                         ClockSkew = TimeSpan.Zero
                     };
+
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+                            var path = context.HttpContext.Request.Path;
+                            // Check if the query contains an access token and matches the SSE endpoint
+                            if (!string.IsNullOrEmpty(accessToken) && 
+                                path.StartsWithSegments("/api/v1/Authentication/coins/listen"))
+                            {
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
 
             builder.Services.AddAuthorization();

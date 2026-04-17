@@ -4,7 +4,7 @@ using Application.UserDTO;
 using AutoMapper;
 using Domain.Contracts;
 using Domain.Entities;
-using Domain.Entities.ValueOpjects;
+using Domain.Entities.ValueObjects;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Options;

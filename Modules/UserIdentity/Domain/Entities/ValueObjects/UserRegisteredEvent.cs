@@ -1,6 +1,6 @@
-﻿using SharedKernel;
+using SharedKernel;
 
-namespace Domain.Entities.ValueOpjects
+namespace Domain.Entities.ValueObjects
 {
     public sealed record UserRegisteredEvent(Guid UserId, string Email) : IDomainEvent
     {

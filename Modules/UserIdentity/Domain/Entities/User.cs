@@ -1,4 +1,4 @@
-using Domain.Entities.ValueOpjects;
+using Domain.Entities.ValueObjects;
 using Domain.Enums;
 using SharedKernel;
 

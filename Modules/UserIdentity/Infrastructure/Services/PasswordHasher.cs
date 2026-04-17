@@ -1,4 +1,4 @@
-﻿using Application.Services.Abstraction;
+using Application.Services.Abstraction;
 using System.Security.Cryptography;
 
 namespace UserIdentityInfrastructure.Services

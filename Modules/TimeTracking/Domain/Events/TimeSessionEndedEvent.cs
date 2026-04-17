@@ -1,11 +1,11 @@
-﻿using SharedKernel;
+using SharedKernel;
 
 namespace TimeTrackingDomain.Events
 {
     public class TimeSessionEndedEvent(
     Guid SessionId,
     Guid UserId,
-    decimal CoinsEarned,
+    int CoinsEarned,
     int DurationMinutes) : IDomainEvent
     {
         public Guid Id { get; } = Guid.NewGuid();

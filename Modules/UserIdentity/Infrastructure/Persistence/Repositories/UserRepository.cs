@@ -1,6 +1,6 @@
 using Domain.Contracts;
 using Domain.Entities;
-using Domain.Entities.ValueOpjects;
+using Domain.Entities.ValueObjects;
 using Infrastructure.Persistence.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;

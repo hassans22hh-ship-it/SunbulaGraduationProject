@@ -1,4 +1,4 @@
-﻿namespace Application.UserDTO
+namespace Application.UserDTO
 {
     public sealed  record AuthREsponseDto
     {

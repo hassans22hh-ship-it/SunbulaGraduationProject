@@ -1,4 +1,4 @@
-﻿using SharedKernel;
+using SharedKernel;
 
 namespace TimeTrackingDomain.Entities
 {
@@ -22,7 +22,7 @@ namespace TimeTrackingDomain.Entities
         public Guid UserId { get; private set; }
         public DateOnly Date { get; private set; }
         public int TotalMinutes { get; private set; }
-        public decimal TotalCoins { get; private set; }
+        public int TotalCoins { get; private set; }
         public int SessionCount { get; private set; }
 
         // ═══════════════════════════════════════════════════════════════
@@ -47,7 +47,7 @@ namespace TimeTrackingDomain.Entities
         /// <summary>
         /// Adds a completed session's data to this daily summary.
         /// </summary>
-        public void AddSession(int durationMinutes, decimal coinsEarned)
+        public void AddSession(int durationMinutes, int coinsEarned)
         {
             if (durationMinutes < 0)
                 throw new ArgumentException("Duration cannot be negative.", nameof(durationMinutes));
@@ -63,7 +63,7 @@ namespace TimeTrackingDomain.Entities
         /// Removes a session's contribution from this daily summary.
         /// Called when a session is deleted.
         /// </summary>
-        public void RemoveSession(int durationMinutes, decimal coinsEarned)
+        public void RemoveSession(int durationMinutes, int coinsEarned)
         {
             TotalMinutes = Math.Max(0, TotalMinutes - durationMinutes);
             TotalCoins -= coinsEarned;
@@ -75,7 +75,7 @@ namespace TimeTrackingDomain.Entities
         /// <summary>
         /// Replaces old session data with updated session data.
         /// </summary>
-        public void UpdateSession(int oldDurationMinutes, decimal oldCoins, int newDurationMinutes, decimal newCoins)
+        public void UpdateSession(int oldDurationMinutes, int oldCoins, int newDurationMinutes, int newCoins)
         {
             RemoveSession(oldDurationMinutes, oldCoins);
             AddSession(newDurationMinutes, newCoins);

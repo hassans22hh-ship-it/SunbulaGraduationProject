@@ -109,7 +109,14 @@ namespace PlantInfrastructure.StorePlantServices
             if (userPlant.UserId != userId)
                 throw new UnauthorizedAccessException("You do not own this plant.");
 
-            // Domain method handles stage advancement logic
+            // 1. Business Rule: Check if user has sufficient coins for watering
+            var user = await _userRepository.GetByIdAsync(userId, cancellationToken)
+                ?? throw new UnauthorizedAccessException("User records not found.");
+
+            if (user.CoinBalance < coins)
+                throw new InsufficientCoinsException(coins, user.CoinBalance);
+
+            // 2. Perform growth logic - Domain method now raises PlantWateredEvent for deduction
             userPlant.AddGrowthCoins(coins);
 
             _unitOfWork.UserPlants.Update(userPlant);

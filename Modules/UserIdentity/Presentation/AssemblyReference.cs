@@ -1,4 +1,4 @@
-﻿namespace PresentationIdentity
+namespace PresentationIdentity
 {
     public static class AssemblyReference
     {

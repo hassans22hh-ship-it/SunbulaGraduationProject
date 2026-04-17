@@ -60,7 +60,7 @@ namespace PlantDomain.Entities
 
         /// <summary>
         /// Adds growth coins and advances the growth stage if threshold is reached.
-        /// Business rule: every 10,000 additional coins → plant grows one stage.
+        /// Business rule: every 100 additional coins → plant grows one stage.
         /// </summary>
         public void AddGrowthCoins(int coins)
         {
@@ -71,7 +71,10 @@ namespace PlantDomain.Entities
 
             StageCoinsAccumulated += coins;
 
-            const int CoinsPerStage = 10_000;
+            // Raise domain event to trigger coin deduction in Identity/Finance module
+            RaiseDomainEvent(new PlantWateredEvent(Id, UserId, coins));
+
+            const int CoinsPerStage = 100; // Lowered from 10,000 for testing/UX
             if (StageCoinsAccumulated >= CoinsPerStage)
             {
                 StageCoinsAccumulated -= CoinsPerStage;

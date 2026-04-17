@@ -1,7 +1,7 @@
 using Application.Options;
 using Application.Services.Abstraction;
 using Domain.Entities;
-using Domain.Entities.ValueOpjects;
+using Domain.Entities.ValueObjects;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;

@@ -1,4 +1,4 @@
-﻿namespace Application.Services.Abstraction
+namespace Application.Services.Abstraction
 {
     public interface IPasswordHasher
     {

@@ -1,4 +1,4 @@
-﻿using Domain.Contracts;
+using Domain.Contracts;
 using Infrastructure.Persistence.Data;
 using Microsoft.EntityFrameworkCore.Storage;
 
