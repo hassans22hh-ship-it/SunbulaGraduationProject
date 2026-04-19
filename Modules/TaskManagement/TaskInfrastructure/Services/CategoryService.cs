@@ -83,11 +83,13 @@ namespace TaskInfrastructure.Services
 
         private static CategoryDto MapToDto(Category category)
         {
+
+            if (category == null) return null;
             return new CategoryDto
             {
                 Id = category.Id,
                 Name = category.Name,
-                Color = category.Color.Value,
+                Color = category.Color != null ? category.Color.Value: "#000000",
                 CreatedAt = category.CreatedAt,
                 TaskCount = category.GetTaskCount()
             };
