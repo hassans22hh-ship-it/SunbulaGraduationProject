@@ -79,6 +79,18 @@ namespace Domain.Entities
 
             return user;
         }
+
+        public static User CreateAdmin(Email email, string firstName, string lastName, string passwordHash, string? phoneNumber)
+        {
+            ValidateName(firstName, nameof(firstName));
+            ValidateName(lastName, nameof(lastName));
+
+            var user = new User(Guid.NewGuid(), email, firstName, passwordHash, lastName, phoneNumber, UserRole.Admin);
+
+            user.RaiseDomainEvent(new UserRegisteredEvent(user.Id, user.Email.Value));
+
+            return user;
+        }
         // Domain methods
         public void UpdateProfile(string firstName, string lastName, string? phoneNumber)
         {

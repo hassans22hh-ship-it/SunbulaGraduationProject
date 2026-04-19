@@ -1,0 +1,100 @@
+[
+  {
+    "name": "Basil",
+    "botanicName": "Ocimum basilicum",
+    "description": "An aromatic herb very easy to care for. Perfect for beginners.",
+    "imageUrl": "https://www.veggycation.com.au/siteassets/veggycationvegetable/basil.jpg",
+    "price": 1,
+    "level": 1,
+    "decoration": "Herb"
+  },
+  {
+    "name": "Chili Pepper",
+    "botanicName": "Capsicum annuum",
+    "description": "A small, productive plant that adds a spicy touch to your garden.",
+    "imageUrl": "https://img.favpng.com/1/11/23/clip-art-peppers-bell-pepper-openclipart-chili-pepper-png-favpng-EVT770ZFY3QKPJUWy52ZS7YuF.jpg",
+    "price": 5,
+    "level": 1,
+    "decoration": "Vegetable"
+  },
+  {
+    "name": "Lettuce",
+    "botanicName": "Lactuca sativa",
+    "description": "A fast-growing leafy green that thrives in cooler weather.",
+    "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQh4PAi0EIrs52JREBQtl9UKjne1B4G_bLodw&s",
+    "price": 8,
+    "level": 1,
+    "decoration": "Vegetable"
+  },
+ ,
+  {
+    "name": "Bell Pepper",
+    "botanicName": "Capsicum annuum Group",
+    "description": "Colorful fruits rich in vitamins and great for cooking.",
+    "imageUrl": "https://img.favpng.com/1/11/23/clip-art-peppers-bell-pepper-openclipart-chili-pepper-png-favpng-EVT770ZFY3QKPJUWy52ZS7YuF.jpg",
+    "price": 15,
+    "level": 1,
+    "decoration": "Vegetable"
+  },
+  
+  {
+    "name": "Spinach",
+    "botanicName": "Spinacia oleracea",
+    "description": "A nutrient-dense leafy green that grows in dense rosettes.",
+    "imageUrl": "https://www.veggycation.com.au/siteassets/veggycationvegetable/spinach.jpg",
+    "price": 22,
+    "level": 1,
+    "decoration": "Vegetable"
+  },
+  
+  {
+    "name": "Tomato",
+    "botanicName": "Solanum lycopersicum",
+    "description": "A backyard staple that produces juicy red fruits.",
+    "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKaW-YaB5sHCN2ORu-9RmnjCFM-AbSaz_bJw&s",
+    "price": 35,
+    "level": 2,
+    "decoration": "Vegetable"
+  },
+ 
+  
+
+  {
+    "name": "Broccoli",
+    "botanicName": "Brassica oleracea italica",
+    "description": "A nutritious tree-like vegetable packed with vitamins and antioxidants.",
+    "imageUrl": "https://www.veggycation.com.au/siteassets/veggycationvegetable/broccoli.jpg",
+    "price": 55,
+    "level": 2,
+    "decoration": "Vegetable"
+  },
+  
+  {
+    "name": "Onion",
+    "botanicName": "Allium cepa",
+    "description": "A layered bulb vegetable essential to cuisines around the world.",
+    "imageUrl": "https://www.veggycation.com.au/siteassets/veggycationvegetable/onion.jpg",
+    "price": 65,
+    "level": 3,
+    "decoration": "Root"
+  },
+  {
+    "name": "Beetroot",
+    "botanicName": "Beta vulgaris",
+    "description": "A root vegetable rich in iron and striking deep red color.",
+    "imageUrl": "https://www.veggycation.com.au/siteassets/veggycationvegetable/beetroot.jpg",
+    "price": 70,
+    "level": 3,
+    "decoration": "Root"
+  },
+ 
+  {
+    "name": "Asparagus",
+    "botanicName": "Asparagus officinalis",
+    "description": "A perennial vegetable that rewards patience with years of harvests.",
+    "imageUrl": "https://www.veggycation.com.au/siteassets/veggycationvegetable/asparagus.jpg",
+    "price": 150,
+    "level": 4,
+    "decoration": "Vegetable"
+  }
+]

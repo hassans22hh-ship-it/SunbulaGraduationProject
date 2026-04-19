@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlantInfrastructure.Persistence.Data;
 
@@ -11,9 +12,11 @@ using PlantInfrastructure.Persistence.Data;
 namespace PlantInfrastructure.Persistence.Migrations
 {
     [DbContext(typeof(StorePlantDbContext))]
-    partial class StorePlantDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260419131521_addPlantvalidate")]
+    partial class addPlantvalidate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -83,7 +86,8 @@ namespace PlantInfrastructure.Persistence.Migrations
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<bool>("IsAvailable")
                         .ValueGeneratedOnAdd()

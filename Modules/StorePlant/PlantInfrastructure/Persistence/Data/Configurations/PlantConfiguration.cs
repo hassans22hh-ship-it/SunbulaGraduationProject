@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PlantDomain.Entities;
 
@@ -27,7 +27,7 @@ namespace PlantInfrastructure.Persistence.Data.Configurations
 
             builder.Property(p => p.ImageUrl)
                 .IsRequired()
-                .HasMaxLength(500);
+                .HasColumnType("nvarchar(max)");
 
             builder.Property(p => p.Price)
                 .IsRequired();

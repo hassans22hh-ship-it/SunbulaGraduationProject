@@ -142,6 +142,7 @@ namespace Sunbula
             // DATABASE MIGRATIONS
             // ═══════════════════════════════════════════════════════════
             await app.Services.MigrateDatabasesAsync();
+            await app.Services.SeedDataAsync();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
