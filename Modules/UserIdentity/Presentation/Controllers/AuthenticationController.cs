@@ -97,9 +97,9 @@ namespace PresentationIdentity.Controllers
                 return BadRequest("Token is required.");
 
             await _authenticationService.ConfirmEmailAsync(token, cancellationToken);
-            
+
             // Redirect to frontend dashboard or a success page
-            return Redirect("http://localhost:4200/dashboard?verified=true");
+            return Redirect("https://sunbula-front-end-474s.vercel.app/tasks");
         }
 
         /// <summary>
@@ -198,25 +198,25 @@ namespace PresentationIdentity.Controllers
             await Response.Body.FlushAsync(cancellationToken);
 
             var channel = coinStreamManager.Subscribe(userId);
-            
+
             try
             {
-                var jsonOptions = new System.Text.Json.JsonSerializerOptions 
-                { 
-                    PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase 
+                var jsonOptions = new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
                 };
 
                 await foreach (var coinEvent in channel.Reader.ReadAllAsync(cancellationToken))
                 {
-                    var payload = new 
-                    { 
-                        coinEvent.NewBalance, 
-                        coinEvent.Change, 
-                        coinEvent.Reason, 
-                        coinEvent.PreviousBalance, 
-                        coinEvent.UserId 
+                    var payload = new
+                    {
+                        coinEvent.NewBalance,
+                        coinEvent.Change,
+                        coinEvent.Reason,
+                        coinEvent.PreviousBalance,
+                        coinEvent.UserId
                     };
-                    
+
                     var dataLine = $"data: {System.Text.Json.JsonSerializer.Serialize(payload, jsonOptions)}\n\n";
                     await Response.WriteAsync(dataLine, cancellationToken);
                     await Response.Body.FlushAsync(cancellationToken);

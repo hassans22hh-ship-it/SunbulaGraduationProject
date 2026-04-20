@@ -96,9 +96,12 @@ namespace Sunbula
             {
                 options.AddPolicy("AllowFrontend", policy =>
                 {
-                    policy.WithOrigins("http://localhost:4200")
-                          .AllowAnyMethod()
+                     policy.WithOrigins("https://sunbula-front-end-474s.vercel.app")
+                           .AllowAnyMethod()
                           .AllowAnyHeader();
+
+                    // policy.WithOrigins("http:\//localhost:4200")
+
                 });
             });
 
