@@ -363,7 +363,6 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /Sunbula/appsettings.json
-/Sunbula/Properties/launchSettings.json
 
 # ═══════════════════════════════════════════════════════════════
 # PROJECT-SPECIFIC: Sunbula Graduation Project
