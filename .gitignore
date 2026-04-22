@@ -364,3 +364,36 @@ MigrationBackup/
 FodyWeavers.xsd
 /Sunbula/appsettings.json
 /Sunbula/Properties/launchSettings.json
+
+# ═══════════════════════════════════════════════════════════════
+# PROJECT-SPECIFIC: Sunbula Graduation Project
+# ═══════════════════════════════════════════════════════════════
+
+# Legacy root-level folders (pre-modular architecture, now under Modules/)
+/Core/
+/Infrastructure/
+/Persentation/
+/Service/
+/Service.Abstraction/
+/Shared/
+/TaskInfrastructure/
+/TaskManagement/
+/TaskManagmentService/
+
+# Build artifacts that leaked to root
+/bin/
+/obj/
+/Modules/Infrastructure/bin/
+/Modules/Infrastructure/obj/
+
+# Debug/utility files — don't track
+build_errors.txt
+hash_gen.cs
+
+# IDE & tooling
+.vscode/
+*.DotSettings
+
+# Sensitive configuration (already covered above, reinforcing)
+**/appsettings.Development.json
+**/appsettings.Production.json
