@@ -70,8 +70,10 @@ namespace Sunbula
                 var passwordHasher = services.GetRequiredService<IPasswordHasher>();
 
                 var adminEmail = "admin@sunbula.com";
-                var adminUser = await identityContext.Users.FirstOrDefaultAsync(u => u.Email.Value == adminEmail);
 
+                var adminUser = identityContext.Users
+                  .AsEnumerable()
+                  .FirstOrDefault(u => u.Email.Value == adminEmail);
                 if (adminUser == null)
                 {
                     logger.LogInformation("Creating default admin user...");

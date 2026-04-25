@@ -151,7 +151,10 @@ namespace Sunbula
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c =>
+                {
+                    c.RoutePrefix = string.Empty;
+                });
             }
 
             app.UseExceptionHandler();
