@@ -73,7 +73,7 @@ namespace TimeTrackingInfrastructure.Persistence.Repositories
         {
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
             var recentDays = await _dbSet
-                .Where(e => e.UserId == userId && !e.IsDeleted && e.TotalMinutes >= 1200 && e.Date <= today)
+                .Where(e => e.UserId == userId && !e.IsDeleted && e.TotalMinutes >= 30 && e.Date <= today)
                 .OrderByDescending(e => e.Date).Select(e => e.Date).Take(60)
                 .ToListAsync(cancellationToken);
 

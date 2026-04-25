@@ -12,7 +12,7 @@ namespace TimeTrackingApplication.TimeDtos
         public required DateTime StartTime { get; init; }
         public DateTime? EndTime { get; init; }
         public required decimal DurationMinutes { get; init; }
-        public required decimal CoinsEarned { get; init; }
+        public required int CoinsEarned { get; init; }
         public required BehaviorType BehaviorType { get; init; }
         public required string BehaviorTypeName { get; init; }
         public required bool IsActive { get; init; }

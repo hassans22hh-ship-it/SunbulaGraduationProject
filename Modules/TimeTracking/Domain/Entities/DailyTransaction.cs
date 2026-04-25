@@ -2,7 +2,7 @@ using SharedKernel;
 
 namespace TimeTrackingDomain.Entities
 {
-    public class DailyTransaction:BaseEntity
+    public class DailyTransaction : BaseEntity
     {
         private DailyTransaction() { }
 
@@ -84,6 +84,6 @@ namespace TimeTrackingDomain.Entities
         /// <summary>
         /// Checks if this day qualifies for streak (20+ hours tracked).
         /// </summary>
-        public bool QualifiesForStreak() => TotalMinutes >= 1200; // 20 hours
+        public bool QualifiesForStreak() => TotalMinutes >= 1200; // 30 minutes minimum
     }
 }

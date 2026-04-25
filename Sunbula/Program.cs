@@ -77,7 +77,7 @@ namespace Sunbula
                             var accessToken = context.Request.Query["access_token"];
                             var path = context.HttpContext.Request.Path;
                             // Check if the query contains an access token and matches the SSE endpoint
-                            if (!string.IsNullOrEmpty(accessToken) && 
+                            if (!string.IsNullOrEmpty(accessToken) &&
                                 path.StartsWithSegments("/api/v1/Authentication/coins/listen"))
                             {
                                 context.Token = accessToken;
@@ -96,9 +96,9 @@ namespace Sunbula
             {
                 options.AddPolicy("AllowFrontend", policy =>
                 {
-                     policy.WithOrigins("http://localhost:4200")
-                           .AllowAnyMethod()
-                          .AllowAnyHeader();
+                    policy.WithOrigins("http://localhost:4200")
+                          .AllowAnyMethod()
+                         .AllowAnyHeader();
 
                     // policy.WithOrigins("http:\//localhost:4200")
 
@@ -108,7 +108,7 @@ namespace Sunbula
             // ═══════════════════════════════════════════════════════════
             // MEDIATR
             // ═══════════════════════════════════════════════════════════
-            builder.Services.AddMediatR(cfg => 
+            builder.Services.AddMediatR(cfg =>
             {
                 // Core and Module Application Assemblies
                 cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
