@@ -23,7 +23,7 @@ namespace TaskInfrastructure.Persistence.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.HasDefaultSchema("TaskManagement");
+            modelBuilder.HasDefaultSchema("task");
             modelBuilder.Ignore<TaskDomain.Entities.TaskManagement.ValueObjects.TaskColor>();
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(TaskManagementDbContext).Assembly);
             base.OnModelCreating(modelBuilder);
@@ -66,7 +66,7 @@ namespace TaskInfrastructure.Persistence.Data
 
             var optionsBuilder = new DbContextOptionsBuilder<TaskManagementDbContext>();
 
-            var connectionString = configuration.GetConnectionString("TaskManagementDb");
+            var connectionString = configuration.GetConnectionString("SunbulaDb");
 
             optionsBuilder.UseSqlServer(connectionString);
 

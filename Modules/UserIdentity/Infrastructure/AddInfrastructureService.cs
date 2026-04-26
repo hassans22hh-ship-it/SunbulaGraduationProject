@@ -16,7 +16,7 @@ namespace Infrastructure
         {
             // Register DbContext
             services.AddDbContext<Persistence.Data.UserIdentityDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("UserIdentityDbContext")));
+                options.UseSqlServer(configuration.GetConnectionString("SunbulaDb")));
             // Register repositories, services, etc. here
             // e.g. services.AddScoped<IUserRepository, UserRepository>();
             // AutoMapper

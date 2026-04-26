@@ -12,14 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DebtInfrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DebtDbContext))]
-    [Migration("20260220115126_InititalCreate")]
-    partial class InititalCreate
+    [Migration("20260426092013_InitialConsolidated")]
+    partial class InitialConsolidated
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("debt")
                 .HasAnnotation("ProductVersion", "10.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
@@ -28,30 +29,45 @@ namespace DebtInfrastructure.Persistence.Migrations
             modelBuilder.Entity("DebtDomain.Entities.Debt", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("Amount");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreditorName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("DebtType")
-                        .HasColumnType("int");
+                    b.Property<string>("DebtType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<bool>("IsPaid")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal>("RemainingAmount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("RemainingAmount");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -61,7 +77,22 @@ namespace DebtInfrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Debts");
+                    b.HasIndex("DueDate")
+                        .HasDatabaseName("IX_Debts_DueDate");
+
+                    b.HasIndex("IsPaid")
+                        .HasDatabaseName("IX_Debts_IsPaid");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_Debts_UserId");
+
+                    b.HasIndex("UserId", "DebtType")
+                        .HasDatabaseName("IX_Debts_UserId_DebtType");
+
+                    b.HasIndex("UserId", "IsPaid", "DueDate")
+                        .HasDatabaseName("IX_Debts_UserId_IsPaid_DueDate");
+
+                    b.ToTable("Debts", "debt");
                 });
 
             modelBuilder.Entity("DebtDomain.Entities.DebtPayment", b =>
@@ -70,7 +101,8 @@ namespace DebtInfrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("Amount");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");

@@ -17,7 +17,7 @@ namespace TaskInfrastructure.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("TaskManagement")
+                .HasDefaultSchema("task")
                 .HasAnnotation("ProductVersion", "10.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
@@ -165,7 +165,7 @@ namespace TaskInfrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", "TaskManagement");
+                    b.ToTable("Categories", "task");
                 });
 
             modelBuilder.Entity("TaskDomain.Entities.TaskManagement.TaskCategory", b =>

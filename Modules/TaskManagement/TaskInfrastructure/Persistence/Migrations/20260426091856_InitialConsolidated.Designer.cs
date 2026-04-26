@@ -12,15 +12,15 @@ using TaskInfrastructure.Persistence.Data;
 namespace TaskInfrastructure.Persistence.Migrations
 {
     [DbContext(typeof(TaskManagementDbContext))]
-    [Migration("20260220115140_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260426091856_InitialConsolidated")]
+    partial class InitialConsolidated
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("TaskManagement")
+                .HasDefaultSchema("task")
                 .HasAnnotation("ProductVersion", "10.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
@@ -67,7 +67,7 @@ namespace TaskInfrastructure.Persistence.Migrations
                     b.ToTable("Folders", "TaskManagement");
                 });
 
-            modelBuilder.Entity("Domain.Entities.TaskManagement.Task", b =>
+            modelBuilder.Entity("Domain.Entities.TaskManagement.TaskItem", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
@@ -139,7 +139,6 @@ namespace TaskInfrastructure.Persistence.Migrations
                         .HasDatabaseName("IX_Tasks_UserId");
 
                     b.HasIndex("UserId", "Title")
-                        .IsUnique()
                         .HasDatabaseName("IX_Tasks_UserId_Title");
 
                     b.ToTable("Tasks", "TaskManagement");
@@ -169,7 +168,7 @@ namespace TaskInfrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", "TaskManagement");
+                    b.ToTable("Categories", "task");
                 });
 
             modelBuilder.Entity("TaskDomain.Entities.TaskManagement.TaskCategory", b =>
@@ -209,7 +208,7 @@ namespace TaskInfrastructure.Persistence.Migrations
                     b.ToTable("TaskCategories", "TaskManagement");
                 });
 
-            modelBuilder.Entity("Domain.Entities.TaskManagement.Task", b =>
+            modelBuilder.Entity("Domain.Entities.TaskManagement.TaskItem", b =>
                 {
                     b.HasOne("Domain.Entities.TaskManagement.Folder", "Folder")
                         .WithMany("Tasks")
@@ -227,7 +226,7 @@ namespace TaskInfrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.TaskManagement.Task", "Task")
+                    b.HasOne("Domain.Entities.TaskManagement.TaskItem", "Task")
                         .WithMany("TaskCategories")
                         .HasForeignKey("TaskId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -243,7 +242,7 @@ namespace TaskInfrastructure.Persistence.Migrations
                     b.Navigation("Tasks");
                 });
 
-            modelBuilder.Entity("Domain.Entities.TaskManagement.Task", b =>
+            modelBuilder.Entity("Domain.Entities.TaskManagement.TaskItem", b =>
                 {
                     b.Navigation("TaskCategories");
                 });

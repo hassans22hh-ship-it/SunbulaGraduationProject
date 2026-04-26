@@ -1,4 +1,4 @@
-﻿using FinanceApplication.FinanceServiceAbs;
+using FinanceApplication.FinanceServiceAbs;
 using FinanceApplication.Mapping;
 using FinanceDomain.contracts;
 using FinanceInfrastructure.financeSService;
@@ -19,7 +19,7 @@ namespace FinanceInfrastructure
             // ── DbContext ────────────────────────────────────────────────────────
             services.AddDbContext<FinanceDbContext>(options =>
                 options.UseSqlServer(
-                    configuration.GetConnectionString("FinanceDb"),
+                    configuration.GetConnectionString("SunbulaDb"),
                     b => b.MigrationsAssembly(typeof(FinanceDbContext).Assembly.FullName)));
 
             // ── Repositories & UoW ──────────────────────────────────────────────
