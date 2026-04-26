@@ -99,7 +99,7 @@ namespace PresentationIdentity.Controllers
             await _authenticationService.ConfirmEmailAsync(token, cancellationToken);
 
             // Redirect to frontend dashboard or a success page
-            return Redirect("https://sunbula-front-end-474s.vercel.app/tasks");
+            return Redirect("http://localhost:4200/tasks");
         }
 
         /// <summary>
