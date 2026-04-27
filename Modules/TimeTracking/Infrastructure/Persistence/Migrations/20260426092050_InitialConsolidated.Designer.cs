@@ -12,14 +12,15 @@ using TimeTrackingInfrastructure.Persistence.Data;
 namespace TimeTrackingInfrastructure.Persistence.Migrations
 {
     [DbContext(typeof(TimeTrackingDbContext))]
-    [Migration("20260326230212_AddPauseFields")]
-    partial class AddPauseFields
+    [Migration("20260426092050_InitialConsolidated")]
+    partial class InitialConsolidated
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("tracking")
                 .HasAnnotation("ProductVersion", "10.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
@@ -46,11 +47,11 @@ namespace TimeTrackingInfrastructure.Persistence.Migrations
                         .HasColumnType("int")
                         .HasDefaultValue(0);
 
-                    b.Property<decimal>("TotalCoins")
+                    b.Property<int>("TotalCoins")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)")
-                        .HasDefaultValue(0m);
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
 
                     b.Property<int>("TotalMinutes")
                         .ValueGeneratedOnAdd()
@@ -84,11 +85,11 @@ namespace TimeTrackingInfrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("CoinsEarned")
+                    b.Property<int>("CoinsEarned")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)")
-                        .HasDefaultValue(0m);
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");

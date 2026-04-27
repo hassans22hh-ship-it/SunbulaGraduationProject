@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TimeTrackingInfrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreates : Migration
+    public partial class InitialConsolidated : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -23,7 +23,7 @@ namespace TimeTrackingInfrastructure.Persistence.Migrations
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     TotalMinutes = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
-                    TotalCoins = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false, defaultValue: 0m),
+                    TotalCoins = table.Column<int>(type: "int", precision: 10, scale: 2, nullable: false, defaultValue: 0),
                     SessionCount = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -45,11 +45,13 @@ namespace TimeTrackingInfrastructure.Persistence.Migrations
                     StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DurationMinutes = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
-                    CoinsEarned = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false, defaultValue: 0m),
+                    CoinsEarned = table.Column<int>(type: "int", precision: 10, scale: 2, nullable: false, defaultValue: 0),
                     BehaviorType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     ManuallyAdded = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     Notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    PausedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    TotalPausedDuration = table.Column<TimeSpan>(type: "time", nullable: false, defaultValue: new TimeSpan(0, 0, 0, 0, 0)),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)

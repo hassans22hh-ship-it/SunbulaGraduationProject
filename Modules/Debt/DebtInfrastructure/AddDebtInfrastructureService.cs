@@ -18,7 +18,7 @@ namespace DebtInfrastructure
             // DbContext
             services.AddDbContext<DebtDbContext>(options =>
                 options.UseSqlServer(
-                    configuration.GetConnectionString("DebtDb"),
+                    configuration.GetConnectionString("SunbulaDb"),
                     b => b.MigrationsAssembly(typeof(DebtDbContext).Assembly.FullName)));
 
             // Unit of Work

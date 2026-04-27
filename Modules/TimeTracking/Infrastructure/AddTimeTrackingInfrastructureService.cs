@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TimeTrackingApplication.Mappings;
@@ -19,7 +19,7 @@ namespace TimeTrackingInfrastructure
             // ── DbContext ──────────────────────────────────────────────
             services.AddDbContext<TimeTrackingDbContext>(options =>
                 options.UseSqlServer(
-                    configuration.GetConnectionString("TimeTrackingDb"),
+                    configuration.GetConnectionString("SunbulaDb"),
                     b => b.MigrationsAssembly(typeof(TimeTrackingDbContext).Assembly.FullName)));
 
             //// ── Unit of Work ───────────────────────────────────────────

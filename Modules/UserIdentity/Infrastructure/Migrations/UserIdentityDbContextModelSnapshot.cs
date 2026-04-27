@@ -17,6 +17,7 @@ namespace UserIdentityInfrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("identity")
                 .HasAnnotation("ProductVersion", "10.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
@@ -221,7 +222,7 @@ namespace UserIdentityInfrastructure.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("UserSettings");
+                    b.ToTable("UserSettings", "identity");
                 });
 
             modelBuilder.Entity("Domain.Entities.UserRefreshToken", b =>

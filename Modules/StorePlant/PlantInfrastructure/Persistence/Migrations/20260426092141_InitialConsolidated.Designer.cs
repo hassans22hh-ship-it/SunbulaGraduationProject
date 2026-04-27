@@ -12,14 +12,15 @@ using PlantInfrastructure.Persistence.Data;
 namespace PlantInfrastructure.Persistence.Migrations
 {
     [DbContext(typeof(StorePlantDbContext))]
-    [Migration("20260222063836_IntialCreate")]
-    partial class IntialCreate
+    [Migration("20260426092141_InitialConsolidated")]
+    partial class InitialConsolidated
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("plant")
                 .HasAnnotation("ProductVersion", "10.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
@@ -86,8 +87,7 @@ namespace PlantInfrastructure.Persistence.Migrations
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsAvailable")
                         .ValueGeneratedOnAdd()

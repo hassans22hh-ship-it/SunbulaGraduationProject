@@ -12,14 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FinanceInfrastructure.Persistence.Migrations
 {
     [DbContext(typeof(FinanceDbContext))]
-    [Migration("20260415131544_AddIconFinanceTransiction")]
-    partial class AddIconFinanceTransiction
+    [Migration("20260426091941_InitialConsolidated")]
+    partial class InitialConsolidated
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("finance")
                 .HasAnnotation("ProductVersion", "10.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 

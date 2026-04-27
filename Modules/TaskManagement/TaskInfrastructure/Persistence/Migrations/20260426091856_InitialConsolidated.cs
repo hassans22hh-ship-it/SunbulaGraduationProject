@@ -6,17 +6,20 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TaskInfrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialConsolidated : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.EnsureSchema(
+                name: "task");
+
+            migrationBuilder.EnsureSchema(
                 name: "TaskManagement");
 
             migrationBuilder.CreateTable(
                 name: "Categories",
-                schema: "TaskManagement",
+                schema: "task",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -97,7 +100,7 @@ namespace TaskInfrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "FK_TaskCategories_Categories_CategoryId",
                         column: x => x.CategoryId,
-                        principalSchema: "TaskManagement",
+                        principalSchema: "task",
                         principalTable: "Categories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -182,8 +185,7 @@ namespace TaskInfrastructure.Persistence.Migrations
                 name: "IX_Tasks_UserId_Title",
                 schema: "TaskManagement",
                 table: "Tasks",
-                columns: new[] { "UserId", "Title" },
-                unique: true);
+                columns: new[] { "UserId", "Title" });
         }
 
         /// <inheritdoc />
@@ -195,7 +197,7 @@ namespace TaskInfrastructure.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "Categories",
-                schema: "TaskManagement");
+                schema: "task");
 
             migrationBuilder.DropTable(
                 name: "Tasks",
