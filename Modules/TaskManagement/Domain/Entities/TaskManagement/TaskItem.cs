@@ -104,7 +104,7 @@ namespace Domain.Entities.TaskManagement
         public void AddCategory(Guid categoryId)
         {
             if (_taskCategories.Any(tc => tc.CategoryId == categoryId))
-                throw new InvalidOperationException("Category already assigned to this task");
+                return;
 
             var taskCategory = TaskCategory.Create(Id, categoryId);
             _taskCategories.Add(taskCategory);

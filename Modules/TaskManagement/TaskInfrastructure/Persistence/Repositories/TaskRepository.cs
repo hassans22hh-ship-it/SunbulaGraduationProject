@@ -8,7 +8,7 @@ using TaskStatus = TaskDomain.Entities.TaskManagement.Enums.TaskStatus;
 
 namespace TaskInfrastructure.Persistence.Repositories
 {
-    public sealed class TaskRepository:ITaskRepository
+    public sealed class TaskRepository : ITaskRepository
     {
         private readonly TaskManagementDbContext _context;
         private readonly DbSet<TaskItem> _dbSet;
@@ -18,10 +18,6 @@ namespace TaskInfrastructure.Persistence.Repositories
             _context = context;
             _dbSet = context.Set<TaskItem>();
         }
-
-        // ═══════════════════════════════════════════════════════════════
-        // IRepository<T> Implementation
-        // ═══════════════════════════════════════════════════════════════
 
         public async Task<TaskItem?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
@@ -37,7 +33,7 @@ namespace TaskInfrastructure.Persistence.Repositories
         }
 
         public async Task<IEnumerable<TaskItem>> FindAsync(
-            Expression<Func<TaskItem ,bool>> predicate,
+            Expression<Func<TaskItem, bool>> predicate,
             CancellationToken cancellationToken = default)
         {
             return await _dbSet
@@ -94,7 +90,7 @@ namespace TaskInfrastructure.Persistence.Repositories
 
         public void Delete(TaskItem entity)
         {
-            entity.MarkAsDeleted(); // Soft delete
+            entity.MarkAsDeleted();
         }
 
         public void DeleteRange(IEnumerable<TaskItem> entities)
@@ -104,10 +100,6 @@ namespace TaskInfrastructure.Persistence.Repositories
                 entity.MarkAsDeleted();
             }
         }
-
-        // ═══════════════════════════════════════════════════════════════
-        // Custom Query Methods - Direct Implementation
-        // ═══════════════════════════════════════════════════════════════
 
         public async Task<TaskItem?> GetByIdWithCategoriesAsync(Guid id, CancellationToken cancellationToken = default)
         {
@@ -126,7 +118,11 @@ namespace TaskInfrastructure.Persistence.Repositories
 
         public async Task<(IEnumerable<TaskItem> Items, int TotalCount)> GetByUserIdAsync(Guid userId, int pageNumber = 1, int pageSize = 10, CancellationToken cancellationToken = default)
         {
-            var query = _dbSet.Where(t => t.UserId == userId && !t.IsDeleted).OrderByDescending(t => t.CreatedAt);
+            var query = _dbSet
+                .Include(t => t.TaskCategories)
+                    .ThenInclude(tc => tc.Category)
+                .Where(t => t.UserId == userId && !t.IsDeleted)
+                .OrderByDescending(t => t.CreatedAt);
             var totalCount = await query.CountAsync(cancellationToken);
             var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
             return (items, totalCount);
@@ -134,7 +130,11 @@ namespace TaskInfrastructure.Persistence.Repositories
 
         public async Task<(IEnumerable<TaskItem> Items, int TotalCount)> GetActiveByUserIdAsync(Guid userId, int pageNumber = 1, int pageSize = 10, CancellationToken cancellationToken = default)
         {
-            var query = _dbSet.Where(t => t.UserId == userId && !t.IsArchived && t.Status == TaskStatus.Active && !t.IsDeleted).OrderBy(t => t.Title);
+            var query = _dbSet
+                .Include(t => t.TaskCategories)
+                    .ThenInclude(tc => tc.Category)
+                .Where(t => t.UserId == userId && !t.IsArchived && t.Status == TaskStatus.Active && !t.IsDeleted)
+                .OrderBy(t => t.Title);
             var totalCount = await query.CountAsync(cancellationToken);
             var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
             return (items, totalCount);
@@ -142,7 +142,11 @@ namespace TaskInfrastructure.Persistence.Repositories
 
         public async Task<(IEnumerable<TaskItem> Items, int TotalCount)> GetArchivedByUserIdAsync(Guid userId, int pageNumber = 1, int pageSize = 10, CancellationToken cancellationToken = default)
         {
-            var query = _dbSet.Where(t => t.UserId == userId && t.IsArchived && !t.IsDeleted).OrderByDescending(t => t.UpdatedAt);
+            var query = _dbSet
+                .Include(t => t.TaskCategories)
+                    .ThenInclude(tc => tc.Category)
+                .Where(t => t.UserId == userId && t.IsArchived && !t.IsDeleted)
+                .OrderByDescending(t => t.UpdatedAt);
             var totalCount = await query.CountAsync(cancellationToken);
             var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
             return (items, totalCount);
@@ -150,7 +154,11 @@ namespace TaskInfrastructure.Persistence.Repositories
 
         public async Task<(IEnumerable<TaskItem> Items, int TotalCount)> GetByFolderIdAsync(Guid folderId, int pageNumber = 1, int pageSize = 10, CancellationToken cancellationToken = default)
         {
-            var query = _dbSet.Where(t => t.FolderId == folderId && !t.IsDeleted).OrderBy(t => t.Title);
+            var query = _dbSet
+                .Include(t => t.TaskCategories)
+                    .ThenInclude(tc => tc.Category)
+                .Where(t => t.FolderId == folderId && !t.IsDeleted)
+                .OrderBy(t => t.Title);
             var totalCount = await query.CountAsync(cancellationToken);
             var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
             return (items, totalCount);
@@ -158,7 +166,11 @@ namespace TaskInfrastructure.Persistence.Repositories
 
         public async Task<(IEnumerable<TaskItem> Items, int TotalCount)> GetByCategoryIdAsync(Guid categoryId, int pageNumber = 1, int pageSize = 10, CancellationToken cancellationToken = default)
         {
-            var query = _dbSet.Where(t => t.TaskCategories.Any(tc => tc.CategoryId == categoryId) && !t.IsDeleted).OrderBy(t => t.Title);
+            var query = _dbSet
+                .Include(t => t.TaskCategories)
+                    .ThenInclude(tc => tc.Category)
+                .Where(t => t.TaskCategories.Any(tc => tc.CategoryId == categoryId) && !t.IsDeleted)
+                .OrderBy(t => t.Title);
             var totalCount = await query.CountAsync(cancellationToken);
             var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
             return (items, totalCount);
@@ -171,7 +183,11 @@ namespace TaskInfrastructure.Persistence.Repositories
             int pageSize = 10,
             CancellationToken cancellationToken = default)
         {
-            var query = _dbSet.Where(t => t.UserId == userId && t.BehaviorType == behaviorType && !t.IsDeleted).OrderBy(t => t.Title);
+            var query = _dbSet
+                .Include(t => t.TaskCategories)
+                    .ThenInclude(tc => tc.Category)
+                .Where(t => t.UserId == userId && t.BehaviorType == behaviorType && !t.IsDeleted)
+                .OrderBy(t => t.Title);
             var totalCount = await query.CountAsync(cancellationToken);
             var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
             return (items, totalCount);
@@ -201,7 +217,11 @@ namespace TaskInfrastructure.Persistence.Repositories
             CancellationToken cancellationToken = default)
         {
             var lowercaseQuery = query.ToLower();
-            var baseQuery = _dbSet.Where(t => t.UserId == userId && !t.IsDeleted && t.Title.ToLower().Contains(lowercaseQuery)).OrderBy(t => t.Title);
+            var baseQuery = _dbSet
+                .Include(t => t.TaskCategories)
+                    .ThenInclude(tc => tc.Category)
+                .Where(t => t.UserId == userId && !t.IsDeleted && t.Title.ToLower().Contains(lowercaseQuery))
+                .OrderBy(t => t.Title);
             var totalCount = await baseQuery.CountAsync(cancellationToken);
             var items = await baseQuery.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
             return (items, totalCount);
@@ -213,6 +233,8 @@ namespace TaskInfrastructure.Persistence.Repositories
             CancellationToken cancellationToken = default)
         {
             return await _dbSet
+                .Include(t => t.TaskCategories)
+                    .ThenInclude(tc => tc.Category)
                 .Where(t => t.UserId == userId && !t.IsDeleted)
                 .OrderByDescending(t => t.UpdatedAt ?? t.CreatedAt)
                 .Take(count)
