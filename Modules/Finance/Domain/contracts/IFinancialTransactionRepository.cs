@@ -15,5 +15,6 @@ namespace FinanceDomain.contracts
         Task<IEnumerable<FinancialTransaction>> GetByCategoryAsync(Guid userId, Guid categoryId, CancellationToken cancellationToken = default);
         Task<decimal> GetTotalByTypeAsync(Guid userId, TransactionType type, DateTime? from = null, DateTime? to = null, CancellationToken cancellationToken = default);
         Task HardDeleteByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+        Task HardDeleteByWalletIdAsync(Guid walletId, CancellationToken cancellationToken = default);
     }
 }

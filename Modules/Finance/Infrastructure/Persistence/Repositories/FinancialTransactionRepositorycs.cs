@@ -129,5 +129,10 @@ namespace FinanceInfrastructure.Persistence.Repositories
         {
             await _dbSet.Where(t => t.UserId == userId).ExecuteDeleteAsync(ct);
         }
+
+        public async Task HardDeleteByWalletIdAsync(Guid walletId, CancellationToken ct = default)
+        {
+            await _dbSet.Where(t => t.WalletId == walletId).ExecuteDeleteAsync(ct);
+        }
     }
 }

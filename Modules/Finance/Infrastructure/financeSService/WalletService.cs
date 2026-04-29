@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FinanceApplication.financedtos;
 using FinanceApplication.FinanceServiceAbs;
 using FinanceDomain.contracts;
@@ -71,8 +71,21 @@ namespace FinanceInfrastructure.financeSService
 
             EnsureOwnership(wallet.UserId, userId);
 
-            _uow.Wallets.Delete(wallet);
-            await _uow.SaveChangesAsync(ct);
+            await _uow.BeginTransactionAsync(ct);
+            try
+            {
+                // Hard-delete all transactions belonging to this wallet
+                await _uow.Transactions.HardDeleteByWalletIdAsync(id, ct);
+
+                _uow.Wallets.Delete(wallet);
+                await _uow.SaveChangesAsync(ct);
+                await _uow.CommitTransactionAsync(ct);
+            }
+            catch
+            {
+                await _uow.RollbackTransactionAsync(ct);
+                throw;
+            }
         }
 
         public async Task<FinanceSummaryDto> GetSummaryAsync(

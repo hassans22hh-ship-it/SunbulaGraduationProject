@@ -177,16 +177,7 @@ namespace DebtInfrastructure.DebtService
             if (debt.UserId != userId)
                 throw new UnauthorizedAccessException("You don't have permission to record payment for this debt");
 
-            // Spend coins BEFORE recording the payment (to validate funds)
-            // Assuming that paying for a debt costs coins equal to the amount.
-            // Converting decimal amount to int... Wait, coins are integers. 
-            // In Sunbula, generally 1 money unit = 1 coin? Yes, amount is decimal, we round/convert to int.
-            var coinsToSpend = (int)Math.Round(dto.Amount);
-            if (coinsToSpend > 0)
-            {
-                await _userIntegrationService.SpendCoinsAsync(userId, coinsToSpend, $"Debt Payment to {debt.CreditorName}", cancellationToken);
-            }
-
+        
             // Use domain method
             var payment = debt.RecordPayment(dto.Amount, dto.PaymentDate, dto.Notes);
 
