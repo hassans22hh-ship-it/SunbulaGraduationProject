@@ -62,5 +62,6 @@ namespace DebtDomain.Contracts
             CancellationToken cancellationToken = default);
 
         Task HardDeleteByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+        Task HardDeletePaymentsByDebtIdAsync(Guid debtId, CancellationToken cancellationToken = default);
     }
 }

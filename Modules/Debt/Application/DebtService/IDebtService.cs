@@ -5,8 +5,8 @@ namespace DebtApplication.DebtService
 {
     public interface IDebtService
     {
-        Task<DebtDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-        Task<DebtWithPaymentsDto> GetByIdWithPaymentsAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<DebtDto> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
+        Task<DebtWithPaymentsDto> GetByIdWithPaymentsAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
         Task<IEnumerable<DebtDto>> GetAllByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<IEnumerable<DebtDto>> GetUnpaidByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<IEnumerable<DebtDto>> GetOverdueByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);

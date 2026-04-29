@@ -197,5 +197,10 @@ namespace DebtInfrastructure.Persistenece.Repositories
         {
             await _dbSet.Where(d => d.UserId == userId).ExecuteDeleteAsync(cancellationToken);
         }
+
+        public async Task HardDeletePaymentsByDebtIdAsync(Guid debtId, CancellationToken cancellationToken = default)
+        {
+            await _context.DebtPayments.Where(p => p.DebtId == debtId).ExecuteDeleteAsync(cancellationToken);
+        }
     }
 }
