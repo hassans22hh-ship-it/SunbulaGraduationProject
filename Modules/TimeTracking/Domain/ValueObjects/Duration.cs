@@ -23,8 +23,8 @@ namespace TimeTrackingDomain.ValueObjects
             if (totalMinutes < 0)
                 throw new ArgumentException("Duration cannot be negative.", nameof(totalMinutes));
 
-            if (totalMinutes > 1440)
-                throw new ArgumentException("Duration cannot exceed 24 hours (1440 minutes).", nameof(totalMinutes));
+            //if (totalMinutes > 1440)
+            //    throw new ArgumentException("Duration cannot exceed 24 hours (1440 minutes).", nameof(totalMinutes));
 
             return new Duration(totalMinutes);
         }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TimeTrackingInfrastructure.Persistence.Data;
 
@@ -11,9 +12,11 @@ using TimeTrackingInfrastructure.Persistence.Data;
 namespace TimeTrackingInfrastructure.Persistence.Migrations
 {
     [DbContext(typeof(TimeTrackingDbContext))]
-    partial class TimeTrackingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260502225936_chageTypeOfDuration")]
+    partial class chageTypeOfDuration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -127,10 +130,10 @@ namespace TimeTrackingInfrastructure.Persistence.Migrations
                     b.Property<Guid>("TaskId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<long>("TotalPausedDuration")
+                    b.Property<TimeSpan>("TotalPausedDuration")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasDefaultValue(0L);
+                        .HasColumnType("time")
+                        .HasDefaultValue(new TimeSpan(0, 0, 0, 0, 0));
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");

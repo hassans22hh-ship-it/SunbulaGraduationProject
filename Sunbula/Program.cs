@@ -72,13 +72,13 @@ namespace Sunbula
 
                     options.Events = new JwtBearerEvents
                     {
+                        // SSE (EventSource) and WebSocket clients cannot set
+                        // custom HTTP headers, so the JWT is passed via query string.
+                        // This hook lets the middleware pick it up.
                         OnMessageReceived = context =>
                         {
                             var accessToken = context.Request.Query["access_token"];
-                            var path = context.HttpContext.Request.Path;
-                            // Check if the query contains an access token and matches the SSE endpoint
-                            if (!string.IsNullOrEmpty(accessToken) &&
-                                path.StartsWithSegments("/api/v1/Authentication/coins/listen"))
+                            if (!string.IsNullOrEmpty(accessToken))
                             {
                                 context.Token = accessToken;
                             }
@@ -153,7 +153,8 @@ namespace Sunbula
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
-                    c.RoutePrefix = string.Empty;
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Sunbula API v1");
+                    c.RoutePrefix = "swagger";
                 });
             }
 
@@ -178,4 +179,4 @@ namespace Sunbula
     }
 }
 
-public partial class Program { }
+
