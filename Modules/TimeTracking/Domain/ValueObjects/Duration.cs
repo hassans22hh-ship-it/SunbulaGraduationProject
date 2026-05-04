@@ -2,7 +2,7 @@ namespace TimeTrackingDomain.ValueObjects
 {
     /// Represents a duration with helpers for display and coin calculation.
 
-    public class Duration: IEquatable<Duration>
+    public class Duration : IEquatable<Duration>
     {
 
         private Duration(double totalMinutes)
@@ -23,8 +23,8 @@ namespace TimeTrackingDomain.ValueObjects
             if (totalMinutes < 0)
                 throw new ArgumentException("Duration cannot be negative.", nameof(totalMinutes));
 
-            if (totalMinutes > 1440)
-                throw new ArgumentException("Duration cannot exceed 24 hours (1440 minutes).", nameof(totalMinutes));
+            //if (totalMinutes > 1440)
+            //    throw new ArgumentException("Duration cannot exceed 24 hours (1440 minutes).", nameof(totalMinutes));
 
             return new Duration(totalMinutes);
         }
@@ -45,14 +45,15 @@ namespace TimeTrackingDomain.ValueObjects
         {
             var coinFactor = behaviorType switch
             {
-                Enums.BehaviorType.Positive => 2.0,
-                Enums.BehaviorType.Neutral => 1.0,
-                Enums.BehaviorType.Rest => 1.0,
-                Enums.BehaviorType.Negative => -1.0,
+                Enums.BehaviorType.Positive => 1.0,     // 2 coins per 60 min
+                Enums.BehaviorType.Neutral => 0.5,   // 120 coins per 60 min
+                Enums.BehaviorType.Rest => 0.25,    // 60 coins per 60 min
+                Enums.BehaviorType.Negative => -1.0,    // -1 coin per 60 min
                 _ => 0.0
             };
 
-            return (int)Math.Round(TotalHours * coinFactor, MidpointRounding.AwayFromZero);
+            var coins = (TotalMinutes / 60.0) * coinFactor;
+            return (int)Math.Round(coins, MidpointRounding.AwayFromZero);
         }
 
         public static implicit operator double(Duration d) => d.TotalMinutes;

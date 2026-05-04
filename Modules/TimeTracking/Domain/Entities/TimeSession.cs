@@ -1,3 +1,4 @@
+
 using SharedKernel;
 using TimeTrackingDomain.Enums;
 using TimeTrackingDomain.Events;
@@ -117,9 +118,7 @@ namespace TimeTrackingDomain.Entities
             session.TotalPausedDuration = TimeSpan.Zero;
 
             session.RaiseDomainEvent(new TimeSessionEndedEvent(session.Id, session.UserId, coins, session.DurationMinutes));
-            
-            if (coins != 0)
-                session.RaiseDomainEvent(new CoinsEarnedEvent(userId, coins, session.Id));
+            // Coins are awarded via IUserIntegrationService.AddCoinsAsync() in the application service layer
 
             return session;
         }
@@ -154,11 +153,7 @@ namespace TimeTrackingDomain.Entities
 
             MarkAsUpdated();
             RaiseDomainEvent(new TimeSessionEndedEvent(Id, UserId, coins, DurationMinutes));
-
-            if (coins != 0)
-            {
-                // Event handled directly via Integration Service in the application layer
-            }
+            // Coins are awarded via IUserIntegrationService.AddCoinsAsync() in the application service layer
         }
 
         public void Pause()
@@ -213,12 +208,8 @@ namespace TimeTrackingDomain.Entities
             Notes = notes;
 
             MarkAsUpdated();
-
-            var coinDifference = CoinsEarned - previousCoins;
-            if (coinDifference != 0)
-            {
-                // Event handled directly via Integration Service in the application layer
-            }
+            // Coin adjustment (if coinDifference != 0) is handled by TimeSessionService.UpdateAsync()
+            // via direct IUserIntegrationService.AddCoinsAsync() / SpendCoinsAsync() calls
         }
 
         /// <summary>
@@ -259,9 +250,7 @@ namespace TimeTrackingDomain.Entities
 
             MarkAsUpdated();
             RaiseDomainEvent(new TimeSessionEndedEvent(Id, UserId, coins, DurationMinutes));
-
-            if (coins != 0)
-                RaiseDomainEvent(new CoinsEarnedEvent(UserId, coins, Id));
+            // Coins are awarded via IUserIntegrationService.AddCoinsAsync() in the application service layer
         }
 
         // ═══════════════════════════════════════════════════════════════

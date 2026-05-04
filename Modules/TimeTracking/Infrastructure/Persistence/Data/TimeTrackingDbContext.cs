@@ -20,6 +20,7 @@ namespace TimeTrackingInfrastructure.Persistence.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.HasDefaultSchema("tracking");
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(TimeTrackingDbContext).Assembly);
 
             // Global soft-delete filter

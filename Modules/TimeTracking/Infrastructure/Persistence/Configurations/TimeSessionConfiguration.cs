@@ -21,7 +21,7 @@ namespace TimeTrackingInfrastructure.Persistence.Configurations
 
             builder.Property(e => e.DurationMinutes)
                 .IsRequired()
-                .HasDefaultValue(0);
+                .HasDefaultValue(0).HasConversion<long>();
 
             builder.Property(e => e.CoinsEarned)
                 .IsRequired()
@@ -46,7 +46,10 @@ namespace TimeTrackingInfrastructure.Persistence.Configurations
             // PausedAt and TotalPausedDuration are persisted (columns added in 20260326230212_AddPauseFields)
             builder.Property(e => e.PausedAt);
             builder.Property(e => e.TotalPausedDuration)
-                .HasColumnType("time")
+                .HasConversion(
+                    v => v.Ticks,          // TimeSpan → long (write)
+                    v => TimeSpan.FromTicks(v)) // long → TimeSpan (read)
+                .HasColumnType("bigint")
                 .HasDefaultValue(TimeSpan.Zero);
 
             // Audit

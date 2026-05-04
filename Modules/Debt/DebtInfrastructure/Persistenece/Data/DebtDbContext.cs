@@ -23,7 +23,7 @@ namespace DebtInfrastructure.Persistenece.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
+            modelBuilder.HasDefaultSchema("debt");
             // Apply configuration explicitly
             modelBuilder.ApplyConfiguration(new DebtConfiguration());
             modelBuilder.ApplyConfiguration(new DebtPaymentConfiguration());

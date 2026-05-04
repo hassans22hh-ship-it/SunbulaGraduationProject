@@ -39,7 +39,8 @@ namespace DebtPresentation.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
         {
-            var result = await _debtService.GetByIdAsync(id, cancellationToken);
+            var userId = GetCurrentUserId();
+            var result = await _debtService.GetByIdAsync(id, userId, cancellationToken);
             return Ok(result);
         }
 
@@ -51,7 +52,8 @@ namespace DebtPresentation.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetByIdWithPayments(Guid id, CancellationToken cancellationToken)
         {
-            var result = await _debtService.GetByIdWithPaymentsAsync(id, cancellationToken);
+            var userId = GetCurrentUserId();
+            var result = await _debtService.GetByIdWithPaymentsAsync(id, userId, cancellationToken);
             return Ok(result);
         }
 

@@ -1,7 +1,4 @@
 using Application.Services.Abstraction; // IUserIntegrationService
-using MediatR;
-using SharedKernel;
-using TimeTrackingDomain.Events;
 using AutoMapper;
 using TimeTrackingApplication.TimeDtos;
 using TimeTrackingApplication.TimeServiceAbstraction;
@@ -14,14 +11,12 @@ namespace TimeTrackingInfrastructure.TimeServices
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IUserIntegrationService _userIntegrationService;
-        private readonly IPublisher _publisher;
 
-        public DailyTransactionService(IUnitOfWork unitOfWork, IMapper mapper, IUserIntegrationService userIntegrationService, IPublisher publisher)
+        public DailyTransactionService(IUnitOfWork unitOfWork, IMapper mapper, IUserIntegrationService userIntegrationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userIntegrationService = userIntegrationService;
-            _publisher = publisher;
         }
 
         public async Task<DailyTransactionDto?> GetByDateAsync(
@@ -103,8 +98,10 @@ namespace TimeTrackingInfrastructure.TimeServices
 
             if (coinsToAward > 0)
             {
+                // AwardStreakMilestoneAsync calls user.AddCoins() internally,
+                // which raises CoinBalanceChangedEvent for SSE streaming.
+                // No need for a separate CoinsEarnedEvent — single path avoids double-counting.
                 await _userIntegrationService.AwardStreakMilestoneAsync(userId, streak, coinsToAward, cancellationToken);
-                await _publisher.Publish(new CoinsEarnedEvent(userId, coinsToAward, Guid.Empty), cancellationToken);
             }
         }
     }

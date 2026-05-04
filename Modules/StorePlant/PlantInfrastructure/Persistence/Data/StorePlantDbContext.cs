@@ -21,6 +21,7 @@ namespace PlantInfrastructure.Persistence.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.HasDefaultSchema("plant");
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(StorePlantDbContext).Assembly);
 
             // Global soft delete filters

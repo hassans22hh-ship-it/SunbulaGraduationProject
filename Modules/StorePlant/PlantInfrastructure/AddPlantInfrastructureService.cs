@@ -19,7 +19,7 @@ namespace PlantInfrastructure
             // ── DbContext ──────────────────────────────────────────────
             services.AddDbContext<StorePlantDbContext>(options =>
                 options.UseSqlServer(
-                    configuration.GetConnectionString("StorePlantDb"),
+                    configuration.GetConnectionString("SunbulaDb"),
                     b => b.MigrationsAssembly(typeof(StorePlantDbContext).Assembly.FullName)
                           .CommandTimeout(30))
                 .EnableSensitiveDataLogging()

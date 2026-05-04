@@ -1,4 +1,4 @@
-﻿using FinanceDomain.Entities;
+using FinanceDomain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -54,6 +54,7 @@ namespace FinanceInfrastructure.Persistence.Configurations
 
             builder.HasIndex(w => new { w.UserId, w.Name })
                 .IsUnique()
+                .HasFilter("[IsDeleted] = 0")
                 .HasDatabaseName("IX_Wallets_UserId_Name");
 
             builder.Ignore(w => w.DomainEvents);

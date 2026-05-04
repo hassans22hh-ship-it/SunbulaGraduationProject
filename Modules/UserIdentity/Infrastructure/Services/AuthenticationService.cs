@@ -230,7 +230,7 @@ namespace UserIdentityInfrastructure.Services
             var protectedBytes = _dataProtector.Protect(userBytes);
             var token = WebEncoders.Base64UrlEncode(protectedBytes);
 
-            var confirmationLink = $"https://sunbula-h2b7hzczh0ebfydg.uaenorth-01.azurewebsites.net/api/v1/authentication/confirm-email?token={token}";
+            var confirmationLink = $"http://localhost:5142/api/v1/authentication/confirm-email?token={token}";
             var emailBody = $"<h1>Welcome to Sunbula!</h1><p>Please confirm your email by clicking <a href='{confirmationLink}'>here</a>.</p>";
             
             // Email sending is now enabled with SMTP configuration
@@ -350,7 +350,7 @@ namespace UserIdentityInfrastructure.Services
             var protectedBytes = _dataProtector.Protect(userBytes);
             var token = WebEncoders.Base64UrlEncode(protectedBytes);
 
-            var confirmationLink = $"https://sunbula-h2b7hzczh0ebfydg.uaenorth-01.azurewebsites.net/api/v1/authentication/confirm-email?token={token}";
+            var confirmationLink = $"http://localhost:5142/api/v1/authentication/confirm-email?token={token}";
             var emailBody = $"<h1>Confirm your Sunbula account</h1><p>Please confirm your email by clicking <a href='{confirmationLink}'>here</a>.</p>";
 
             // Email sending is now enabled with SMTP configuration

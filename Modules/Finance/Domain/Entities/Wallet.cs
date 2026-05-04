@@ -67,12 +67,18 @@ namespace FinanceDomain.Entities
 
         // ─── Domain Methods ─────────────────────────────────────────────────────
 
-        /// <summary>Updates wallet name and/or type.</summary>
-        public void Update(string name, WalletType type)
+        /// <summary>Updates wallet name and/or type, and optionally balance.</summary>
+        public void Update(string name, WalletType type, Money? balance = null)
         {
             ValidateName(name);
             Name = name;
             Type = type;
+
+            if (balance != null)
+            {
+                Balance = balance;
+            }
+
             MarkAsUpdated();
         }
 

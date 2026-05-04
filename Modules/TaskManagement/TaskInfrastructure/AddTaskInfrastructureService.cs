@@ -18,7 +18,7 @@ namespace TaskInfrastructure
             // DbContext
             services.AddDbContext<TaskManagementDbContext>(options =>
                 options.UseSqlServer(
-                    configuration.GetConnectionString("TaskManagementDb"),
+                    configuration.GetConnectionString("SunbulaDb"),
                     b => b.MigrationsAssembly(typeof(TaskManagementDbContext).Assembly.FullName)));
 
             // Unit of Work

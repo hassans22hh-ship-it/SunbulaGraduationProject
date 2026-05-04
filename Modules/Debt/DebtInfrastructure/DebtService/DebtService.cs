@@ -20,22 +20,29 @@ namespace DebtInfrastructure.DebtService
             _userIntegrationService = userIntegrationService;
         }
 
-        public async Task<DebtDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<DebtDto> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
         {
             var debt = await _unitOfWork.Debts.GetByIdAsync(id, cancellationToken);
             if (debt == null)
                 throw new DebtNotFoundException(id);
+
+            if (debt.UserId != userId)
+                throw new UnauthorizedAccessException("You don't have permission to access this debt");
 
             return MapToDto(debt);
         }
 
         public async Task<DebtWithPaymentsDto> GetByIdWithPaymentsAsync(
             Guid id,
+            Guid userId,
             CancellationToken cancellationToken = default)
         {
             var debt = await _unitOfWork.Debts.GetByIdWithPaymentsAsync(id, cancellationToken);
             if (debt == null)
                 throw new DebtNotFoundException(id);
+
+            if (debt.UserId != userId)
+                throw new UnauthorizedAccessException("You don't have permission to access this debt");
 
             return new DebtWithPaymentsDto
             {
@@ -85,34 +92,34 @@ namespace DebtInfrastructure.DebtService
             var unpaidDebts = await _unitOfWork.Debts.GetUnpaidByUserIdAsync(userId, cancellationToken);
             var overdueDebts = await _unitOfWork.Debts.GetOverdueByUserIdAsync(userId, cancellationToken);
 
-            //var totalPayable = await _unitOfWork.Debts.GetTotalDebtAmountAsync(
-            //    userId,
-            //    DebtType.Payable,
-            //    unpaidOnly: false,
-            //    cancellationToken);
+            var totalPayable = await _unitOfWork.Debts.GetTotalDebtAmountAsync(
+                userId,
+                "Payable",
+                unpaidOnly: false,
+                cancellationToken);
 
-            //var totalReceivable = await _unitOfWork.Debts.GetTotalDebtAmountAsync(
-            //    userId,
-            //    DebtType.Receivable,
-            //    unpaidOnly: false,
-            //    cancellationToken);
+            var totalReceivable = await _unitOfWork.Debts.GetTotalDebtAmountAsync(
+                userId,
+                "Receivable",
+                unpaidOnly: false,
+                cancellationToken);
 
-            //var totalRemainingPayable = await _unitOfWork.Debts.GetTotalRemainingAmountAsync(
-            //    userId,
-            //    DebtType.Payable,
-            //    cancellationToken);
+            var totalRemainingPayable = await _unitOfWork.Debts.GetTotalRemainingAmountAsync(
+                userId,
+                "Payable",
+                cancellationToken);
 
-            //var totalRemainingReceivable = await _unitOfWork.Debts.GetTotalRemainingAmountAsync(
-            //    userId,
-            //    DebtType.Receivable,
-            //    cancellationToken);
+            var totalRemainingReceivable = await _unitOfWork.Debts.GetTotalRemainingAmountAsync(
+                userId,
+                "Receivable",
+                cancellationToken);
 
             return new DebtSummaryDto
             {
-                //TotalPayable = totalPayable,
-                //TotalReceivable = totalReceivable,
-                //TotalRemainingPayable = totalRemainingPayable,
-                //TotalRemainingReceivable = totalRemainingReceivable,
+                TotalPayable = totalPayable,
+                TotalReceivable = totalReceivable,
+                TotalRemainingPayable = totalRemainingPayable,
+                TotalRemainingReceivable = totalRemainingReceivable,
                 TotalDebtsCount = allDebts.Count(),
                 UnpaidDebtsCount = unpaidDebts.Count(),
                 OverdueDebtsCount = overdueDebts.Count()
@@ -177,16 +184,7 @@ namespace DebtInfrastructure.DebtService
             if (debt.UserId != userId)
                 throw new UnauthorizedAccessException("You don't have permission to record payment for this debt");
 
-            // Spend coins BEFORE recording the payment (to validate funds)
-            // Assuming that paying for a debt costs coins equal to the amount.
-            // Converting decimal amount to int... Wait, coins are integers. 
-            // In Sunbula, generally 1 money unit = 1 coin? Yes, amount is decimal, we round/convert to int.
-            var coinsToSpend = (int)Math.Round(dto.Amount);
-            if (coinsToSpend > 0)
-            {
-                await _userIntegrationService.SpendCoinsAsync(userId, coinsToSpend, $"Debt Payment to {debt.CreditorName}", cancellationToken);
-            }
-
+        
             // Use domain method
             var payment = debt.RecordPayment(dto.Amount, dto.PaymentDate, dto.Notes);
 
@@ -235,8 +233,21 @@ namespace DebtInfrastructure.DebtService
             if (debt.UserId != userId)
                 throw new UnauthorizedAccessException("You don't have permission to delete this debt");
 
-            _unitOfWork.Debts.Delete(debt);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.BeginTransactionAsync(cancellationToken);
+            try
+            {
+                // Hard-delete all payments belonging to this debt
+                await _unitOfWork.Debts.HardDeletePaymentsByDebtIdAsync(id, cancellationToken);
+
+                _unitOfWork.Debts.Delete(debt);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                await _unitOfWork.CommitTransactionAsync(cancellationToken);
+            }
+            catch
+            {
+                await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+                throw;
+            }
         }
 
         public async Task DeleteUserDataAsync(Guid userId, CancellationToken cancellationToken = default)

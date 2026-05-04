@@ -39,7 +39,7 @@ namespace TaskInfrastructure.Services
             var (tasks, totalCount) = await _unitOfWork.Tasks.GetByUserIdAsync(userId, pagination.PageNumber, pagination.PageSize, cancellationToken);
             return new PagedResultDto<TaskDto>
             {
-                Items = tasks.Select(MapToDto),
+                Items = tasks.Select(MapToDtoWithDetails),
                 TotalCount = totalCount,
                 PageNumber = pagination.PageNumber,
                 PageSize = pagination.PageSize
@@ -51,7 +51,7 @@ namespace TaskInfrastructure.Services
             var (tasks, totalCount) = await _unitOfWork.Tasks.GetActiveByUserIdAsync(userId, pagination.PageNumber, pagination.PageSize, cancellationToken);
             return new PagedResultDto<TaskDto>
             {
-                Items = tasks.Select(MapToDto),
+                Items = tasks.Select(MapToDtoWithDetails),
                 TotalCount = totalCount,
                 PageNumber = pagination.PageNumber,
                 PageSize = pagination.PageSize
@@ -63,7 +63,7 @@ namespace TaskInfrastructure.Services
             var (tasks, totalCount) = await _unitOfWork.Tasks.GetArchivedByUserIdAsync(userId, pagination.PageNumber, pagination.PageSize, cancellationToken);
             return new PagedResultDto<TaskDto>
             {
-                Items = tasks.Select(MapToDto),
+                Items = tasks.Select(MapToDtoWithDetails),
                 TotalCount = totalCount,
                 PageNumber = pagination.PageNumber,
                 PageSize = pagination.PageSize
@@ -83,7 +83,7 @@ namespace TaskInfrastructure.Services
             var (tasks, totalCount) = await _unitOfWork.Tasks.GetByFolderIdAsync(folderId, pagination.PageNumber, pagination.PageSize, cancellationToken);
             return new PagedResultDto<TaskDto>
             {
-                Items = tasks.Select(MapToDto),
+                Items = tasks.Select(MapToDtoWithDetails),
                 TotalCount = totalCount,
                 PageNumber = pagination.PageNumber,
                 PageSize = pagination.PageSize
@@ -103,7 +103,7 @@ namespace TaskInfrastructure.Services
             var (tasks, totalCount) = await _unitOfWork.Tasks.GetByCategoryIdAsync(categoryId, pagination.PageNumber, pagination.PageSize, cancellationToken);
             return new PagedResultDto<TaskDto>
             {
-                Items = tasks.Select(MapToDto),
+                Items = tasks.Select(MapToDtoWithDetails),
                 TotalCount = totalCount,
                 PageNumber = pagination.PageNumber,
                 PageSize = pagination.PageSize
@@ -119,7 +119,7 @@ namespace TaskInfrastructure.Services
             var (tasks, totalCount) = await _unitOfWork.Tasks.GetByBehaviorTypeAsync(userId, behaviorType, pagination.PageNumber, pagination.PageSize, cancellationToken);
             return new PagedResultDto<TaskDto>
             {
-                Items = tasks.Select(MapToDto),
+                Items = tasks.Select(MapToDtoWithDetails),
                 TotalCount = totalCount,
                 PageNumber = pagination.PageNumber,
                 PageSize = pagination.PageSize
@@ -134,7 +134,7 @@ namespace TaskInfrastructure.Services
             var (tasks, totalCount) = await _unitOfWork.Tasks.SearchByTitleAsync(userId, query, pagination.PageNumber, pagination.PageSize, cancellationToken);
             return new PagedResultDto<TaskDto>
             {
-                Items = tasks.Select(MapToDto),
+                Items = tasks.Select(MapToDtoWithDetails),
                 TotalCount = totalCount,
                 PageNumber = pagination.PageNumber,
                 PageSize = pagination.PageSize
@@ -144,7 +144,7 @@ namespace TaskInfrastructure.Services
         public async Task<IEnumerable<TaskDto>> GetRecentAsync(Guid userId, int count = 10, CancellationToken cancellationToken = default)
         {
             var tasks = await _unitOfWork.Tasks.GetRecentAsync(userId, count, cancellationToken);
-            return tasks.Select(MapToDto);
+            return tasks.Select(MapToDtoWithDetails);
         }
 
         public async Task<TaskDto> CreateAsync(CreateTaskDto dto, Guid userId, CancellationToken cancellationToken = default)
@@ -339,7 +339,6 @@ namespace TaskInfrastructure.Services
 
             task.AddCategory(categoryId);
 
-            _unitOfWork.Tasks.Update(task);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
 
@@ -354,7 +353,6 @@ namespace TaskInfrastructure.Services
 
             task.RemoveCategory(categoryId);
 
-            _unitOfWork.Tasks.Update(task);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
 
@@ -398,13 +396,15 @@ namespace TaskInfrastructure.Services
                 IsArchived = task.IsArchived,
                 CreatedAt = task.CreatedAt,
                 UpdatedAt = task.UpdatedAt,
-                Categories = task.TaskCategories.Select(tc => new CategoryDto
-                {
+                Categories = task.TaskCategories
+               .Where(tc => tc.Category != null)
+               .Select(tc => new CategoryDto
+               {
                     Id = tc.Category.Id,
                     Name = tc.Category.Name,
-                    Color = tc.Category.Color.Value,
+                    Color = tc.Category.Color?.Value ?? "#52B788",
                     CreatedAt = tc.Category.CreatedAt
-                }).ToList()
+               }).ToList()
             };
         }
     }

@@ -1,4 +1,4 @@
-﻿namespace Domain.Entities.TaskManagement
+namespace Domain.Entities.TaskManagement
 {
     public enum BehaviorType
     {
