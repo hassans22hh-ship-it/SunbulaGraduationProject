@@ -5,6 +5,7 @@ using FinanceDomain.contracts;
 using FinanceDomain.Entities;
 using FinanceDomain.Enums;
 using FinanceDomain.Exceptions;
+using FinanceDomain.ValueObjects;
 
 namespace FinanceInfrastructure.financeSService
 {
@@ -57,7 +58,11 @@ namespace FinanceInfrastructure.financeSService
 
             EnsureOwnership(wallet.UserId, userId);
 
-            wallet.Update(dto.Name, dto.Type);
+            Money? newBalance = dto.Balance.HasValue 
+                ? Money.Create(dto.Balance.Value, wallet.Balance.Currency) 
+                : null;
+
+            wallet.Update(dto.Name, dto.Type, newBalance);
             _uow.Wallets.Update(wallet);
             await _uow.SaveChangesAsync(ct);
 

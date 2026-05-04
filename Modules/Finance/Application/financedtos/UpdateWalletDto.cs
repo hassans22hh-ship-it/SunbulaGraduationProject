@@ -1,4 +1,4 @@
-﻿using FinanceDomain.Enums;
+using FinanceDomain.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace FinanceApplication.financedtos
@@ -12,5 +12,10 @@ namespace FinanceApplication.financedtos
 
         [Required]
         public WalletType Type { get; init; }
+
+        /// <summary>
+        /// Optional: Direct balance adjustment.
+        /// </summary>
+        public decimal? Balance { get; init; }
     }
 }
