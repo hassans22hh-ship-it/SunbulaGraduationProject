@@ -159,8 +159,61 @@ namespace TimeTrackingInfrastructure.TimeServices
 
         public async Task<TimeSessionDto> CreateManualAsync(CreateTimeSessionDto dto, Guid userId, CancellationToken cancellationToken = default)
         {
-            var overlapping = await _unitOfWork.TimeSessions.GetOverlappingSessionsAsync(userId, dto.StartTime, dto.EndTime, taskId: dto.TaskId, cancellationToken: cancellationToken);
-            if (overlapping.Any()) throw new OverlappingSessionException(dto.StartTime, dto.EndTime);
+            var overlapping = (await _unitOfWork.TimeSessions.GetOverlappingSessionsAsync(userId, dto.StartTime, dto.EndTime, taskId: dto.TaskId, cancellationToken: cancellationToken)).ToList();
+            
+            if (overlapping.Any())
+            {
+                // Auto-merge strategy
+                var minStartTime = new[] { dto.StartTime }.Concat(overlapping.Select(s => s.StartTime)).Min();
+                var maxEndTime = new[] { dto.EndTime }.Concat(overlapping.Where(s => s.EndTime.HasValue).Select(s => s.EndTime!.Value)).Max();
+                
+                var firstSession = overlapping.OrderBy(s => s.StartTime).First();
+                var oldDuration = firstSession.DurationMinutes;
+                var oldCoins = firstSession.CoinsEarned;
+                
+                var combinedNotes = string.Join(" | ", new[] { firstSession.Notes, dto.Notes }.Where(n => !string.IsNullOrWhiteSpace(n)));
+
+                firstSession.Update(minStartTime, maxEndTime, dto.BehaviorType, combinedNotes);
+                
+                var date = DateOnly.FromDateTime(firstSession.StartTime);
+                var daily = await GetOrCreateDailyTransactionAsync(userId, date, cancellationToken);
+                daily.UpdateSession(oldDuration, oldCoins, firstSession.DurationMinutes, firstSession.CoinsEarned);
+                
+                _unitOfWork.TimeSessions.Update(firstSession);
+                
+                // Delete other overlapping sessions
+                var others = overlapping.Where(s => s.Id != firstSession.Id).ToList();
+                foreach (var other in others)
+                {
+                    if (other.EndTime.HasValue)
+                    {
+                        var otherDate = DateOnly.FromDateTime(other.StartTime);
+                        var otherDaily = await _unitOfWork.DailyTransactions.GetByUserAndDateAsync(userId, otherDate, cancellationToken);
+                        otherDaily?.RemoveSession(other.DurationMinutes, other.CoinsEarned);
+                    }
+                    _unitOfWork.TimeSessions.Delete(other);
+                    
+                    if (other.CoinsEarned > 0)
+                    {
+                        await _userIntegrationService.SpendCoinsAsync(userId, other.CoinsEarned, "Merged Overlapping Session (Deleted)", cancellationToken);
+                    }
+                }
+                
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                
+                // Sync coin difference for the updated primary session
+                var coinDiff = firstSession.CoinsEarned - oldCoins;
+                if (coinDiff != 0)
+                {
+                    var amount = Math.Abs(coinDiff);
+                    if (coinDiff > 0)
+                        await _userIntegrationService.AddCoinsAsync(userId, amount, "Merged Overlapping Session (Increase)", cancellationToken);
+                    else
+                        await _userIntegrationService.SpendCoinsAsync(userId, amount, "Merged Overlapping Session (Decrease)", cancellationToken);
+                }
+                
+                return _mapper.Map<TimeSessionDto>(firstSession);
+            }
 
             var session = TimeSession.CreateManual(userId, dto.TaskId, dto.StartTime, dto.EndTime, dto.BehaviorType, dto.Notes);
             await UpdateDailyTransactionAsync(session, cancellationToken);
@@ -184,13 +237,42 @@ namespace TimeTrackingInfrastructure.TimeServices
             if (session.UserId != userId)
                 throw new UnauthorizedAccessException("You don't have permission to update this session.");
 
-            var overlapping = await _unitOfWork.TimeSessions.GetOverlappingSessionsAsync(userId, dto.StartTime, dto.EndTime, taskId: session.TaskId, excludeSessionId: id, cancellationToken: cancellationToken);
-            if (overlapping.Any()) throw new OverlappingSessionException(dto.StartTime, dto.EndTime);
+            var overlapping = (await _unitOfWork.TimeSessions.GetOverlappingSessionsAsync(userId, dto.StartTime, dto.EndTime, taskId: session.TaskId, excludeSessionId: id, cancellationToken: cancellationToken)).ToList();
+
+            var minStartTime = dto.StartTime;
+            var maxEndTime = dto.EndTime;
+            var combinedNotes = dto.Notes;
+
+            if (overlapping.Any())
+            {
+                minStartTime = new[] { dto.StartTime }.Concat(overlapping.Select(s => s.StartTime)).Min();
+                maxEndTime = new[] { dto.EndTime }.Concat(overlapping.Where(s => s.EndTime.HasValue).Select(s => s.EndTime!.Value)).Max();
+                
+                var notesToCombine = overlapping.Select(s => s.Notes).Concat(new[] { dto.Notes }).Where(n => !string.IsNullOrWhiteSpace(n));
+                combinedNotes = string.Join(" | ", notesToCombine);
+
+                // Delete other overlapping sessions
+                foreach (var other in overlapping)
+                {
+                    if (other.EndTime.HasValue)
+                    {
+                        var otherDate = DateOnly.FromDateTime(other.StartTime);
+                        var otherDaily = await _unitOfWork.DailyTransactions.GetByUserAndDateAsync(userId, otherDate, cancellationToken);
+                        otherDaily?.RemoveSession(other.DurationMinutes, other.CoinsEarned);
+                    }
+                    _unitOfWork.TimeSessions.Delete(other);
+                    
+                    if (other.CoinsEarned > 0)
+                    {
+                        await _userIntegrationService.SpendCoinsAsync(userId, other.CoinsEarned, "Merged Overlapping Session (Deleted)", cancellationToken);
+                    }
+                }
+            }
 
             var oldDuration = session.DurationMinutes;
             var oldCoins = session.CoinsEarned;
 
-            session.Update(dto.StartTime, dto.EndTime, dto.BehaviorType, dto.Notes);
+            session.Update(minStartTime, maxEndTime, dto.BehaviorType, combinedNotes);
 
             var date = DateOnly.FromDateTime(session.StartTime);
             var daily = await GetOrCreateDailyTransactionAsync(userId, date, cancellationToken);
