@@ -25,8 +25,7 @@ namespace TimeTrackingInfrastructure.Persistence.Configurations
 
             builder.Property(e => e.CoinsEarned)
                 .IsRequired()
-                .HasPrecision(10, 2)
-                .HasDefaultValue(0m);
+                .HasDefaultValue(0);
 
             builder.Property(e => e.BehaviorType)
                 .HasConversion<string>()
