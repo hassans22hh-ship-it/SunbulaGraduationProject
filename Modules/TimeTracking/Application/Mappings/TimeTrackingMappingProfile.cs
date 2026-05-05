@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using TimeTrackingApplication.TimeDtos;
 using TimeTrackingDomain.Entities;
 
@@ -15,6 +15,10 @@ namespace TimeTrackingApplication.Mappings
             CreateMap<TimeSession, TimeSessionDto>()
                 .ForMember(dest => dest.BehaviorTypeName,
                            opt => opt.MapFrom(src => src.BehaviorType.ToString()))
+                .ForMember(dest => dest.IsPaused,
+                           opt => opt.MapFrom(src => src.PausedAt.HasValue))
+                .ForMember(dest => dest.TotalPausedDurationSeconds,
+                           opt => opt.MapFrom(src => (int)src.TotalPausedDuration.TotalSeconds))
                 .ForMember(dest => dest.FormattedDuration,
                            opt => opt.Ignore()); // Computed property — no mapping needed
 

@@ -19,6 +19,9 @@ namespace TimeTrackingApplication.TimeDtos
         public required bool ManuallyAdded { get; init; }
         public string? Notes { get; init; }
         public required DateTime CreatedAt { get; init; }
+        public bool IsPaused { get; init; }
+        public DateTime? PausedAt { get; init; }
+        public int TotalPausedDurationSeconds { get; init; }
 
         // Computed for display
         public string FormattedDuration => $"{(int)DurationMinutes / 60}h {(int)DurationMinutes % 60}m";
