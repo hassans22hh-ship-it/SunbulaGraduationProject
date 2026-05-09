@@ -159,16 +159,16 @@ namespace Sunbula
             }
 
             app.UseExceptionHandler();
-            app.Use(async (context, next) =>
-            {
-                Console.WriteLine($"--> REQUEST: {context.Request.Method} {context.Request.Path}");
-                await next();
-            });
+            //app.Use(async (context, next) =>
+            //{
+            //    Console.WriteLine($"--> REQUEST: {context.Request.Method} {context.Request.Path}");
+            //    await next();
+            //});
             // app.UseHttpsRedirection();
             app.UseCors("AllowFrontend");
 
             app.UseAuthentication();
-            // app.UseMiddleware<RequireEmailConfirmedMiddleware>();
+             app.UseMiddleware<RequireEmailConfirmedMiddleware>();
             app.UseAuthorization();
 
             app.MapGet("/health", () => "OK");

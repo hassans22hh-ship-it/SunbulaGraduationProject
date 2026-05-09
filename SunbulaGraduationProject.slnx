@@ -1,7 +1,5 @@
 <Solution>
   <Folder Name="/BuildingBlocks/">
-    <Project Path="BuildingBlocks/Contracts/Contracts.csproj" Id="e20cddf6-558c-4719-b293-b40fb3ab4e09" />
-    <Project Path="BuildingBlocks/Shared/Shared.csproj" Id="8d37bd8e-d692-43f1-98c5-beb95aad8b55" />
     <Project Path="BuildingBlocks/SharedKernel/SharedKernel.csproj" Id="3df026ed-d6f2-493c-b537-435e019c9932" />
   </Folder>
   <Folder Name="/Modules/" />
