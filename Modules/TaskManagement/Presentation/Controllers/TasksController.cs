@@ -156,6 +156,15 @@ namespace TaskPresentation.Controllers
             return NoContent();
         }
 
+        [HttpPatch("{id:guid}/activate")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Activate(Guid id, CancellationToken ct)
+        {
+            await _taskService.ReactivateAsync(id, GetUserId(), ct);
+            return NoContent();
+        }
+
         [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

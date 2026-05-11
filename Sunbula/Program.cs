@@ -96,7 +96,7 @@ namespace Sunbula
             {
                 options.AddPolicy("AllowFrontend", policy =>
                 {
-                    policy.WithOrigins("https://sunbula-front-end-git-master-hassans22hh-ship-its-projects.vercel.app")
+                    policy.WithOrigins("https://sunbula-front-end.vercel.app")
                           .AllowAnyMethod()
                          .AllowAnyHeader();
 

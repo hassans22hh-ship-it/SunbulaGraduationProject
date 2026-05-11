@@ -308,6 +308,21 @@ namespace TaskInfrastructure.Services
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
 
+        public async Task ReactivateAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
+        {
+            var task = await _unitOfWork.Tasks.GetByIdAsync(id, cancellationToken);
+            if (task == null)
+                throw new TaskNotFoundException(id);
+
+            if (task.UserId != userId)
+                throw new UnauthorizedAccessException("You don't have permission to reactivate this task");
+
+            task.Reactivate();
+
+            _unitOfWork.Tasks.Update(task);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+
         public async Task DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
         {
             var task = await _unitOfWork.Tasks.GetByIdAsync(id, cancellationToken);

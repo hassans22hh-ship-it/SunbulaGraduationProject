@@ -21,6 +21,7 @@ namespace Application.ServiceAbstraction
         Task ArchiveAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
         Task UnarchiveAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
         Task CompleteAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
+        Task ReactivateAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
         Task DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
         Task AddCategoryAsync(Guid taskId, Guid categoryId, Guid userId, CancellationToken cancellationToken = default);
         Task RemoveCategoryAsync(Guid taskId, Guid categoryId, Guid userId, CancellationToken cancellationToken = default);

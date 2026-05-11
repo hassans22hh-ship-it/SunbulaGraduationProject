@@ -159,6 +159,18 @@ namespace Domain.Entities.TaskManagement
         }
 
         /// <summary>
+        /// Reactivates a completed task back to Active status.
+        /// </summary>
+        public void Reactivate()
+        {
+            if (Status == TaskStatus.Active)
+                throw new InvalidOperationException("Task is already active");
+
+            Status = TaskStatus.Active;
+            MarkAsUpdated();
+        }
+
+        /// <summary>
         /// Moves task to a different folder.
         /// </summary>
         public void MoveToFolder(Guid? newFolderId)
