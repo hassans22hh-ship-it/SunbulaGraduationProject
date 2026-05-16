@@ -144,7 +144,27 @@ namespace Domain.Entities
         public void RecordLogin()
         {
             var now = DateTime.UtcNow;
-            var today = now.Date;
+
+            // Standardize TimeZone conversion to Egypt for Gamification Daily Streaks
+            // Matches the handling in TimeSessionService
+            DateTime today;
+            try
+            {
+                var tz = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                today = TimeZoneInfo.ConvertTimeFromUtc(now, tz).Date;
+            }
+            catch (TimeZoneNotFoundException)
+            {
+                try
+                {
+                    var tz = TimeZoneInfo.FindSystemTimeZoneById("Africa/Cairo");
+                    today = TimeZoneInfo.ConvertTimeFromUtc(now, tz).Date;
+                }
+                catch (Exception)
+                {
+                    today = now.AddHours(3).Date;
+                }
+            }
 
             if (LastStreakDate.HasValue)
             {
@@ -227,10 +247,10 @@ namespace Domain.Entities
             var awarded = AwardedMilestones.Split(',', StringSplitOptions.RemoveEmptyEntries);
             if (awarded.Contains(milestoneStr)) return; // Already awarded
 
-            AwardedMilestones = string.IsNullOrEmpty(AwardedMilestones) 
-                ? milestoneStr 
+            AwardedMilestones = string.IsNullOrEmpty(AwardedMilestones)
+                ? milestoneStr
                 : $"{AwardedMilestones},{milestoneStr}";
-                
+
             AddCoins(coins, $"Streak Bonus: {milestoneDays} days");
         }
 
@@ -265,7 +285,7 @@ namespace Domain.Entities
         {
             if (Settings != null)
                 throw new InvalidOperationException("Settings already initialized");
-            
+
             Settings = UserSettings.Create(Id);
         }
     }
