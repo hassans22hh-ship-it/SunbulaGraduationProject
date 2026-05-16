@@ -218,5 +218,18 @@ namespace UserIdentityInfrastructure.Persistence.Repositories
 
             return await query.CountAsync(cancellationToken);
         }
+
+        /// <summary>
+        /// Atomically deducts coins from the user if they have sufficient balance.
+        /// Prevents race conditions during rapid requests.
+        /// </summary>
+        public async Task<bool> TryDeductCoinsAtomicAsync(Guid userId, int amount, CancellationToken cancellationToken = default)
+        {
+            var rowsAffected = await _dbSet
+                .Where(u => u.Id == userId && u.CoinBalance >= amount && !u.IsDeleted)
+                .ExecuteUpdateAsync(s => s.SetProperty(u => u.CoinBalance, u => u.CoinBalance - amount), cancellationToken);
+
+            return rowsAffected > 0;
+        }
     }
 }

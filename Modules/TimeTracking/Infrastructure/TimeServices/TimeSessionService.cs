@@ -99,10 +99,14 @@ namespace TimeTrackingInfrastructure.TimeServices
             _unitOfWork.TimeSessions.Update(session);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // Directly award coins to ensure database update
+            // Directly award or deduct coins to ensure database update
             if (session.CoinsEarned > 0)
             {
                 await _userIntegrationService.AddCoinsAsync(userId, session.CoinsEarned, "Time Tracking Session Reward", cancellationToken);
+            }
+            else if (session.CoinsEarned < 0)
+            {
+                await _userIntegrationService.SpendCoinsAsync(userId, Math.Abs(session.CoinsEarned), "Time Tracking Session Penalty", cancellationToken);
             }
 
             return _mapper.Map<TimeSessionDto>(session);
@@ -118,10 +122,14 @@ namespace TimeTrackingInfrastructure.TimeServices
             _unitOfWork.TimeSessions.Update(session);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // Directly award coins
+            // Directly award or deduct coins
             if (session.CoinsEarned > 0)
             {
                 await _userIntegrationService.AddCoinsAsync(userId, session.CoinsEarned, "Time Tracking Session Reward", cancellationToken);
+            }
+            else if (session.CoinsEarned < 0)
+            {
+                await _userIntegrationService.SpendCoinsAsync(userId, Math.Abs(session.CoinsEarned), "Time Tracking Session Penalty", cancellationToken);
             }
 
             return _mapper.Map<TimeSessionDto>(session);
@@ -175,7 +183,7 @@ namespace TimeTrackingInfrastructure.TimeServices
 
                 firstSession.Update(minStartTime, maxEndTime, dto.BehaviorType, combinedNotes);
                 
-                var date = DateOnly.FromDateTime(firstSession.StartTime);
+                var date = GetLocalUserDate(firstSession.StartTime);
                 var daily = await GetOrCreateDailyTransactionAsync(userId, date, cancellationToken);
                 daily.UpdateSession(oldDuration, oldCoins, firstSession.DurationMinutes, firstSession.CoinsEarned);
                 
@@ -187,7 +195,7 @@ namespace TimeTrackingInfrastructure.TimeServices
                 {
                     if (other.EndTime.HasValue)
                     {
-                        var otherDate = DateOnly.FromDateTime(other.StartTime);
+                        var otherDate = GetLocalUserDate(other.StartTime);
                         var otherDaily = await _unitOfWork.DailyTransactions.GetByUserAndDateAsync(userId, otherDate, cancellationToken);
                         otherDaily?.RemoveSession(other.DurationMinutes, other.CoinsEarned);
                     }
@@ -220,10 +228,14 @@ namespace TimeTrackingInfrastructure.TimeServices
             await _unitOfWork.TimeSessions.AddAsync(session, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // Directly award coins
+            // Directly award or deduct coins
             if (session.CoinsEarned > 0)
             {
                 await _userIntegrationService.AddCoinsAsync(userId, session.CoinsEarned, "Manual Focus Session Reward", cancellationToken);
+            }
+            else if (session.CoinsEarned < 0)
+            {
+                await _userIntegrationService.SpendCoinsAsync(userId, Math.Abs(session.CoinsEarned), "Manual Focus Session Penalty", cancellationToken);
             }
 
             return _mapper.Map<TimeSessionDto>(session);
@@ -256,7 +268,7 @@ namespace TimeTrackingInfrastructure.TimeServices
                 {
                     if (other.EndTime.HasValue)
                     {
-                        var otherDate = DateOnly.FromDateTime(other.StartTime);
+                        var otherDate = GetLocalUserDate(other.StartTime);
                         var otherDaily = await _unitOfWork.DailyTransactions.GetByUserAndDateAsync(userId, otherDate, cancellationToken);
                         otherDaily?.RemoveSession(other.DurationMinutes, other.CoinsEarned);
                     }
@@ -274,7 +286,7 @@ namespace TimeTrackingInfrastructure.TimeServices
 
             session.Update(minStartTime, maxEndTime, dto.BehaviorType, combinedNotes);
 
-            var date = DateOnly.FromDateTime(session.StartTime);
+            var date = GetLocalUserDate(session.StartTime);
             var daily = await GetOrCreateDailyTransactionAsync(userId, date, cancellationToken);
             daily.UpdateSession(oldDuration, oldCoins, session.DurationMinutes, session.CoinsEarned);
 
@@ -311,7 +323,7 @@ namespace TimeTrackingInfrastructure.TimeServices
 
             if (!session.IsActive && session.EndTime.HasValue)
             {
-                var date = DateOnly.FromDateTime(session.StartTime);
+                var date = GetLocalUserDate(session.StartTime);
                 var daily = await _unitOfWork.DailyTransactions.GetByUserAndDateAsync(userId, date, cancellationToken);
                 daily?.RemoveSession(session.DurationMinutes, session.CoinsEarned);
             }
@@ -323,6 +335,10 @@ namespace TimeTrackingInfrastructure.TimeServices
             if (session.CoinsEarned > 0)
             {
                 await _userIntegrationService.SpendCoinsAsync(userId, session.CoinsEarned, "Session Deleted", cancellationToken);
+            }
+            else if (session.CoinsEarned < 0)
+            {
+                await _userIntegrationService.AddCoinsAsync(userId, Math.Abs(session.CoinsEarned), "Session Deleted (Penalty Refund)", cancellationToken);
             }
         }
 
@@ -339,10 +355,14 @@ namespace TimeTrackingInfrastructure.TimeServices
             _unitOfWork.TimeSessions.Update(session);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // Award coins directly on recovery
+            // Award or deduct coins directly on recovery
             if (session.CoinsEarned > 0)
             {
                 await _userIntegrationService.AddCoinsAsync(userId, session.CoinsEarned, "Recovered Focus Reward", cancellationToken);
+            }
+            else if (session.CoinsEarned < 0)
+            {
+                await _userIntegrationService.SpendCoinsAsync(userId, Math.Abs(session.CoinsEarned), "Recovered Focus Penalty", cancellationToken);
             }
 
             return _mapper.Map<TimeSessionDto>(session);
@@ -357,9 +377,32 @@ namespace TimeTrackingInfrastructure.TimeServices
 
         private async Task UpdateDailyTransactionAsync(TimeSession session, CancellationToken cancellationToken)
         {
-            var date = DateOnly.FromDateTime(session.StartTime);
+            var date = GetLocalUserDate(session.StartTime);
             var daily = await GetOrCreateDailyTransactionAsync(session.UserId, date, cancellationToken);
             daily.AddSession(session.DurationMinutes, session.CoinsEarned);
+        }
+
+        private DateOnly GetLocalUserDate(DateTime utcTime)
+        {
+            try
+            {
+                var tz = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                var localTime = TimeZoneInfo.ConvertTimeFromUtc(utcTime, tz);
+                return DateOnly.FromDateTime(localTime);
+            }
+            catch (TimeZoneNotFoundException)
+            {
+                try
+                {
+                    var tz = TimeZoneInfo.FindSystemTimeZoneById("Africa/Cairo");
+                    var localTime = TimeZoneInfo.ConvertTimeFromUtc(utcTime, tz);
+                    return DateOnly.FromDateTime(localTime);
+                }
+                catch (Exception)
+                {
+                    return DateOnly.FromDateTime(utcTime.AddHours(3)); 
+                }
+            }
         }
 
         private async Task<DailyTransaction> GetOrCreateDailyTransactionAsync(Guid userId, DateOnly date, CancellationToken cancellationToken)

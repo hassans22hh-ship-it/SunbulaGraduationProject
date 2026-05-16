@@ -69,14 +69,15 @@ namespace PlantInfrastructure.StorePlantServices
                 if (alreadyOwned)
                     throw new DuplicatePlantPurchaseException(userId, dto.PlantId);
 
-                // 3. Business rule: sufficient coin balance
-                var user = await _userRepository.GetByIdAsync(userId, cancellationToken)
-                    ?? throw new UnauthorizedAccessException("User not found.");
-
-                var userCoinBalance = user.CoinBalance;
-
-                if (userCoinBalance < plant.Price)
-                    throw new InsufficientCoinsException(plant.Price, userCoinBalance);
+                // 3. Business rule: sufficient coin balance (Atomically deducted to prevent double-spending race condition)
+                var deductionSuccessful = await _userRepository.TryDeductCoinsAtomicAsync(userId, plant.Price, cancellationToken);
+                
+                if (!deductionSuccessful)
+                {
+                    var user = await _userRepository.GetByIdAsync(userId, cancellationToken)
+                        ?? throw new UnauthorizedAccessException("User not found.");
+                    throw new InsufficientCoinsException(plant.Price, user.CoinBalance);
+                }
 
                 // 4. Create domain entity — domain event fires here (PlantPurchasedEvent)
                 //    UserIdentity module will consume this event to deduct coins
@@ -109,12 +110,16 @@ namespace PlantInfrastructure.StorePlantServices
             if (userPlant.UserId != userId)
                 throw new UnauthorizedAccessException("You do not own this plant.");
 
-            // 1. Business Rule: Check if user has sufficient coins for watering
-            var user = await _userRepository.GetByIdAsync(userId, cancellationToken)
-                ?? throw new UnauthorizedAccessException("User records not found.");
+            // 1. Business Rule: Atomically deduct coins from user to prevent race condition (double spending)
+            var deductionSuccessful = await _userRepository.TryDeductCoinsAtomicAsync(userId, coins, cancellationToken);
 
-            if (user.CoinBalance < coins)
+            if (!deductionSuccessful)
+            {
+                // To provide accurate exception details, fetch the current balance
+                var user = await _userRepository.GetByIdAsync(userId, cancellationToken)
+                    ?? throw new UnauthorizedAccessException("User records not found.");
                 throw new InsufficientCoinsException(coins, user.CoinBalance);
+            }
 
             // 2. Perform growth logic - Domain method now raises PlantWateredEvent for deduction
             userPlant.AddGrowthCoins(coins);

@@ -21,12 +21,10 @@ namespace Application.EventHandlers
 
         public async Task Handle(PlantPurchasedEvent notification, CancellationToken cancellationToken)
         {
-            // Business Rule: Deduct coins spent on the plant from the user's identity profile.
-            await _userIntegrationService.SpendCoinsAsync(
-                notification.UserId, 
-                notification.CoinsSpent, 
-                "Plant Purchase", 
-                cancellationToken);
+            // Note: The coins are now atomically deducted in the Plant module to prevent race conditions.
+            // We no longer call SpendCoinsAsync here to prevent double deduction.
+            // If gamification events are needed, we can publish a notification here instead.
+            await Task.CompletedTask;
         }
     }
 }
