@@ -41,7 +41,9 @@ namespace TimeTrackingPresentation.Controllers
         public async Task<IActionResult> GetTodaySummary(CancellationToken cancellationToken)
         {
             var userId = GetCurrentUserId();
-            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var localNow = DateTime.UtcNow;
+            try { localNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time")); } catch { localNow = localNow.AddHours(3); }
+            var today = DateOnly.FromDateTime(localNow);
             var result = await _dailyService.GetDailySummaryAsync(userId, today, cancellationToken);
             return Ok(result);
         }

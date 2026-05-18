@@ -71,7 +71,9 @@ namespace TimeTrackingInfrastructure.Persistence.Repositories
 
         public async Task<int> GetCurrentStreakAsync(Guid userId, CancellationToken cancellationToken = default)
         {
-            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var localNow = DateTime.UtcNow;
+            try { localNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time")); } catch { localNow = localNow.AddHours(3); }
+            var today = DateOnly.FromDateTime(localNow);
             var recentDays = await _dbSet
                 .Where(e => e.UserId == userId && !e.IsDeleted && e.TotalMinutes >= 30 && e.Date <= today)
                 .OrderByDescending(e => e.Date).Select(e => e.Date).Take(60)
@@ -93,7 +95,9 @@ namespace TimeTrackingInfrastructure.Persistence.Repositories
 
         public async Task<IEnumerable<DailyTransaction>> GetLastNDaysAsync(Guid userId, int days, CancellationToken cancellationToken = default)
         {
-            var from = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-days));
+            var localNow = DateTime.UtcNow;
+            try { localNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time")); } catch { localNow = localNow.AddHours(3); }
+            var from = DateOnly.FromDateTime(localNow.AddDays(-days));
             return await _dbSet.Where(e => e.UserId == userId && !e.IsDeleted && e.Date >= from).OrderBy(e => e.Date).ToListAsync(cancellationToken);
         }
     }
