@@ -19,6 +19,7 @@ namespace TimeTrackingDomain.Entities
             Guid userId,
             Guid taskId,
             DateTime startTime,
+            DateOnly date,
             BehaviorType behaviorType,
             bool manuallyAdded,
             string? notes) : base(id)
@@ -26,6 +27,7 @@ namespace TimeTrackingDomain.Entities
             UserId = userId;
             TaskId = taskId;
             StartTime = startTime;
+            Date = date;
             BehaviorType = behaviorType;
             ManuallyAdded = manuallyAdded;
             Notes = notes;
@@ -48,6 +50,7 @@ namespace TimeTrackingDomain.Entities
         public Guid TaskId { get; private set; }
 
         public DateTime StartTime { get; private set; }
+        public DateOnly Date { get; private set; }
         public DateTime? EndTime { get; private set; }
         public int DurationMinutes { get; private set; }
         public int CoinsEarned { get; private set; }
@@ -65,7 +68,7 @@ namespace TimeTrackingDomain.Entities
         /// <summary>
         /// Starts a new live tracking session.
         /// </summary>
-        public static TimeSession Start(Guid userId, Guid taskId, BehaviorType behaviorType, string? notes = null)
+        public static TimeSession Start(Guid userId, Guid taskId, BehaviorType behaviorType, DateOnly date, string? notes = null)
         {
             ValidateUserId(userId);
             ValidateTaskId(taskId);
@@ -75,6 +78,7 @@ namespace TimeTrackingDomain.Entities
                 userId: userId,
                 taskId: taskId,
                 startTime: DateTime.UtcNow,
+                date: date,
                 behaviorType: behaviorType,
                 manuallyAdded: false,
                 notes: notes);
@@ -91,6 +95,7 @@ namespace TimeTrackingDomain.Entities
             Guid taskId,
             DateTime startTime,
             DateTime endTime,
+            DateOnly date,
             BehaviorType behaviorType,
             string? notes = null)
         {
@@ -106,6 +111,7 @@ namespace TimeTrackingDomain.Entities
                 userId: userId,
                 taskId: taskId,
                 startTime: timeRange.StartTime,
+                date: date,
                 behaviorType: behaviorType,
                 manuallyAdded: true,
                 notes: notes);
@@ -189,7 +195,7 @@ namespace TimeTrackingDomain.Entities
         /// Updates session details (time range, notes, behavior type).
         /// Only allowed for completed sessions.
         /// </summary>
-        public void Update(DateTime startTime, DateTime endTime, BehaviorType behaviorType, string? notes)
+        public void Update(DateTime startTime, DateTime endTime, DateOnly date, BehaviorType behaviorType, string? notes)
         {
             if (IsActive)
                 throw new InvalidOperationException("Cannot update an active session. Stop it first.");
@@ -201,6 +207,7 @@ namespace TimeTrackingDomain.Entities
             var coins = duration.CalculateCoins(behaviorType);
 
             StartTime = timeRange.StartTime;
+            Date = date;
             EndTime = timeRange.EndTime;
             BehaviorType = behaviorType;
             DurationMinutes = (int)Math.Round(duration.TotalMinutes, MidpointRounding.AwayFromZero);

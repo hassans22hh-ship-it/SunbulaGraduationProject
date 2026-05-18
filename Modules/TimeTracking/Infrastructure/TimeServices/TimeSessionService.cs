@@ -75,7 +75,8 @@ namespace TimeTrackingInfrastructure.TimeServices
             if (sameTaskSession != null)
                 throw new ActiveSessionExistsException(sameTaskSession.Id);
 
-            var session = TimeSession.Start(userId, dto.TaskId, dto.BehaviorType, dto.Notes);
+            var date = GetLocalUserDate(DateTime.UtcNow);
+            var session = TimeSession.Start(userId, dto.TaskId, dto.BehaviorType, date, dto.Notes);
             await _unitOfWork.TimeSessions.AddAsync(session, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             return _mapper.Map<TimeSessionDto>(session);
@@ -181,9 +182,9 @@ namespace TimeTrackingInfrastructure.TimeServices
                 
                 var combinedNotes = string.Join(" | ", new[] { firstSession.Notes, dto.Notes }.Where(n => !string.IsNullOrWhiteSpace(n)));
 
-                firstSession.Update(minStartTime, maxEndTime, dto.BehaviorType, combinedNotes);
+                var date = GetLocalUserDate(minStartTime);
+                firstSession.Update(minStartTime, maxEndTime, date, dto.BehaviorType, combinedNotes);
                 
-                var date = GetLocalUserDate(firstSession.StartTime);
                 var daily = await GetOrCreateDailyTransactionAsync(userId, date, cancellationToken);
                 daily.UpdateSession(oldDuration, oldCoins, firstSession.DurationMinutes, firstSession.CoinsEarned);
                 
@@ -223,7 +224,8 @@ namespace TimeTrackingInfrastructure.TimeServices
                 return _mapper.Map<TimeSessionDto>(firstSession);
             }
 
-            var session = TimeSession.CreateManual(userId, dto.TaskId, dto.StartTime, dto.EndTime, dto.BehaviorType, dto.Notes);
+            var dateForNew = GetLocalUserDate(dto.StartTime);
+            var session = TimeSession.CreateManual(userId, dto.TaskId, dto.StartTime, dto.EndTime, dateForNew, dto.BehaviorType, dto.Notes);
             await UpdateDailyTransactionAsync(session, cancellationToken);
             await _unitOfWork.TimeSessions.AddAsync(session, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -284,9 +286,9 @@ namespace TimeTrackingInfrastructure.TimeServices
             var oldDuration = session.DurationMinutes;
             var oldCoins = session.CoinsEarned;
 
-            session.Update(minStartTime, maxEndTime, dto.BehaviorType, combinedNotes);
+            var date = GetLocalUserDate(minStartTime);
+            session.Update(minStartTime, maxEndTime, date, dto.BehaviorType, combinedNotes);
 
-            var date = GetLocalUserDate(session.StartTime);
             var daily = await GetOrCreateDailyTransactionAsync(userId, date, cancellationToken);
             daily.UpdateSession(oldDuration, oldCoins, session.DurationMinutes, session.CoinsEarned);
 

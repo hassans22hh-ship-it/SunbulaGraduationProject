@@ -53,7 +53,7 @@ namespace TimeTrackingInfrastructure.Persistence.Repositories
 
         public async Task<int> GetTotalMinutesByUserIdAndDateAsync(Guid userId, DateOnly date, CancellationToken ct = default)
             => await _dbSet
-                .Where(ts => ts.UserId == userId && !ts.IsDeleted && DateOnly.FromDateTime(ts.StartTime) == date)
+                .Where(ts => ts.UserId == userId && !ts.IsDeleted && ts.Date == date)
                 .SumAsync(ts => ts.DurationMinutes, ct);
 
         public async Task HardDeleteByUserIdAsync(Guid userId, CancellationToken ct = default)
@@ -69,19 +69,15 @@ namespace TimeTrackingInfrastructure.Persistence.Repositories
 
         public async Task<IEnumerable<TimeSession>> GetByUserAndDateAsync(Guid userId, DateOnly date, CancellationToken cancellationToken = default)
         {
-            var startOfDay = date.ToDateTime(TimeOnly.MinValue);
-            var endOfDay = date.ToDateTime(TimeOnly.MaxValue);
             return await _dbSet
-                .Where(e => e.UserId == userId && !e.IsDeleted && e.StartTime >= startOfDay && e.StartTime <= endOfDay)
+                .Where(e => e.UserId == userId && !e.IsDeleted && e.Date == date)
                 .OrderBy(e => e.StartTime).ToListAsync(cancellationToken);
         }
 
         public async Task<IEnumerable<TimeSession>> GetByUserAndDateRangeAsync(Guid userId, DateOnly from, DateOnly to, CancellationToken cancellationToken = default)
         {
-            var startDate = from.ToDateTime(TimeOnly.MinValue);
-            var endDate = to.ToDateTime(TimeOnly.MaxValue);
             return await _dbSet
-                .Where(e => e.UserId == userId && !e.IsDeleted && e.StartTime >= startDate && e.StartTime <= endDate)
+                .Where(e => e.UserId == userId && !e.IsDeleted && e.Date >= from && e.Date <= to)
                 .OrderBy(e => e.StartTime).ToListAsync(cancellationToken);
         }
 

@@ -17,6 +17,7 @@ namespace TimeTrackingInfrastructure.Persistence.Configurations
             builder.Property(e => e.TaskId).IsRequired();
 
             builder.Property(e => e.StartTime).IsRequired();
+            builder.Property(e => e.Date).IsRequired();
             builder.Property(e => e.EndTime);
 
             builder.Property(e => e.DurationMinutes)
