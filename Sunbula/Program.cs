@@ -52,7 +52,10 @@ namespace Sunbula
             // ═══════════════════════════════════════════════════════════
             // JWT AUTHENTICATION
             // ═══════════════════════════════════════════════════════════
-            var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtOptions>();
+            var jwtSettings = builder.Configuration.GetRequiredSection("Jwt").Get<JwtOptions>()
+                ?? throw new InvalidOperationException(
+                    "JWT configuration section 'Jwt' is missing or invalid in appsettings.json. " +
+                    "Ensure SecretKey, Issuer, and Audience are set.");
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -63,7 +66,8 @@ namespace Sunbula
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = jwtSettings!.Issuer,
+                        ValidIssuers = jwtSettings.Issuer
+                            .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries),
                         ValidAudience = jwtSettings.Audience,
                         IssuerSigningKey = new SymmetricSecurityKey(
                             Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
@@ -96,9 +100,13 @@ namespace Sunbula
             {
                 options.AddPolicy("AllowFrontend", policy =>
                 {
-                    policy.WithOrigins("https://sunbula-front-end.vercel.app")
+                    policy.WithOrigins("http://localhost:4200")
                           .AllowAnyMethod()
                          .AllowAnyHeader();
+             /*  
+              *  https:\//sunbula-front-end.vercel.app
+              
+              */
 
                     // policy.WithOrigins("http:\//localhost:4200")
 
@@ -174,7 +182,7 @@ namespace Sunbula
             app.MapGet("/health", () => "OK");
             app.MapControllers();
 
-            app.Run();
+            await app.RunAsync();
         }
     }
 }
