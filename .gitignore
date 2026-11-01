@@ -99,7 +99,7 @@ StyleCopReport.xml
 *.pidb
 *.svclog
 *.scc
-
+*.dll
 # Chutzpah Test files
 _Chutzpah*
 
@@ -396,3 +396,8 @@ hash_gen.cs
 # Sensitive configuration (already covered above, reinforcing)
 **/appsettings.Development.json
 **/appsettings.Production.json
+appsettings.json
+appsettings.*.json
+!**/appsettings.Example.json
+publish-output/
+**/publish-output/
