@@ -63,7 +63,7 @@ jobs:
             },
             "Jwt": {
               "SecretKey": "${{ secrets.JWT_SECRET_KEY }}",
-              "Issuer": "${{ secrets.APP_URL || 'https://sunbula.runasp.net' }}",
+              "Issuer": "https://localhost:7217;http://localhost:5142;https://sunbula.runasp.net/",
               "Audience": "SunbulaClient",
               "ExpiryMinutes": 60,
               "RefreshTokenExpiryDays": 7
@@ -74,7 +74,7 @@ jobs:
               "Host": "smtp.gmail.com",
               "Port": 587
             },
-            "Logging": {
+            "Logging":mfsuhnduoraezghh {
               "LogLevel": {
                 "Default": "Warning",
                 "Microsoft.AspNetCore": "Warning"
@@ -83,13 +83,26 @@ jobs:
           }
           SETTINGS
 
-      # ── 7. Deploy via FTP ──
+      # ── 7. Safely take IIS app offline to release file locks ──
+      - name: Put app offline (release DLL locks)
+        run: |
+          echo "<html><head><title>Deploying</title></head><body><h2>Updating Sunbula... Please wait 30 seconds.</h2></body></html>" > ./app_offline.htm
+          curl --ftp-create-dirs -T ./app_offline.htm -u "${{ secrets.FTP_USERNAME || 'site68347' }}:${{ secrets.FTP_PASSWORD }}" ftp://site68347.siteasp.net/wwwroot/app_offline.htm || true
+          sleep 3
+
+      # ── 8. Deploy via FTP ──
       - name: Deploy to MonsterASP via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: site68347.siteasp.net
-          username: ${{ secrets.FTP_USERNAME }}
+          username: ${{ secrets.FTP_USERNAME || 'site68347' }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./publish/
-          server-dir: /wwwroot/         # MonsterASP path from your panel
-          dangerous-clean-slate: false   # Don't delete existing files not in source
+          server-dir: /wwwroot/
+          dangerous-clean-slate: false
+
+      # ── 9. Bring app back online ──
+      - name: Bring app online (remove app_offline.htm)
+        if: always()
+        run: |
+          curl -u "${{ secrets.FTP_USERNAME || 'site68347' }}:${{ secrets.FTP_PASSWORD }}" -Q "DELE /wwwroot/app_offline.htm" ftp://site68347.siteasp.net/ || true
