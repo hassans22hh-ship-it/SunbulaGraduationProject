@@ -52,28 +52,36 @@ namespace Sunbula
             // ═══════════════════════════════════════════════════════════
             // JWT AUTHENTICATION
             // ═══════════════════════════════════════════════════════════
-            var jwtSettings = builder.Configuration.GetRequiredSection("Jwt").Get<JwtOptions>()
-                ?? throw new InvalidOperationException(
-                    "JWT configuration section 'Jwt' is missing or invalid in appsettings.json. " +
-                    "Ensure SecretKey, Issuer, and Audience are set.");
+            builder.Services.Configure<JwtOptions>(
+                builder.Configuration.GetSection(JwtOptions.SectionName));
 
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
+            builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+                .Configure<Microsoft.Extensions.Options.IOptions<JwtOptions>>((options, jwtOpt) =>
                 {
+                    var settings = jwtOpt.Value;
+                    if (string.IsNullOrWhiteSpace(settings.SecretKey))
+                    {
+                        return;
+                    }
+
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuers = jwtSettings.Issuer
+                        ValidIssuers = (settings.Issuer ?? string.Empty)
                             .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries),
-                        ValidAudience = jwtSettings.Audience,
+                        ValidAudience = settings.Audience,
                         IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+                            Encoding.UTF8.GetBytes(settings.SecretKey)),
                         ClockSkew = TimeSpan.Zero
                     };
+                });
 
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
                     options.Events = new JwtBearerEvents
                     {
                         // SSE (EventSource) and WebSocket clients cannot set

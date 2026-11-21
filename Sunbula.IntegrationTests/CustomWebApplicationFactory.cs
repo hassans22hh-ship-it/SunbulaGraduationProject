@@ -35,7 +35,11 @@ namespace Sunbula.IntegrationTests
                 {
                     ["ConnectionStrings:SunbulaDb"] = _dbContainer.GetConnectionString(),
                     ["Database:AutoMigrate"] = "true",
-                    ["Jwt:Issuer"] = "https://localhost:7217;http://localhost:5142"
+                    ["Jwt:SecretKey"] = "SunbulaDummyIntegrationTestSecretKey_NotReal_AtLeast256BitsLongForHmacSha256Security!",
+                    ["Jwt:Issuer"] = "https://localhost:7217;http://localhost:5142",
+                    ["Jwt:Audience"] = "SunbulaIntegrationTests",
+                    ["Jwt:ExpiryMinutes"] = "60",
+                    ["Jwt:RefreshTokenExpiryDays"] = "7"
                 });
             });
 

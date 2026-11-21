@@ -29,6 +29,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup test configuration
+        run: cp Sunbula/appsettings.Example.json Sunbula/appsettings.json
+
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
