@@ -1,10 +1,11 @@
 # ═══════════════════════════════════════════════════════════════
 # CD — Continuous Deployment to MonsterASP via FTP
 # Runs only when code is pushed to the master branch.
+# Must pass the integration test gate before deploying.
 # ═══════════════════════════════════════════════════════════════
 #
 # REQUIRED GITHUB SECRETS (set in repo Settings → Secrets → Actions):
-#   FTP_SERVER        — MonsterASP FTP hostname (e.g., ftp.monster-asp.net)
+#   FTP_SERVER        — MonsterASP FTP hostname (e.g., site68347.siteasp.net)
 #   FTP_USERNAME      — FTP login username
 #   FTP_PASSWORD      — FTP login password
 #   DB_CONNECTION_STRING — Production SQL Server connection string
@@ -19,7 +20,40 @@ on:
     branches: [master]
 
 jobs:
+  # ── Gate: Integration tests must pass before deployment runs ──
+  test:
+    name: Run Integration Test Gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore NuGet packages
+        run: dotnet restore SunbulaGraduationProject.slnx
+
+      - name: Build tests
+        run: dotnet build Sunbula.IntegrationTests/Sunbula.IntegrationTests.csproj -c Release --no-restore
+
+      - name: Run Integration Tests (Testcontainers.MsSql)
+        run: dotnet test Sunbula.IntegrationTests/Sunbula.IntegrationTests.csproj -c Release --no-build --verbosity normal
+
+  # ── Deploy: Runs strictly after test job succeeds ──
   deploy:
+    name: Deploy to MonsterASP
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
@@ -53,11 +87,13 @@ jobs:
         run: dotnet publish Sunbula/Sunbula.csproj -c Release -o ./publish --no-build
 
       # ── 6. Create production appsettings ──
-      #    Injects secrets as environment-specific config
       - name: Create appsettings.Production.json
         run: |
           cat > ./publish/appsettings.Production.json << 'SETTINGS'
           {
+            "Database": {
+              "AutoMigrate": false
+            },
             "ConnectionStrings": {
               "SunbulaDb": "${{ secrets.DB_CONNECTION_STRING }}"
             },
@@ -74,7 +110,7 @@ jobs:
               "Host": "smtp.gmail.com",
               "Port": 587
             },
-            "Logging":mfsuhnduoraezghh {
+            "Logging": {
               "LogLevel": {
                 "Default": "Warning",
                 "Microsoft.AspNetCore": "Warning"
@@ -101,8 +137,8 @@ jobs:
           server-dir: /wwwroot/
           dangerous-clean-slate: false
 
-      # ── 9. Bring app back online ──
-      - name: Bring app online (remove app_offline.htm)
+      # ── 9. Bring IIS app back online ──
+      - name: Bring app back online (remove app_offline.htm)
         if: always()
         run: |
           curl -u "${{ secrets.FTP_USERNAME || 'site68347' }}:${{ secrets.FTP_PASSWORD }}" -Q "DELE /wwwroot/app_offline.htm" ftp://site68347.siteasp.net/ || true

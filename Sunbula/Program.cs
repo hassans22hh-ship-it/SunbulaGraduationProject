@@ -100,7 +100,7 @@ namespace Sunbula
             {
                 options.AddPolicy("AllowFrontend", policy =>
                 {
-                    policy.WithOrigins("http://localhost:4200")
+                    policy.WithOrigins("https://sunbula-front-end.vercel.app")
                           .AllowAnyMethod()
                          .AllowAnyHeader();
              /*  

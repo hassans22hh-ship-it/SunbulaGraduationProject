@@ -2,6 +2,7 @@ using DebtDomain.Exceptions;
 using Domain.Exceptions;
 using FinanceDomain.Exceptions;
 using TimeTrackingDomain.Exceptions;
+using PlantDomain.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -52,6 +53,12 @@ namespace Sunbula
                 ActiveSessionExistsException => (HttpStatusCode.Conflict, "Active session exists"),
                 OverlappingSessionException => (HttpStatusCode.Conflict, "Overlapping session"),
                 TimeSessionNotFoundException => (HttpStatusCode.NotFound, "Time session not found"),
+
+                // Store Plant Exceptions
+                DuplicatePlantPurchaseException => (HttpStatusCode.Conflict, "Duplicate plant purchase"),
+                PlantNotFoundException => (HttpStatusCode.NotFound, "Plant not found"),
+                UserPlantNotFoundException => (HttpStatusCode.NotFound, "User plant not found"),
+                InsufficientCoinsException => (HttpStatusCode.BadRequest, "Insufficient coins"),
 
                 // Auth exceptions
                 UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "Unauthorized"),

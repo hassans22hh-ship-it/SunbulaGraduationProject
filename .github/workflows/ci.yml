@@ -43,8 +43,6 @@ jobs:
       - name: Build solution
         run: dotnet build SunbulaGraduationProject.slnx -c Release --no-restore
 
-      # ── 6. Run tests ──
-      # Note: Integration tests may need a DB. For CI, consider using
-      # a test database or in-memory provider.
-      # - name: Run tests
-      #   run: dotnet test Sunbula.IntegrationTests/Sunbula.IntegrationTests.csproj -c Release --no-build --verbosity normal
+      # ── 6. Run integration tests (Testcontainers.MsSql) ──
+      - name: Run Integration Tests
+        run: dotnet test Sunbula.IntegrationTests/Sunbula.IntegrationTests.csproj -c Release --no-build --verbosity normal

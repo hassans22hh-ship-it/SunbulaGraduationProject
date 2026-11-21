@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using PlantApplication.StorePlantDTOs;
 using PlantApplication.StorePlantServiceAbstraction;
 using PlantDomain.Contracts;
@@ -96,6 +97,27 @@ namespace PlantInfrastructure.StorePlantServices
                 // Re-fetch with navigation properties loaded
                 var saved = await _unitOfWork.UserPlants.GetByIdWithDetailsAsync(userPlant.Id, cancellationToken)!;
                 return _mapper.Map<UserPlantDto>(saved!);
+            }
+            catch (DbUpdateException ex)
+            {
+                await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+
+                // Compensating transaction: refund deducted coins on failure to maintain consistency
+                await _userCoinService.RefundCoinsAsync(
+                    userId, 
+                    plant.Price, 
+                    $"Rollback: Purchase failed for plant {plant.Name}", 
+                    cancellationToken);
+
+                // Handle unique index violation cleanly (concurrency race condition)
+                if (ex.InnerException?.Message.Contains("IX_UserPlants_UserId_PlantId") == true ||
+                    ex.InnerException?.Message.Contains("Cannot insert duplicate key") == true ||
+                    ex.Message.Contains("IX_UserPlants_UserId_PlantId"))
+                {
+                    throw new DuplicatePlantPurchaseException(userId, dto.PlantId);
+                }
+
+                throw;
             }
             catch
             {
