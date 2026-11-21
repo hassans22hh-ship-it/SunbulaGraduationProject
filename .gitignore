@@ -401,3 +401,9 @@ appsettings.*.json
 !**/appsettings.Example.json
 publish-output/
 **/publish-output/
+
+# ═══════════════════════════════════════════════════════════════
+# DOCKER & ENVIRONMENT
+# ═══════════════════════════════════════════════════════════════
+.env
+!.env.example

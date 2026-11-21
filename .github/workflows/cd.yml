@@ -1,0 +1,95 @@
+# ═══════════════════════════════════════════════════════════════
+# CD — Continuous Deployment to MonsterASP via FTP
+# Runs only when code is pushed to the master branch.
+# ═══════════════════════════════════════════════════════════════
+#
+# REQUIRED GITHUB SECRETS (set in repo Settings → Secrets → Actions):
+#   FTP_SERVER        — MonsterASP FTP hostname (e.g., ftp.monster-asp.net)
+#   FTP_USERNAME      — FTP login username
+#   FTP_PASSWORD      — FTP login password
+#   DB_CONNECTION_STRING — Production SQL Server connection string
+#   JWT_SECRET_KEY    — JWT signing key
+#   EMAIL_APP_PASSWORD — Gmail app password
+#   EMAIL_ADDRESS     — Gmail address for sending emails
+
+name: CD — Deploy to MonsterASP
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout code ──
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Setup .NET 10 SDK ──
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      # ── 3. Cache NuGet packages ──
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      # ── 4. Restore + Build ──
+      - name: Restore NuGet packages
+        run: dotnet restore SunbulaGraduationProject.slnx
+
+      - name: Build solution
+        run: dotnet build SunbulaGraduationProject.slnx -c Release --no-restore
+
+      # ── 5. Publish ──
+      - name: Publish application
+        run: dotnet publish Sunbula/Sunbula.csproj -c Release -o ./publish --no-build
+
+      # ── 6. Create production appsettings ──
+      #    Injects secrets as environment-specific config
+      - name: Create appsettings.Production.json
+        run: |
+          cat > ./publish/appsettings.Production.json << 'SETTINGS'
+          {
+            "ConnectionStrings": {
+              "SunbulaDb": "${{ secrets.DB_CONNECTION_STRING }}"
+            },
+            "Jwt": {
+              "SecretKey": "${{ secrets.JWT_SECRET_KEY }}",
+              "Issuer": "${{ secrets.APP_URL || 'https://sunbula.runasp.net' }}",
+              "Audience": "SunbulaClient",
+              "ExpiryMinutes": 60,
+              "RefreshTokenExpiryDays": 7
+            },
+            "EmailSettings": {
+              "Email": "${{ secrets.EMAIL_ADDRESS }}",
+              "Password": "${{ secrets.EMAIL_APP_PASSWORD }}",
+              "Host": "smtp.gmail.com",
+              "Port": 587
+            },
+            "Logging": {
+              "LogLevel": {
+                "Default": "Warning",
+                "Microsoft.AspNetCore": "Warning"
+              }
+            }
+          }
+          SETTINGS
+
+      # ── 7. Deploy via FTP ──
+      - name: Deploy to MonsterASP via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: site68347.siteasp.net
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./publish/
+          server-dir: /wwwroot/         # MonsterASP path from your panel
+          dangerous-clean-slate: false   # Don't delete existing files not in source

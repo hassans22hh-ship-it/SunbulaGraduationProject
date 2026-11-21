@@ -1,0 +1,32 @@
+# Build outputs
+**/bin/
+**/obj/
+**/out/
+**/publish-output/
+
+# IDE and tooling
+.vs/
+.vscode/
+*.DotSettings
+*.DotSettings.user
+*.user
+
+# Git
+.git/
+.github/
+.gitignore
+
+# Docker (don't send Dockerfile into the build context)
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Sensitive files
+**/.env
+**/appsettings.Development.json
+**/appsettings.Production.json
+
+# Misc
+*.md
+LICENSE
+csharp-uml-generator/
