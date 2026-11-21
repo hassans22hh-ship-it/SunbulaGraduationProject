@@ -3,7 +3,7 @@
 # 🌱 Sunbula (سُنبلة) — Modular Monolith Backend
 
 [![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
-[![C# 13](https://img.shields.io/badge/C%23-13.0-239120?style=for-the-badge&logo=c-sharp&logoColor=white)](https://learn.microsoft.com/en-us/dotnet/csharp/)
+[![C# 14](https://img.shields.io/badge/C%23-14.0-239120?style=for-the-badge&logo=c-sharp&logoColor=white)](https://learn.microsoft.com/en-us/dotnet/csharp/)
 [![SQL Server](https://img.shields.io/badge/SQL%20Server-2022-CC292B?style=for-the-badge&logo=microsoft-sql-server&logoColor=white)](https://www.microsoft.com/sql-server)
 [![Testcontainers](https://img.shields.io/badge/Testcontainers-MsSql-008080?style=for-the-badge&logo=docker&logoColor=white)](https://dotnet.testcontainers.org/)
 [![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
@@ -73,7 +73,7 @@ graph TB
     end
 
     subgraph SHARED["Shared Kernel (BuildingBlocks)"]
-        SK["BaseEntity / ValueObject<br/>Domain Event Contracts<br/>Internal Service Contracts (IUserCoinService)"]
+        SK["BaseEntity / ValueObject<br/>Cross-Module Contracts<br/>Domain Events (MediatR)"]
     end
 
     subgraph DB["SQL Server (Schema Isolation)"]
@@ -83,7 +83,7 @@ graph TB
         D_TT[(timetracking Schema)]
         D_FIN[(finance Schema)]
         D_DBT[(debt Schema)]
-        D_PLT[(storeplant Schema)]
+        D_PLT[(store Schema)]
     end
 
     Gateway --> UI & TM & TT & FIN & DBT & PLT
@@ -96,13 +96,14 @@ graph TB
 
     UI & TM & TT & FIN & DBT & PLT -. Contracts & Base Entities .-> SK
     UI -. UserAccountDeletedEvent (MediatR) .-> TM & TT & FIN & DBT & PLT
-    PLT -. Synchronous Deduct / Refund .-> SK
+    PLT -. IUserCoinService (Deduct / Refund) .-> UI
+    TT -. IUserIntegrationService (Award / Milestone) .-> UI
 ```
 
 ### Core Tenets:
 1. **Clean Architecture per Module:** Every module maintains autonomous `Domain`, `Application`, `Infrastructure`, and `Presentation` projects.
-2. **Dedicated DbContexts:** Zero cross-context database foreign keys or LINQ joins. Each module owns its EF Core `DbContext` and schema namespace (`identity`, `storeplant`, etc.).
-3. **Explicit Cross-Module Contracts:** Cross-module dependencies are mediated strictly via abstractions in `SharedKernel` or asynchronous domain events. Direct project dependencies between module domain/infrastructure layers are strictly prohibited.
+2. **Dedicated DbContexts & Schema Isolation:** Zero cross-context database foreign keys or LINQ joins. Each module owns its EF Core `DbContext` and schema namespace (`identity`, `store`, `finance`, etc.).
+3. **Explicit Cross-Module Contracts:** Cross-module communication is mediated strictly via abstractions in `SharedKernel` or asynchronous domain events. Direct project dependencies between module domain/infrastructure layers are strictly prohibited.
 
 ---
 
@@ -123,15 +124,15 @@ Modules/{ModuleName}/
 | **`TimeTracking`** | Focus session intervals, Pomodoro allocations, streak tracking | `timetracking` | `TimeSession`, `TimeSpanAllocation` |
 | **`Finance`** | Income/expense cashflows, wallet management | `finance` | `Transaction`, `FinancialCategory`, `Wallet` |
 | **`Debt`** | Debts, creditor/debtor directory, payment schedules | `debt` | `Debt`, `Installment` |
-| **`StorePlant`** | Nursery catalog, plant purchase, growth and watering stages | `storeplant` | `Plant`, `UserPlant` |
+| **`StorePlant`** | Nursery catalog, plant purchase, growth and watering stages | `store` | `Plant`, `UserPlant` |
 
 ---
 
 ## 📡 Cross-Module Consistency & Event Choreography
 
-### Plant Purchase Flow (Compensating Transaction Pattern)
+### Plant Purchase Flow (Synchronous Compensating Action Pattern)
 
-Because `UserIdentity` (coin balance) and `StorePlant` (plant ownership) reside in separate `DbContext` instances without two-phase commit (2PC), cross-module consistency is guaranteed using a **synchronous internal contract (`IUserCoinService`) with a compensating rollback (Saga pattern)**:
+Because `UserIdentity` (coin balance) and `StorePlant` (plant ownership) reside in separate `DbContext` instances, cross-module consistency is coordinated using a **synchronous internal contract (`IUserCoinService`) with a best-effort compensating refund**:
 
 ```mermaid
 sequenceDiagram
@@ -156,23 +157,23 @@ sequenceDiagram
         alt Persistence Succeeded
             StorePlant->>PlantDB: CommitTransactionAsync()
             StorePlant-->>User: 200 OK (UserPlantDto)
-        else Persistence Failed (Exception / Timeout)
+        else Persistence Failed (Exception / Timeout / Unique Key Constraint)
             StorePlant->>PlantDB: RollbackTransactionAsync()
             StorePlant->>CoinService: RefundCoinsAsync(userId, price) [Compensating Action]
             CoinService->>UserDB: Restore CoinBalance (user.AddCoins)
-            StorePlant-->>User: 500 Internal Error (Coins Restored)
+            StorePlant-->>User: Error Response (Coins Refunded)
         end
     end
 ```
 
-### Event Choreography Table
+### Active Cross-Module Contracts & Events
 
-| Event | Publisher | Subscribers | Delivery / Role |
+| Mechanism | Source | Target | Delivery / Role |
 | :--- | :--- | :--- | :--- |
-| `UserAccountDeletedEvent` | **UserIdentity** | All Modules | In-Process MediatR: Cascades soft-delete / data cleanup across bounded contexts |
-| `PlantPurchasedEvent` | **StorePlant** | **UserIdentity** | Domain event raised on purchase; serves as extension point for audit and achievements |
-| `PlantWateredEvent` | **StorePlant** | **UserIdentity** | Domain event raised on plant watering; extension point for streak rewards |
-| `CoinBalanceChangedEvent` | **UserIdentity** | **UserIdentity** | Broadcasts live coin changes to connected clients via Server-Sent Events (SSE) |
+| `UserAccountDeletedEvent` | **UserIdentity** | `Debt`, `Finance`, `StorePlant`, `TaskManagement`, `TimeTracking` | In-Process MediatR (`INotification`): Cascades user account deletion across all bounded contexts |
+| `CoinBalanceChangedEvent` | **UserIdentity** | Connected Clients | In-Process MediatR (`INotification`): Dispatches balance updates to `CoinStreamManager` for SSE live streaming |
+| `IUserCoinService` | **StorePlant** | **UserIdentity** | Synchronous internal service call: Deducts plant purchase/watering coins with best-effort rollback refund on persistence failure |
+| `IUserIntegrationService` | **TimeTracking** | **UserIdentity** | Synchronous internal service call: Awards focus session coins (`AddCoinsAsync`) and daily streak bonuses (`AwardStreakMilestoneAsync`) |
 
 ---
 
@@ -180,12 +181,12 @@ sequenceDiagram
 
 | Component | Technology | Version / Details |
 | :--- | :--- | :--- |
-| **Runtime & Language** | .NET | `10.0` (C# 13 default) |
+| **Runtime & Language** | .NET | `10.0` (C# 14 compiler) |
 | **Web Framework** | ASP.NET Core Web API | Kestrel Server, Minimal APIs + Dynamic Controllers |
 | **ORM & Data Access** | Entity Framework Core | `10.0` (Code-First with Per-Module Migrations) |
 | **Database Engine** | Microsoft SQL Server | `2022-latest` (Docker & Windows Server) |
-| **Integration Testing** | Testcontainers.MsSql | `4.3.0` (Real containerized SQL Server fixtures) |
-| **Test Runner & Assertions**| xUnit, FluentAssertions | `xUnit 2.9.3`, `FluentAssertions 8.9.0` |
+| **Integration Testing** | Testcontainers.MsSql | `4.3.0` (Containerized SQL Server test fixtures) |
+| **Test Runner & Assertions**| xUnit, FluentAssertions | `xUnit 2.9.3`, `FluentAssertions 7.2.0` (Apache 2.0) |
 | **Authentication** | JWT (JSON Web Tokens) | HMAC-SHA256, Refresh Token Rotation |
 | **In-Process Messaging** | MediatR | `12.4.1` (`INotification` / `INotificationHandler`) |
 | **Object Mapping** | AutoMapper | Assembly-scanned module profiles |
@@ -255,7 +256,7 @@ Configuration follows standard .NET hierarchical configuration providers (`appse
 
 ### Startup Hygiene & Security Gates:
 - **Default Admin Seeding:** In `DatabaseInitializer.cs`, default admin seeding (`admin@sunbula.com` / `AdminPassword123!`) is strictly gated behind `env.IsDevelopment()`. Hardcoded credentials will never be seeded into Staging or Production databases.
-- **Automated Migrations Flag:** Startup migrations are gated via configuration flag `"Database:AutoMigrate"`. Set to `false` in `appsettings.Production.json` to prevent race conditions during multi-instance deployment.
+- **Automated Migrations Flag:** Startup migrations are gated via configuration flag `"Database:AutoMigrate"`. Configured as `false` in `appsettings.Production.json` to prevent race conditions and schema locks during multi-instance deployment.
 
 ### Key Environment Mappings:
 
@@ -272,22 +273,26 @@ Configuration follows standard .NET hierarchical configuration providers (`appse
 
 ## 🔄 CI/CD & Deployment Strategy
 
-As a student graduation project, Sunbula uses a pragmatic cloud deployment strategy tailored for cost efficiency and ease of maintenance:
+Sunbula utilizes a pragmatic CI/CD pipeline built on **GitHub Actions** tailored for cost efficiency and automated releases:
 
 ```mermaid
 flowchart LR
-    A[Git Push to Master] --> B[GitHub Actions Runner]
-    B --> C[dotnet restore & build -c Release]
-    C --> D[dotnet publish to staging artifact]
-    D --> E[Upload app_offline.htm to MonsterASP]
-    E --> F[FTP Sync Published Binaries to \\wwwroot]
-    F --> G[Remove app_offline.htm]
-    G --> H[IIS AppPool Recycles & Serves Traffic]
+    A[Git Push / PR] --> B[CI: Restore & Build]
+    B --> C[CI: Run Integration Tests via Testcontainers]
+    C --> D{Target: Master?}
+    D -- Yes --> E[CD Gate: Run Integration Tests]
+    E --> F[CD: Publish Release Artifacts]
+    F --> G[CD: Upload app_offline.htm]
+    G --> H[CD: Deploy to MonsterASP via FTP]
+    H --> I[CD: Remove app_offline.htm]
+    I --> J[Live Production Reloaded]
+    D -- No --> K[PR Check Passed]
 ```
 
 ### Deployment Details:
 - **Hosting Provider:** [MonsterASP.net](https://www.monsterasp.net/) (Windows / IIS Shared Hosting).
-- **Deployment Mechanism:** Secure FTP synchronization via GitHub Actions (`.github/workflows/deploy.yml`).
+- **Deployment Mechanism:** Secure FTP synchronization via GitHub Actions (`.github/workflows/cd.yml`).
+- **Integration Test Gate:** MonsterASP FTP deployment requires the `Run Integration Test Gate` job to pass first.
 - **File Locking Strategy:** An `app_offline.htm` file is uploaded to the application root before file transfer to instruct ASP.NET Core Module (ANCM) in IIS to release file locks on assemblies (`.dll`), then removed immediately after synchronization to trigger a clean application restart.
 
 ---
@@ -320,15 +325,15 @@ dotnet ef database update --context StorePlantDbContext --project Sunbula
 
 ## 🧪 Testing & Quality Assurance
 
-Integration tests run against a real Microsoft SQL Server 2022 container via **`Testcontainers.MsSql`**, replacing the legacy `Microsoft.EntityFrameworkCore.InMemory` provider to ensure test fidelity across SQL transactions, foreign keys, schema isolation, and raw SQL operations.
+Integration tests run against a real Microsoft SQL Server 2022 container via **`Testcontainers.MsSql`**, ensuring test fidelity across SQL transactions, foreign keys, schema isolation, and raw SQL operations.
 
 ```bash
-# Ensure Docker daemon is accessible
-DOCKER_HOST="unix:///var/run/docker.sock" dotnet test Sunbula.IntegrationTests/Sunbula.IntegrationTests.csproj -c Release
+dotnet test Sunbula.IntegrationTests/Sunbula.IntegrationTests.csproj -c Release
 ```
+*(Note for Linux users running custom or rootless Docker socket configurations: prefix with `DOCKER_HOST="unix:///var/run/docker.sock"` if the Docker daemon socket is not discovered automatically).*
 
 ### Shared Fixture Architecture:
-- `CustomWebApplicationFactory` implements `IAsyncLifetime` to start a single, shared SQL Server container across the test run via `[CollectionDefinition("IntegrationTests")]`.
+- `CustomWebApplicationFactory` implements `IAsyncLifetime` to manage a single shared SQL Server container across the test run via `[CollectionDefinition("IntegrationTests")]`.
 - Replaces external outbound network dependencies (e.g. SMTP email sending) with `TestNoOpEmailService` to guarantee reliable offline test execution.
 - Tests cover full authentication, registration, email confirmation, task priority filtering, debtor installment records, focus sessions, and plant purchases with coin deductions.
 
@@ -336,23 +341,21 @@ DOCKER_HOST="unix:///var/run/docker.sock" dotnet test Sunbula.IntegrationTests/S
 
 ## ⚖️ Architectural Trade-offs & Known Limitations
 
-Demonstrating engineering maturity requires acknowledging the architectural compromises made in this system:
-
-1. **In-Process MediatR vs. Distributed Message Broker:**
-   - *Current State:* Domain events are dispatched synchronously or in-process asynchronously using `MediatR`.
-   - *Trade-off:* If the host process crashes mid-dispatch or scales to multiple instances, in-memory events are not queued or shared across nodes. Moving to a distributed broker (RabbitMQ, Azure Service Bus, or MassTransit) would be required for horizontally-scaled multi-node deployments.
-2. **Dual DbContexts & Lack of Distributed Transactions (2PC):**
-   - *Current State:* `StorePlant` and `UserIdentity` operate on separate `DbContext` connections. Cross-module operations (e.g. buying a plant with coins) use a synchronous check-and-deduct contract with a compensating rollback (Saga pattern) upon persistence failure.
-   - *Trade-off:* While this prevents data loss without two-phase commit overhead, it introduces eventual consistency and requires careful maintenance of compensating actions.
-3. **Shared Database Instance (Logical vs. Physical Separation):**
-   - *Current State:* Modules maintain strict schema isolation (`identity`, `storeplant`, `finance`, etc.), but currently share a single physical SQL Server database instance to keep shared-hosting costs at zero.
-   - *Trade-off:* Bounded contexts are logically isolated at the schema level, but compete for shared database CPU, I/O, and connection pools.
-4. **FTP Deployment Downtime:**
-   - *Current State:* Deployment to MonsterASP occurs via FTP with `app_offline.htm`.
-   - *Trade-off:* The application experiences brief (30-60 second) maintenance downtime during release deployments, rather than zero-downtime blue/green or rolling deployments.
-5. **Startup Migrations in Production:**
+1. **Dual DbContexts & Best-Effort Compensating Actions:**
+   - *Current State:* `StorePlant` and `UserIdentity` operate on separate `DbContext` instances with dedicated schema namespaces (`identity`, `store`, etc.). Cross-module coin transactions (such as plant purchase and watering) rely on a synchronous check-and-deduct contract followed by a best-effort compensating refund in the `catch` block on persistence failure.
+   - *Failure Mode:* Because these operations are not wrapped in a single shared database transaction or a durable Outbox/Saga, if the application host crashes between deduction and persistence, or if a database failure occurs during both the insert and the refund, coin balances can become inconsistent. Achieving true atomicity across modules would require either coordinating within a shared database transaction (since all schemas live on the same database) or implementing an asynchronous transactional outbox with durable idempotency.
+2. **In-Process MediatR vs. Distributed Message Broker:**
+   - *Current State:* Domain events (such as `UserAccountDeletedEvent` and `CoinBalanceChangedEvent`) are dispatched in-process using `MediatR`.
+   - *Trade-off:* While this avoids the infrastructure complexity of external message brokers, events are volatile and limited to a single application instance. Multi-instance horizontal scaling would require migrating to an external message broker (such as RabbitMQ, Azure Service Bus, or MassTransit).
+3. **Logical Schema Isolation on a Shared Database Catalog:**
+   - *Current State:* Each bounded context defines an isolated database schema (`identity`, `store`, `timetracking`, `finance`, `debt`, `task`). However, all schemas currently share a single physical SQL Server database instance to keep hosting costs at zero for this project.
+   - *Trade-off:* The modules are logically decoupled but share connection pool limits and database hardware resources.
+4. **FTP Deployment Maintenance Window:**
+   - *Current State:* Deployments to MonsterASP shared Windows hosting occur via FTP. To prevent file-lock errors on executing `.dll` assemblies, the deployment pipeline uploads `app_offline.htm` during file synchronization.
+   - *Trade-off:* The application experiences a brief (30-60 second) maintenance window during release deployments, rather than zero-downtime blue/green or rolling deployments.
+5. **Startup Migrations in Production Environments:**
    - *Current State:* Migrations can be run on startup via `DatabaseInitializer.cs`.
-   - *Trade-off:* While convenient for local development, automatic migration execution on startup is dangerous in multi-instance production environments. The `Database:AutoMigrate` flag must remain `false` in production, and migrations applied via CI/CD migration bundles.
+   - *Trade-off:* While convenient for local development, automatic migration execution on startup is dangerous in multi-instance production environments. The `"Database:AutoMigrate"` flag is configured to `false` in production, and migrations applied via CI/CD migration bundles.
 
 ---
 
