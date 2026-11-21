@@ -110,6 +110,11 @@ jobs:
               "Host": "smtp.gmail.com",
               "Port": 587
             },
+            "Cors": {
+              "AllowedOrigins": [
+                "https://sunbula-front-end.vercel.app"
+              ]
+            },
             "Logging": {
               "LogLevel": {
                 "Default": "Warning",
