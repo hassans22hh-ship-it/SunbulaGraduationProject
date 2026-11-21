@@ -45,7 +45,7 @@ jobs:
         run: dotnet restore SunbulaGraduationProject.slnx
 
       - name: Build tests
-        run: dotnet build Sunbula.IntegrationTests/Sunbula.IntegrationTests.csproj -c Release --no-restore
+        run: dotnet build Sunbula.IntegrationTests/Sunbula.IntegrationTests.csproj -c Release
 
       - name: Run Integration Tests (Testcontainers.MsSql)
         run: dotnet test Sunbula.IntegrationTests/Sunbula.IntegrationTests.csproj -c Release --no-build --verbosity normal

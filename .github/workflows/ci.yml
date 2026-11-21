@@ -41,7 +41,7 @@ jobs:
 
       # ── 5. Build ──
       - name: Build solution
-        run: dotnet build SunbulaGraduationProject.slnx -c Release --no-restore
+        run: dotnet build SunbulaGraduationProject.slnx -c Release
 
       # ── 6. Run integration tests (Testcontainers.MsSql) ──
       - name: Run Integration Tests
