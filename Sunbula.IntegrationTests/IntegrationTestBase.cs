@@ -1,45 +1,62 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using Microsoft.AspNetCore.Mvc.Testing;
 using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
+using Xunit;
 
 namespace Sunbula.IntegrationTests
 {
-    public abstract class IntegrationTestBase : IClassFixture<WebApplicationFactory<Program>>
+    [Collection("IntegrationTests")]
+    public abstract class IntegrationTestBase
     {
-        protected readonly WebApplicationFactory<Program> Factory;
+        protected readonly CustomWebApplicationFactory Factory;
         protected readonly HttpClient Client;
 
-        protected IntegrationTestBase(WebApplicationFactory<Program> factory)
+        protected IntegrationTestBase(CustomWebApplicationFactory factory)
         {
             Factory = factory;
             Client = factory.CreateClient();
         }
 
         protected string? CurrentToken { get; private set; }
+        protected string? CurrentUserEmail { get; private set; }
 
         protected async Task AuthenticateAsync()
         {
-            var userEmail = $"test_{Guid.NewGuid()}@test.com";
+            CurrentUserEmail = $"test_{Guid.NewGuid()}@test.com";
+            var password = "Password123!";
             var loginDto = new
             {
-                Email = userEmail,
-                Password = "Password123!"
+                Email = CurrentUserEmail,
+                Password = password
             };
 
             // 1. Register
             var registerDto = new
             {
-                Email = userEmail,
+                Email = CurrentUserEmail,
                 FirstName = "Test",
                 LastName = "User",
-                Password = "Password123!",
-                ConfirmPassword = "Password123!"
+                Password = password,
+                ConfirmPassword = password
             };
             var regResponse = await Client.PostAsJsonAsync("/api/v1/Authentication/register", registerDto);
-            // Ignore if already exists (depends on how 409 is handled)
-            
-            // 2. Login
+            regResponse.EnsureSuccessStatusCode();
+
+            // 2. Confirm email directly in database so RequireEmailConfirmedMiddleware passes
+            using (var scope = Factory.Services.CreateScope())
+            {
+                var identityContext = scope.ServiceProvider.GetRequiredService<Infrastructure.Persistence.Data.UserIdentityDbContext>();
+                var user = await identityContext.Users.FirstOrDefaultAsync(u => EF.Property<string>(u, "_email") == CurrentUserEmail);
+                if (user != null)
+                {
+                    user.ConfirmEmail();
+                    await identityContext.SaveChangesAsync();
+                }
+            }
+
+            // 3. Login with confirmed user
             var response = await Client.PostAsJsonAsync("/api/v1/Authentication/login", loginDto);
             if (!response.IsSuccessStatusCode)
             {

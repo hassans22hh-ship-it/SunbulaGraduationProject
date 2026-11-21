@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using DebtInfrastructure.Persistenece.Data;
 using FinanceInfrastructure.Persistence.Data;
 using PlantInfrastructure.Persistence.Data;
@@ -22,6 +25,14 @@ namespace Sunbula
             using var scope = serviceProvider.CreateScope();
             var services = scope.ServiceProvider;
             var logger = services.GetRequiredService<ILogger<Program>>();
+            var configuration = services.GetRequiredService<IConfiguration>();
+
+            var autoMigrate = configuration.GetValue<bool>("Database:AutoMigrate", true);
+            if (!autoMigrate)
+            {
+                logger.LogInformation("Automatic database migration is disabled via 'Database:AutoMigrate'. Skipping startup migrations.");
+                return;
+            }
 
             // List of DbContext types to migrate
             var dbContextTypes = new List<Type>
@@ -57,6 +68,7 @@ namespace Sunbula
             using var scope = serviceProvider.CreateScope();
             var services = scope.ServiceProvider;
             var logger = services.GetRequiredService<ILogger<Program>>();
+            var env = services.GetRequiredService<IWebHostEnvironment>();
 
             try
             {
@@ -65,7 +77,13 @@ namespace Sunbula
                 await plantDbIntializer.SeedPlantsAsync(storeContext, logger);
                 logger.LogInformation("Plant seeding check completed.");
 
-                // 2. Seed Admin User
+                // 2. Seed Admin User - strictly gated behind Development environment
+                if (!env.IsDevelopment())
+                {
+                    logger.LogInformation("Skipping default admin user seeding in non-Development environment ({EnvironmentName}).", env.EnvironmentName);
+                    return;
+                }
+
                 var identityContext = services.GetRequiredService<UserIdentityDbContext>();
                 var passwordHasher = services.GetRequiredService<IPasswordHasher>();
 
@@ -76,7 +94,7 @@ namespace Sunbula
                   .FirstOrDefault(u => u.Email.Value == adminEmail);
                 if (adminUser == null)
                 {
-                    logger.LogInformation("Creating default admin user...");
+                    logger.LogInformation("Creating default admin user for Development environment...");
                     var passwordHash = passwordHasher.HashPassword("AdminPassword123!");
                     var email = Email.Create(adminEmail);
                     

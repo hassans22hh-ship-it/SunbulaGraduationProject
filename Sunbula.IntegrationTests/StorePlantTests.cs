@@ -9,7 +9,7 @@ namespace Sunbula.IntegrationTests
 {
     public class StorePlantTests : IntegrationTestBase
     {
-        public StorePlantTests(WebApplicationFactory<Program> factory) : base(factory)
+        public StorePlantTests(CustomWebApplicationFactory factory) : base(factory)
         {
         }
 
@@ -76,7 +76,7 @@ namespace Sunbula.IntegrationTests
                 if (plant == null)
                 {
                     // Create a dummy plant if none exists
-                    plant = PlantDomain.Entities.Plant.Create("Test Plant", "Test Desc", 100, PlantDomain.Enums.PlantLevel.Beginner);
+                    plant = PlantDomain.Entities.Plant.Create("Test Plant", "Test Botanic", "Test Desc", "https://example.com/plant.png", 100, PlantDomain.Enums.PlantLevel.Beginner);
                     await storeContext.Plants.AddAsync(plant);
                     await storeContext.SaveChangesAsync();
                 }

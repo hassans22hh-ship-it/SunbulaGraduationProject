@@ -4,6 +4,7 @@ using PlantApplication.StorePlantServiceAbstraction;
 using PlantDomain.Contracts;
 using PlantDomain.Entities;
 using PlantDomain.Exceptions;
+using SharedKernel.Contracts;
 
 namespace PlantInfrastructure.StorePlantServices
 {
@@ -11,13 +12,16 @@ namespace PlantInfrastructure.StorePlantServices
     {
         private readonly PlantDomain.Contracts.IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly Domain.Contracts.IUserRepository _userRepository;
+        private readonly IUserCoinService _userCoinService;
 
-        public UserPlantService(PlantDomain.Contracts.IUnitOfWork unitOfWork, IMapper mapper, Domain.Contracts.IUserRepository userRepository)
+        public UserPlantService(
+            PlantDomain.Contracts.IUnitOfWork unitOfWork, 
+            IMapper mapper, 
+            IUserCoinService userCoinService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _userRepository = userRepository;
+            _userCoinService = userCoinService;
         }
 
         public async Task<UserPlantDto> GetByIdAsync(Guid userPlantId, Guid userId, CancellationToken cancellationToken = default)
@@ -53,34 +57,36 @@ namespace PlantInfrastructure.StorePlantServices
             Guid userId,
             CancellationToken cancellationToken = default)
         {
+            // 1. Fetch plant and verify it exists and is available
+            var plant = await _unitOfWork.Plants.GetByIdAsync(dto.PlantId, cancellationToken)
+                ?? throw new PlantNotFoundException(dto.PlantId);
+
+            if (!plant.IsCurrentlyAvailable())
+                throw new InvalidOperationException($"Plant '{plant.Name}' is not currently available.");
+
+            // 2. Business rule: no duplicate ownership
+            var alreadyOwned = await _unitOfWork.UserPlants.UserOwnsPlantAsync(userId, dto.PlantId, cancellationToken);
+            if (alreadyOwned)
+                throw new DuplicatePlantPurchaseException(userId, dto.PlantId);
+
+            // 3. Business rule: sufficient coin balance (Atomically deducted via clean module contract)
+            var deductionSuccessful = await _userCoinService.TryDeductCoinsAsync(
+                userId, 
+                plant.Price, 
+                $"Purchase Plant: {plant.Name}", 
+                cancellationToken);
+            
+            if (!deductionSuccessful)
+            {
+                var currentBalance = await _userCoinService.GetUserCoinBalanceAsync(userId, cancellationToken);
+                throw new InsufficientCoinsException(plant.Price, currentBalance);
+            }
+
             await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
             try
             {
-                // 1. Fetch plant and verify it exists and is available
-                var plant = await _unitOfWork.Plants.GetByIdAsync(dto.PlantId, cancellationToken)
-                    ?? throw new PlantNotFoundException(dto.PlantId);
-
-                if (!plant.IsCurrentlyAvailable())
-                    throw new InvalidOperationException($"Plant '{plant.Name}' is not currently available.");
-
-                // 2. Business rule: no duplicate ownership
-                var alreadyOwned = await _unitOfWork.UserPlants.UserOwnsPlantAsync(userId, dto.PlantId, cancellationToken);
-                if (alreadyOwned)
-                    throw new DuplicatePlantPurchaseException(userId, dto.PlantId);
-
-                // 3. Business rule: sufficient coin balance (Atomically deducted to prevent double-spending race condition)
-                var deductionSuccessful = await _userRepository.TryDeductCoinsAtomicAsync(userId, plant.Price, cancellationToken);
-                
-                if (!deductionSuccessful)
-                {
-                    var user = await _userRepository.GetByIdAsync(userId, cancellationToken)
-                        ?? throw new UnauthorizedAccessException("User not found.");
-                    throw new InsufficientCoinsException(plant.Price, user.CoinBalance);
-                }
-
-                // 4. Create domain entity — domain event fires here (PlantPurchasedEvent)
-                //    UserIdentity module will consume this event to deduct coins
+                // 4. Create domain entity and persist to StorePlantDbContext
                 var userPlant = UserPlant.Create(userId, dto.PlantId, plant.Price);
 
                 await _unitOfWork.UserPlants.AddAsync(userPlant, cancellationToken);
@@ -94,6 +100,14 @@ namespace PlantInfrastructure.StorePlantServices
             catch
             {
                 await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+
+                // Compensating transaction: refund deducted coins on failure to maintain consistency
+                await _userCoinService.RefundCoinsAsync(
+                    userId, 
+                    plant.Price, 
+                    $"Rollback: Purchase failed for plant {plant.Name}", 
+                    cancellationToken);
+
                 throw;
             }
         }
@@ -110,24 +124,40 @@ namespace PlantInfrastructure.StorePlantServices
             if (userPlant.UserId != userId)
                 throw new UnauthorizedAccessException("You do not own this plant.");
 
-            // 1. Business Rule: Atomically deduct coins from user to prevent race condition (double spending)
-            var deductionSuccessful = await _userRepository.TryDeductCoinsAtomicAsync(userId, coins, cancellationToken);
+            // 1. Business Rule: Atomically deduct coins via clean module contract
+            var deductionSuccessful = await _userCoinService.TryDeductCoinsAsync(
+                userId, 
+                coins, 
+                $"Water Plant: {userPlantId}", 
+                cancellationToken);
 
             if (!deductionSuccessful)
             {
-                // To provide accurate exception details, fetch the current balance
-                var user = await _userRepository.GetByIdAsync(userId, cancellationToken)
-                    ?? throw new UnauthorizedAccessException("User records not found.");
-                throw new InsufficientCoinsException(coins, user.CoinBalance);
+                var currentBalance = await _userCoinService.GetUserCoinBalanceAsync(userId, cancellationToken);
+                throw new InsufficientCoinsException(coins, currentBalance);
             }
 
-            // 2. Perform growth logic - Domain method now raises PlantWateredEvent for deduction
-            userPlant.AddGrowthCoins(coins);
+            try
+            {
+                // 2. Perform growth logic
+                userPlant.AddGrowthCoins(coins);
 
-            _unitOfWork.UserPlants.Update(userPlant);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+                _unitOfWork.UserPlants.Update(userPlant);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return _mapper.Map<UserPlantDto>(userPlant);
+                return _mapper.Map<UserPlantDto>(userPlant);
+            }
+            catch
+            {
+                // Compensating transaction: refund growth coins if persistence fails
+                await _userCoinService.RefundCoinsAsync(
+                    userId, 
+                    coins, 
+                    $"Rollback: AddGrowthCoins failed for {userPlantId}", 
+                    cancellationToken);
+
+                throw;
+            }
         }
 
         public async Task DeleteUserDataAsync(Guid userId, CancellationToken cancellationToken = default)

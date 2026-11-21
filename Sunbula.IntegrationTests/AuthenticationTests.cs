@@ -1,38 +1,48 @@
 using System.Net.Http.Json;
+using System.Text.Json;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Sunbula; // Ensure this matches the namespace in Sunbula/Program.cs
+using Xunit;
 
 namespace Sunbula.IntegrationTests
 {
-    public class AuthenticationTests : IClassFixture<WebApplicationFactory<Program>>
+    public class AuthenticationTests : IntegrationTestBase
     {
-        private readonly WebApplicationFactory<Program> _factory;
-        private readonly HttpClient _client;
-
-        public AuthenticationTests(WebApplicationFactory<Program> factory)
+        public AuthenticationTests(CustomWebApplicationFactory factory) : base(factory)
         {
-            _factory = factory;
-            _client = factory.CreateClient();
         }
 
         [Fact]
-        public async Task Login_WithTestUser_ShouldReturnOk()
+        public async Task Login_WithRegisteredUser_ShouldReturnOkAndToken()
         {
             // Arrange
+            var email = $"test_login_{Guid.NewGuid()}@test.com";
+            var password = "Password123!";
+
+            var registerDto = new
+            {
+                Email = email,
+                FirstName = "Integration",
+                LastName = "Tester",
+                Password = password,
+                ConfirmPassword = password
+            };
+
+            var regResponse = await Client.PostAsJsonAsync("/api/v1/Authentication/register", registerDto);
+            regResponse.EnsureSuccessStatusCode();
+
             var loginDto = new
             {
-                Email = "test_antigravity@test.com",
-                Password = "any"
+                Email = email,
+                Password = password
             };
 
             // Act
-            var response = await _client.PostAsJsonAsync("/api/v1/Authentication/login", loginDto);
+            var response = await Client.PostAsJsonAsync("/api/v1/Authentication/login", loginDto);
 
             // Assert
             response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
-            
-            var result = await response.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+
+            var result = await response.Content.ReadFromJsonAsync<JsonElement>();
             result.TryGetProperty("accessToken", out var token).Should().BeTrue();
             token.GetString().Should().NotBeNullOrEmpty();
         }

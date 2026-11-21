@@ -24,8 +24,12 @@ namespace UserIdentityInfrastructure.Services
             var claims = GetClaims(user);
             var expiresAt = DateTime.UtcNow.AddMinutes(_jwtOptions.ExpiryMinutes);
 
+            var primaryIssuer = _jwtOptions.Issuer
+                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .FirstOrDefault() ?? _jwtOptions.Issuer;
+
             var token = new JwtSecurityToken(
-                issuer: _jwtOptions.Issuer,
+                issuer: primaryIssuer,
                 audience: _jwtOptions.Audience,
                 claims: claims,
                 expires: expiresAt,

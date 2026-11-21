@@ -7,7 +7,7 @@ namespace Sunbula.IntegrationTests
 {
     public class FinanceTests : IntegrationTestBase
     {
-        public FinanceTests(WebApplicationFactory<Program> factory) : base(factory)
+        public FinanceTests(CustomWebApplicationFactory factory) : base(factory)
         {
         }
 

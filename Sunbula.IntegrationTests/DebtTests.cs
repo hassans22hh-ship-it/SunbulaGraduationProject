@@ -7,7 +7,7 @@ namespace Sunbula.IntegrationTests
 {
     public class DebtTests : IntegrationTestBase
     {
-        public DebtTests(WebApplicationFactory<Program> factory) : base(factory)
+        public DebtTests(CustomWebApplicationFactory factory) : base(factory)
         {
         }
 
@@ -22,7 +22,7 @@ namespace Sunbula.IntegrationTests
             {
                 CreditorName = "Creditor " + Guid.NewGuid().ToString().Substring(0, 8),
                 Amount = 500.50m,
-                DebtType = 0, // Assuming 0 is Payable
+                DebtType = "Payable",
                 DueDate = DateTime.UtcNow.AddMonths(1),
                 Notes = "Integration Test Notes"
             };

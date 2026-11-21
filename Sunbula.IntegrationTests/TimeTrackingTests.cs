@@ -7,7 +7,7 @@ namespace Sunbula.IntegrationTests
 {
     public class TimeTrackingTests : IntegrationTestBase
     {
-        public TimeTrackingTests(WebApplicationFactory<Program> factory) : base(factory)
+        public TimeTrackingTests(CustomWebApplicationFactory factory) : base(factory)
         {
         }
 
@@ -61,16 +61,10 @@ namespace Sunbula.IntegrationTests
             var getActiveResponse = await Client.GetAsync("/api/v1/TimeSession/active");
             getActiveResponse.EnsureSuccessStatusCode();
             
-            var sessionBody = await getActiveResponse.Content.ReadAsStringAsync();
-            var session = JsonSerializer.Deserialize<JsonElement>(sessionBody);
-            
-            // Try both casings if needed, or just log
-            if (!session.TryGetProperty("id", out var idProp) && !session.TryGetProperty("Id", out idProp))
-            {
-                 throw new Exception($"Could not find 'id' or 'Id' in response: {sessionBody}");
-            }
-            
-            idProp.GetGuid().Should().NotBeEmpty();
+            var sessions = await getActiveResponse.Content.ReadFromJsonAsync<IEnumerable<JsonElement>>();
+            sessions.Should().NotBeNullOrEmpty();
+            var activeSession = sessions!.First();
+            activeSession.GetProperty("id").GetGuid().Should().NotBeEmpty();
             
             // 4. Stop Active Session (Cleanup)
             var stopResponse = await Client.PostAsync("/api/v1/TimeSession/stop-active", null);

@@ -1,28 +1,22 @@
-using Application.Services.Abstraction;
 using MediatR;
 using SharedKernel;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Application.EventHandlers
 {
     /// <summary>
-    /// Handles the PlantWateredEvent by deducting coins from the user's balance.
-    /// This ensures that watering a plant actually costs the user coins in the database.
+    /// Integration event handler for PlantWateredEvent.
+    /// In this Modular Monolith architecture, coin deduction is coordinated synchronously via IUserCoinService
+    /// with compensating rollback on failure to maintain consistency across DbContexts without distributed transactions.
+    /// This event handler serves as an extension point for audit logging, achievements, or analytics.
     /// </summary>
     public class PlantWateredEventHandler : INotificationHandler<PlantWateredEvent>
     {
-        private readonly IUserIntegrationService _userIntegrationService;
-
-        public PlantWateredEventHandler(IUserIntegrationService userIntegrationService)
+        public Task Handle(PlantWateredEvent notification, CancellationToken cancellationToken)
         {
-            _userIntegrationService = userIntegrationService;
-        }
-
-        public async Task Handle(PlantWateredEvent notification, CancellationToken cancellationToken)
-        {
-            // Note: The coins are now atomically deducted in the Plant module to prevent race conditions.
-            // We no longer call SpendCoinsAsync here to prevent double deduction.
-            // If gamification events are needed, we can publish a notification here instead.
-            await Task.CompletedTask;
+            // Extension point for cross-module gamification metrics / audit logging.
+            return Task.CompletedTask;
         }
     }
 }

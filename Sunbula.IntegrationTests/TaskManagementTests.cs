@@ -7,7 +7,7 @@ namespace Sunbula.IntegrationTests
 {
     public class TaskManagementTests : IntegrationTestBase
     {
-        public TaskManagementTests(WebApplicationFactory<Program> factory) : base(factory)
+        public TaskManagementTests(CustomWebApplicationFactory factory) : base(factory)
         {
         }
 
@@ -54,7 +54,7 @@ namespace Sunbula.IntegrationTests
             response.EnsureSuccessStatusCode();
 
             var user = await response.Content.ReadFromJsonAsync<JsonElement>();
-            user.GetProperty("email").GetString().Should().Be("test_antigravity@test.com");
+            user.GetProperty("email").GetString().Should().Be(CurrentUserEmail);
         }
     }
 }

@@ -40,6 +40,7 @@ namespace Infrastructure
             services.AddScoped<IEmailService, SmtpEmailService>();
             services.AddScoped<IUserIntegrationService, UserIntegrationService>();
             services.AddScoped<IUserSettingsService, UserSettingsService>();
+            services.AddScoped<SharedKernel.Contracts.IUserCoinService, UserCoinService>();
 
             // Coin Stream Manager
             services.AddSingleton<ICoinStreamManager, CoinStreamManager>();
