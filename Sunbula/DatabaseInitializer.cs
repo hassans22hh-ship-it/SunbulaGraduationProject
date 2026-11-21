@@ -69,21 +69,23 @@ namespace Sunbula
             var services = scope.ServiceProvider;
             var logger = services.GetRequiredService<ILogger<Program>>();
             var env = services.GetRequiredService<IWebHostEnvironment>();
+            var configuration = services.GetRequiredService<IConfiguration>();
 
             try
             {
+                var autoMigrate = configuration.GetValue<bool>("Database:AutoMigrate", true);
+                if (!autoMigrate || !env.IsDevelopment())
+                {
+                    logger.LogInformation("Skipping data seeding in non-Development environment ({EnvironmentName}) or when AutoMigrate is disabled.", env.EnvironmentName);
+                    return;
+                }
+
                 // 1. Seed Plants
                 var storeContext = services.GetRequiredService<StorePlantDbContext>();
                 await plantDbIntializer.SeedPlantsAsync(storeContext, logger);
                 logger.LogInformation("Plant seeding check completed.");
 
-                // 2. Seed Admin User - strictly gated behind Development environment
-                if (!env.IsDevelopment())
-                {
-                    logger.LogInformation("Skipping default admin user seeding in non-Development environment ({EnvironmentName}).", env.EnvironmentName);
-                    return;
-                }
-
+                // 2. Seed Admin User
                 var identityContext = services.GetRequiredService<UserIdentityDbContext>();
                 var passwordHasher = services.GetRequiredService<IPasswordHasher>();
 

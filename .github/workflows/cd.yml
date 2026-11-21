@@ -64,6 +64,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # ── Ensure base appsettings exists before build/publish ──
+      - name: Ensure base appsettings
+        run: cp Sunbula/appsettings.Example.json Sunbula/appsettings.json
+
       # ── 2. Setup .NET 10 SDK ──
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
@@ -89,14 +93,16 @@ jobs:
       - name: Publish application
         run: dotnet publish Sunbula/Sunbula.csproj -c Release -o ./publish --no-build
 
-      # ── 6. Create production appsettings ──
-      - name: Create appsettings.Production.json
+      # ── 6. Create production appsettings & logs folder ──
+      - name: Create appsettings.Production.json and logs directory
         run: |
+          mkdir -p ./publish/logs
           cat > ./publish/appsettings.Production.json << 'SETTINGS'
           {
             "Database": {
               "AutoMigrate": false
             },
+            "AllowedHosts": "*",
             "ConnectionStrings": {
               "SunbulaDb": "${{ secrets.DB_CONNECTION_STRING }}"
             },
