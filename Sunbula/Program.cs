@@ -96,20 +96,45 @@ namespace Sunbula
             // ═══════════════════════════════════════════════════════════
             // CORS
             // ═══════════════════════════════════════════════════════════
+            var configuredOrigins = builder.Configuration
+                .GetSection("Cors:AllowedOrigins")
+                .Get<string[]>() ?? Array.Empty<string>();
+
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowFrontend", policy =>
                 {
-                    policy.WithOrigins("https://sunbula-front-end.vercel.app")
-                          .AllowAnyMethod()
-                         .AllowAnyHeader();
-             /*  
-              *  https:\//sunbula-front-end.vercel.app
-              
-              */
+                    policy.SetIsOriginAllowed(origin =>
+                    {
+                        if (string.IsNullOrWhiteSpace(origin))
+                            return false;
 
-                    // policy.WithOrigins("http:\//localhost:4200")
+                        // 1. Allow localhost & 127.0.0.1 on any port (Angular :4200, Next.js/React :3000, Vite :5173, etc.)
+                        if (Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+                        {
+                            if (uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase) ||
+                                uri.Host.Equals("127.0.0.1", StringComparison.OrdinalIgnoreCase))
+                            {
+                                return true;
+                            }
 
+                            // 2. Allow Vercel production domain & all preview deployments (*.vercel.app)
+                            if (uri.Host.Equals("sunbula-front-end.vercel.app", StringComparison.OrdinalIgnoreCase) ||
+                                uri.Host.EndsWith(".vercel.app", StringComparison.OrdinalIgnoreCase))
+                            {
+                                return true;
+                            }
+                        }
+
+                        // 3. Allow explicitly configured origins from appsettings.json
+                        return configuredOrigins.Any(o =>
+                            string.Equals(o.TrimEnd('/'), origin.TrimEnd('/'), StringComparison.OrdinalIgnoreCase));
+                    })
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials()
+                    .WithExposedHeaders("Content-Disposition", "X-Pagination", "Location")
+                    .SetPreflightMaxAge(TimeSpan.FromHours(1));
                 });
             });
 
@@ -167,12 +192,8 @@ namespace Sunbula
             }
 
             app.UseExceptionHandler();
-            //app.Use(async (context, next) =>
-            //{
-            //    Console.WriteLine($"--> REQUEST: {context.Request.Method} {context.Request.Path}");
-            //    await next();
-            //});
             // app.UseHttpsRedirection();
+            app.UseRouting();
             app.UseCors("AllowFrontend");
 
             app.UseAuthentication();
